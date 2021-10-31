@@ -30,15 +30,6 @@ hr {
     height: 1px;
 }
 
-
-/*.brand {
-    position: absolute;
-    left: 50%;
-    height: 100%;
-    padding: 0;
-    margin-left: -50px !important;*/ /* 50% of your logo width */
-/*display: block;
-}*/
 a.navbar-brand {
     white-space: normal;
     text-align: center;
@@ -122,7 +113,24 @@ a, .btn-link {
     padding: 3rem !important;
 }
 
+.mobile-logo {
+    display: none;
+}
+
+.list-orientation{
+    display: inline-block;
+}
+
 @media (max-width: 480px) {
+    .list-orientation {
+        display: block;
+    }
+
+    .mobile-logo {
+        align-items: start;
+        display: block;
+    }
+
     .hide-icon-mobile {
         display: none !important;
     }
@@ -151,7 +159,7 @@ a, .btn-link {
     }
 }
 
-@media (min-width:600px) { /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+@media (min-width:480px) { 
     .image-container {
         position: relative;
         text-align: center;
