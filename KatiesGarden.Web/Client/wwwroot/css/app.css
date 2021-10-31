@@ -13,14 +13,14 @@ html, body {
     position: relative;
 }
 
-.brand {
+/*.brand {
     position: absolute;
     left: 50%;
     height: 100%;
     padding: 0;
-    margin-left: -50px !important; /* 50% of your logo width */
-    display: block;
-}
+    margin-left: -50px !important;*/ /* 50% of your logo width */
+    /*display: block;
+}*/
 
 a.navbar-brand {
     white-space: normal;
@@ -122,6 +122,15 @@ a, .btn-link {
     .card-padding {
         padding: 0;
         margin: 0;
+    }
+
+    .crop {
+        height: inherit !important;
+    }
+
+    .contact-button 
+    {
+        width : 100%;
     }
 }
 
