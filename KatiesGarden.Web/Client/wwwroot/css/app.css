@@ -24,11 +24,54 @@ html, body {
 hr {
     border: 0;
     clear: both;
-    display: block;
-    width: 70%;
+    display: block;    
     background-color: #a79d96;
     height: 1px;
 }
+
+.company-history-list ul.history-left-list{
+    float: left;    
+}
+
+.company-history-list ul li {
+    color: #167000;
+    font-size: 17px;
+    font-style: normal;
+    font-family: "Open Sans",serif;
+    line-height: 40px;
+}
+
+.tri-images{
+    align-items: center;
+    text-align: center;    
+}
+
+.tri-images > img{    
+    display: inline-block;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    width: 30%;
+}
+
+#promotional-text {
+    background-color: #902545;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    display: flex;
+    height: 50px;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+}
+
+    .break-banner > p {
+        display: table-cell;
+    }
 
 a.navbar-brand {
     white-space: normal;
@@ -105,8 +148,9 @@ a, .btn-link {
     }
 
 .carousel-width {
-    min-width: 45%;
-    min-height: 450px;
+    /*min-width: 45%;*/
+    min-height: 275px;
+    height: 100% !important;
 }
 
 .article-section{
