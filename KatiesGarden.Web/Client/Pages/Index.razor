@@ -1,0 +1,140 @@
+﻿@page "/"
+@inject HttpClient httpClient
+
+<div class="m-1 background-colour-primary">
+    <div class="image-container">
+        <div class="crop">
+            <img src="Images/ImagesWeLike/Background/IMG_0774.JPG"
+                 alt="Garden masterclass designing within the historic environment">
+            <div class="center-left image-text bg-white">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">From our home to yours...</h5>
+                        <p class="card-text">Some quick example text</p>
+                        <a href="/contact" class="button-primary btn btn-info">Contact us</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="m-2 pb-1">
+    Duis ac velit blandit, tempor justo et, faucibus mi. Ut eleifend libero ante, quis pellentesque purus cursus at.
+</p>
+
+<section class="m-2 d-flex justify-content-center">
+    <MudCarousel Class="carousel-width"  ShowArrows="@arrows" ShowDelimiters="@delimiters" AutoCycle="@autocycle" TData="object">
+        <PreviousButtonTemplate>
+            <div class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon hide-icon-mobile">
+                <span class="mud-icon-button-label">
+                    <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium background-colour-primary" Icon="@Icons.Material.Filled.SkipPrevious" Color="@Color.Inherit" />
+                </span>
+            </div>
+        </PreviousButtonTemplate>
+        <NextButtonTemplate>
+            <div class="mud-button-root mud-icon-button mud-ripple mud-ripple-icon hide-icon-mobile">
+                <span class="mud-icon-button-label">
+                    <MudIcon Class="mud-ripple mud-ripple-icon mud-icon-button-size-medium background-colour-primary" Icon="@Icons.Material.Filled.SkipNext" Color="@Color.Inherit" />
+                </span>
+            </div>
+        </NextButtonTemplate>
+        <ChildContent>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block" style="max-height: 100%; max-width: 100%; object-fit: contain;" src="Images/ImagesWeLike/@imageNames[0]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[1]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[2]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[3]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[4]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[5]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[6]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[7]" alt="">
+                </div>
+            </MudCarouselItem>
+            <MudCarouselItem Transition="transition" Color="@transitionColour">
+                <div class="d-flex">
+                    <img class="d-block w-100" src="Images/ImagesWeLike/@imageNames[8]" alt="">
+                </div>
+            </MudCarouselItem>
+        </ChildContent>
+    </MudCarousel>
+</section>
+<section class="m-2">
+    <div class="row">
+        <div class="col-sm article-section">
+            <h3>tempor justo et</h3>
+            <p class="pb-1">
+                Duis ac velit blandit, tempor justo et, faucibus mi. Ut eleifend libero ante, quis pellentesque purus cursus at.
+            </p>
+        </div>
+        <div class="col-sm article-section">
+            <h3>ac velit blandit, </h3>
+            <p class="pb-1">
+                Duis ac velit blandit, tempor justo et, faucibus mi. Ut eleifend libero ante, quis pellentesque purus cursus at.
+            </p>
+        </div>
+    </div>
+</section>
+
+@*<SurveyPrompt Title="How did you find our website?" />*@
+
+@code{
+
+    private MudCarousel<string> _carousel;
+
+    private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
+    private string imageWidth = "100%";
+
+    private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
+
+    private const double sizeMultiple = 1.5;
+    private const double ratio = 1.50149;
+
+    private bool arrows = true;
+    private bool delimiters = false;
+    private bool autocycle = false;
+    private Transition transition = Transition.Fade;
+    private Color transitionColour = Color.Transparent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await httpClient.GetAsync("/files/1");
+        }
+        catch (Exception e)
+        {
+
+        }
+        await base.OnInitializedAsync();
+    }
+}

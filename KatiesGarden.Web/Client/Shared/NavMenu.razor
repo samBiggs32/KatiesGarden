@@ -1,0 +1,43 @@
+﻿
+<nav class="navbar navbar-expand-sm navbar-light background-colour-primary p-0">
+    <a class="navbar-brand brand" href="#">
+        <img src="logo.jpg" alt="Katie's Garden" style="width: 55px"> Katie's Garden'
+    </a>    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" 
+            data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="true" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="navbar-collapse collapse ml-auto p-1" id="navbarsExample03" style="">
+        <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
+            <li class="nav-item active pt-1">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </li>
+            <li class="nav-item pt-1">
+                <NavLink class="nav-link" href="contact">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Contact
+                </NavLink>
+            </li>
+            <li class="nav-item pt-1">
+                <NavLink class="nav-link" href="fetchdata">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Weather
+                </NavLink>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
