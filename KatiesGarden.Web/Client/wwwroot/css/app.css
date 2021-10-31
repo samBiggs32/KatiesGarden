@@ -13,15 +13,32 @@ html, body {
     position: relative;
 }
 
+.slogan-text {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.phone-number-text {
+    font-family: 'Times New Roman', Georgia, Times, serif;
+}
+
+hr {
+    border: 0;
+    clear: both;
+    display: block;
+    width: 70%;
+    background-color: #a79d96;
+    height: 1px;
+}
+
+
 /*.brand {
     position: absolute;
     left: 50%;
     height: 100%;
     padding: 0;
     margin-left: -50px !important;*/ /* 50% of your logo width */
-    /*display: block;
+/*display: block;
 }*/
-
 a.navbar-brand {
     white-space: normal;
     text-align: center;
