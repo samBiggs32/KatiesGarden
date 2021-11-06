@@ -1,14 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace KatiesGarden.Web.Client.Pages
 {
-    
     public partial class Index : ComponentBase
     {
         List<string> imageNames;
@@ -39,7 +34,5 @@ namespace KatiesGarden.Web.Client.Pages
             };
             numberOfImages = imageNames.Count();
         }
-
-
     }
 }

@@ -1,25 +1,86 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+:root {
+    --background-colour: #d6d4d0;
+    --primary-colour: #902545;
+    --secondary-colour: rgba(47, 79, 79);
+}
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .background-colour-primary {
-    background-color: #d6d4d0;
+    background-color: var(--background-colour);
 }
 
 .navbar {
     position: relative;
 }
 
-.brand {
-    position: absolute;
-    left: 50%;
-    height: 100%;
-    padding: 0;
-    margin-left: -50px !important; /* 50% of your logo width */
+.slogan-text {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.phone-number-text {
+    font-family: 'Times New Roman', Georgia, Times, serif;
+}
+
+hr {
+    border: 0;
+    clear: both;
     display: block;
+    background-color: #a79d96;
+    height: 1px;
+}
+
+.company-history-list ul.history-left-list {
+    float: left;
+}
+
+.company-history-list ul li {
+    color: #167000;
+    font-size: 17px;
+    font-style: normal;
+    font-family: "Open Sans",serif;
+    line-height: 40px;
+}
+
+.contact {
+    background-color: rgba(47, 79, 79, 0.55) !important;
+    color: #ffffff !important;
+}
+
+.tri-images {
+    align-items: center;
+    text-align: center;
+}
+
+    .tri-images > img {
+        display: inline-block;
+        height: auto;
+        margin-left: auto;
+        margin-right: auto;
+        width: 30%;
+    }
+
+#promotional-text {
+    background-color: var(--primary-colour);
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    display: flex;
+    height: 50px;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.break-banner > p {
+    display: table-cell;
 }
 
 a.navbar-brand {
@@ -97,20 +158,42 @@ a, .btn-link {
     }
 
 .carousel-width {
-    min-width: 45%;
-    min-height: 450px;
+    /*min-width: 45%;*/
+    min-height: 275px;
+    height: 100% !important;
 }
 
-.article-section{
+.article-section {
     padding: 3rem !important;
 }
 
+.mobile-logo {
+    display: none;
+}
+
+.contact{
+    background-color: var(--secondary-colour);
+}
+
+.list-orientation {
+    display: inline-block;
+}
+
 @media (max-width: 480px) {
+    .list-orientation {
+        display: block;
+    }
+
+    .mobile-logo {
+        align-items: start;
+        display: block;
+    }
+
     .hide-icon-mobile {
         display: none !important;
     }
 
-    .article-section{
+    .article-section {
         padding: 0.5rem !important;
     }
 
@@ -123,9 +206,17 @@ a, .btn-link {
         padding: 0;
         margin: 0;
     }
+
+    .crop {
+        height: inherit !important;
+    }
+
+    .contact-button {
+        width: 100%;
+    }
 }
 
-@media (min-width:600px) { /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+@media (min-width:480px) {
     .image-container {
         position: relative;
         text-align: center;

@@ -1,6 +1,35 @@
 ﻿@page "/contact"
-@inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
-<h1>Contact Info </h1>
+<div class="image-container">
+    <img src="Images/ImagesWeLike/Background/IMG_0852_cropped.JPG" style="width: 100%" />
+    <div class="centered image-text">
+        <div class="card border-0 bg-transparent">
+            <div class="card-body contact">
+                <h1 class="card-title">Contact us</h1>
+                <p class="card-text">We would love to know what you think of our services, drop us a note, we'd be happy to answer any questions.</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<p>This component demonstrates fetching data from the server.</p>
+<div class="row">
+    <div class="col-sm-6">
+        <div id="map" style="height:500px;width:100%;"></div>
+    </div>
+    <div class="col-sm-6">
+        <p>Contact us lol</p>
+    </div>
+</div>
+
+@code{
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initMap", null);
+            StateHasChanged();
+        }
+    }
+}
