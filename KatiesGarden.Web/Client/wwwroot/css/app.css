@@ -171,6 +171,10 @@ a, .btn-link {
     display: none;
 }
 
+.contact{
+    background-color: var(--secondary-colour);
+}
+
 .list-orientation {
     display: inline-block;
 }
