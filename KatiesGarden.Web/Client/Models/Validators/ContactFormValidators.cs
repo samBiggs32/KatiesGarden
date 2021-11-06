@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KatiesGarden.Web.Client.Models.Validators
@@ -12,6 +13,9 @@ namespace KatiesGarden.Web.Client.Models.Validators
     /// <typeparam name="OrderModel"></typeparam>
     public class ContactUsFormValidator : AbstractValidator<ContactUsForm>
     {
+        private Regex _phoneNumberRegex = new Regex(@"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$", 
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+
         public ContactUsFormValidator()
         {
             RuleFor(x => x.FirstName)
@@ -33,30 +37,24 @@ namespace KatiesGarden.Web.Client.Models.Validators
             RuleFor(x => x.ContactNumber)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .MatchPhoneNumber();                                      
-        }
+                .Custom((x, context) =>
+                {
+                    var matches = _phoneNumberRegex.Match(x);
 
-
-
-        private async Task<bool> IsUniqueAsync(string email)
-        {
-            // Simulates a long running http call
-            await Task.Delay(2000);
-            return email.ToLower() != "test@test.com";
+                    if(!matches.Success)
+                        context.AddFailure($"Invalid phone number");
+                });
         }
 
         public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
         {
-            var result = await ValidateAsync(ValidationContext<ContactUsForm>.CreateWithOptions((ContactUsForm)model, x => x.IncludeProperties(propertyName)));
+            var result = await ValidateAsync(ValidationContext<ContactUsForm>
+                .CreateWithOptions((ContactUsForm)model, x => x.IncludeProperties(propertyName)));
+
             if (result.IsValid)
                 return Array.Empty<string>();
+
             return result.Errors.Select(e => e.ErrorMessage);
         };
-    }        
-
-    public static class Extensions
-    {
-        public static IRuleBuilderOptions<T, string> MatchPhoneNumber<T>(this IRuleBuilder<T, string> rule)
-            => rule.Matches(@"^(1-)?\d{3}-\d{3}-\d{4}$").WithMessage("Invalid phone number");
-    }
+    }       
 }
