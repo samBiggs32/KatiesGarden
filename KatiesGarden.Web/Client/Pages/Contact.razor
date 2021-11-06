@@ -8,13 +8,17 @@
 
 <div class="image-container">
     <img src="Images/ImagesWeLike/Background/IMG_0852_cropped.JPG" style="width: 100%" />
-    <div class="centered image-text">
-        <div class="card border-0 bg-transparent">
-            <div class="card-body contact">
-                <h1 class="card-title">Contact us</h1>
-                <p class="card-text">We would love to know what you think of our services, drop us a note, we'd be happy to answer any questions.</p>
-            </div>
-        </div>
+    <div class="centered">
+        <MudCard Class="card-background">
+            <MudCardHeader Class="card-background">
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Contact us</MudText>
+                </CardHeaderContent>                
+            </MudCardHeader>
+            <MudCardContent Class="card-background">
+                <MudText>We would love to know what you think of our services, drop us a note, we'd be happy to answer any questions.</MudText>                
+            </MudCardContent>            
+        </MudCard>        
     </div>
 </div>
 
@@ -22,7 +26,7 @@
     <div class="col-sm-6">
         <div id="map" style="height:500px;width:100%;"></div>
     </div>
-    <div class="col-sm-6">      
+    <div class="col-sm-6">
         <MudCard>
             <MudForm Model="@model" @ref="@form">
                 <MudCardContent>
@@ -34,7 +38,7 @@
                                   For="@(() => model.ContactNumber)" Immediate="true" Label="Contact Number" />
 
                     <MudTextField @bind-Value="model.EmailSubject" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Title" />
+                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Message Title" />
                     <MudTextField @bind-Value="model.EmailBody" Validation="@(orderValidator.ValidateValue)"
                                   For="@(() => model.EmailBody)" Immediate="true" Label="Message" />
 

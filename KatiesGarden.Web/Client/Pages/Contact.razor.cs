@@ -32,7 +32,8 @@ namespace KatiesGarden.Web.Client.Pages
             
             string email = "eeysb11@gmail.com";
 
-            await JSRuntime.InvokeAsync<object>("blazorExtensions.SendLocalEmail", new object[] { email, model.EmailSubject, model.EmailBody });
+            await JSRuntime.InvokeAsync<object>("blazorExtensions.SendLocalEmail", 
+                new object[] { email, model.EmailSubject, model.EmailBody, model.FirstName, model.LastName, model.ContactNumber});
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)

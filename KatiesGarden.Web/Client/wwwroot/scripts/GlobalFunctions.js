@@ -1,5 +1,6 @@
 ﻿window.blazorExtensions = {
-    SendLocalEmail: function (mailto, subject, body) {
+    SendLocalEmail: function (mailto, subject, body, firstName, lastName, contactNumber) {
+
         var link = document.createElement('a');
         var uri = "mailto:" + mailto + "?";
         if (!isEmpty(subject)) {
@@ -10,8 +11,7 @@
             if (!isEmpty(subject)) { // We already appended one querystring parameter, add the '&' separator
                 uri = uri + "&"
             }
-
-            uri = uri + "body=" + body;
+            uri = uri + "body=" + "Dear Katie\n" + body + "\n\n" + "--\nMany thanks\n" + firstName + " " + lastName + " \n" + contactNumber;
         }
 
         uri = encodeURI(uri);
@@ -24,6 +24,7 @@
         document.body.removeChild(link);
     }
 };
+
 
 function isEmpty(str) {
     return (!str || str.length === 0);
