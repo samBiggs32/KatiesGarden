@@ -1,6 +1,19 @@
 ﻿@page "/contact"
-@inject HttpClient Http
+@inject IJSRuntime JSRuntime
 
-<h1>Contact Info </h1>
+<h1>Display Google Map</h1>
+<div id="map" style="height:500px;width:100%;">
+</div>
 
-<p>This component demonstrates fetching data from the server.</p>
+@code{
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initMap", null);
+            StateHasChanged();
+        }
+
+    }
+}
