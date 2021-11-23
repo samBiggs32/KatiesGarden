@@ -21,9 +21,7 @@ namespace KatiesGarden.Web.Client.Pages
         ContactUsFormValidator orderValidator = new ContactUsFormValidator();        
 
         ContactUsForm model = new();
-        bool success;
         string[] errors = { };
-        MudTextField<string> pwField1;
         MudForm form;
 
         private async Task HandleSubmit()
