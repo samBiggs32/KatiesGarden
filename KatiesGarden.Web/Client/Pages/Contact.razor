@@ -1,35 +1,47 @@
 ﻿@page "/contact"
-@inject IJSRuntime JSRuntime
 
-<div class="image-container">
-    <img src="Images/ImagesWeLike/Background/IMG_0852_cropped.JPG" style="width: 100%" />
-    <div class="centered image-text">
-        <div class="card border-0 bg-transparent">
-            <div class="card-body contact">
-                <h1 class="card-title">Contact us</h1>
-                <p class="card-text">We would love to know what you think of our services, drop us a note, we'd be happy to answer any questions.</p>
-            </div>
-        </div>
+@using Microsoft.Extensions.Logging
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using Models
+@inject ILogger<Contact> Logger
+
+<ContactUsBanner HeadingText="Spring is just around the corner" ParagraphText="Some quick example text" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="true"/>
+
+<section id="promotional-text" class="m-2 break-banner">
+    <div class="row">        
+        <div class="col-lg-12 col-md-12 text-center break-banner">
+            <p>Professional horticulturists offering exceptional service</p>
+        </div>        
     </div>
-</div>
+</section>
+<br />
 
 <div class="row">
     <div class="col-sm-6">
         <div id="map" style="height:500px;width:100%;"></div>
     </div>
     <div class="col-sm-6">
-        <p>Contact us lol</p>
+        <MudCard>
+            <MudForm Model="@model" @ref="@form">
+                <MudCardContent>
+                    <MudTextField @bind-Value="model.FirstName" Validation="@(orderValidator.ValidateValue)"
+                                  For="@(() => model.FirstName)" Immediate="true" Label="First Name" />
+                    <MudTextField @bind-Value="model.LastName" Validation="@(orderValidator.ValidateValue)"
+                                  For="@(() => model.LastName)" Immediate="true" Label="Last Name" />
+                    <MudTextField @bind-Value="model.ContactNumber" Validation="@(orderValidator.ValidateValue)"
+                                  For="@(() => model.ContactNumber)" Immediate="true" Label="Contact Number" />
+                    <MudTextField @bind-Value="model.EmailSubject" Validation="@(orderValidator.ValidateValue)"
+                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Message Title" />
+                    <MudTextField @bind-Value="model.EmailBody" Validation="@(orderValidator.ValidateValue)"
+                                  For="@(() => model.EmailBody)" Immediate="true" Label="Message" />
+                </MudCardContent>
+            </MudForm>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await HandleSubmit())">Send</MudButton>
+            </MudCardActions>
+        </MudCard>
     </div>
 </div>
 
-@code{
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("initMap", null);
-            StateHasChanged();
-        }
-    }
-}
