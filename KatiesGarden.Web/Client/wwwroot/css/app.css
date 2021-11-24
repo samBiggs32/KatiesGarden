@@ -192,7 +192,16 @@ a, .btn-link {
     display: inline-block;
 }
 
+.gallery-carousel{
+    width: 75%;
+    left: 12.5%
+}
+
 @media (max-width: 480px) {
+    .gallery-carousel {
+        width: 100%;
+    }
+
     .carousel-size {
         max-width: 65%;
     }

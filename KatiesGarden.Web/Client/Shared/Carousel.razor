@@ -32,17 +32,6 @@
                     </MudCarouselItem>
                 </ChildContent>
             </MudCarousel>
-            @*<div class="center-right image-text bg-white">
-                <div class="card">
-                <div class="card-body">
-                <h5 class="card-title">@HeadingText</h5>
-                <p class="card-text">@ParagraphText</p>
-                @if(!HideButton){
-                <a href="@ButtonUrl" class="button-primary btn btn-info contact-button">@ButtonText</a>
-                }
-                </div>
-                </div>
-                </div>*@
         </div>
     </div>
 </div>
@@ -68,14 +57,4 @@
     private int numberOfImages = 0;
 
     public Carousel() => numberOfImages = Images.Carousel.Count();
-
-    [Parameter] public string ButtonUrl { get; set; }
-
-    [Parameter] public string HeadingText { get; set; }
-
-    [Parameter] public string ParagraphText { get; set; }
-
-    [Parameter] public string ButtonText { get; set; }
-
-    [Parameter] public bool HideButton { get; set; }
 }
