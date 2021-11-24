@@ -2,7 +2,8 @@
 
 @inject HttpClient httpClient
 
-<ContactUsBanner HeadingText="From our home to yours..." ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"/>
+<ContactUsBanner HeadingText="From our home to yours..." 
+ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"/>
 
 <section id="promotional-text" class="m-2 break-banner">
     <div class="row">        
@@ -50,9 +51,9 @@
             <div class="col-lg-5 col-md-5 col-sm-4 col-xs-12">
                 <div class="company-history-right">
                     <div class="tri-images">
-                        <img src="Images/ImagesWeLike/IMG_0775.JPG" />
-                        <img src="Images/ImagesWeLike/IMG_0841.JPG" />
-                        <img src="Images/ImagesWeLike/IMG_0834.JPG" />
+                        <img src="@filePath/IMG_0775.JPG" />
+                        <img src="@filePath/IMG_0841.JPG" />
+                        <img src="@filePath/IMG_0834.JPG" />
                     </div>                    
                     <div class="section-title2 company-history-right-title">
                         <h3 class="text-center pt-2"><span>Experienced Horticulturists</span></h3>
@@ -68,4 +69,7 @@
     </div>
 </section>
 
-@*<SurveyPrompt Title="How did you find our website?" />*@
+@code{
+    private string filePath = "Images/ImagesWeLike/Compressed";
+
+}
