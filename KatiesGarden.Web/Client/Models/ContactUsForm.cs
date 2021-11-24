@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace KatiesGarden.Web.Client.Models
+﻿namespace KatiesGarden.Web.Client.Models
 {
     public class ContactUsForm
-    {        
+    {
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string EmailSubject { get; set; }

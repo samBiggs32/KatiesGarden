@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.IO;
-
-namespace KatiesGarden.Web.Server.Controllers
+﻿namespace KatiesGarden.Web.Server.Controllers
 {
     //[Route("[controller]")]
     //[ApiController]
