@@ -6,49 +6,29 @@
                 <ChildContent>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block" style="max-height: 100%; max-width: 100%; object-fit: contain;" src="Images/ImagesWeLike/@Images.Values[0]" alt="">
+                            <img class="d-block" style="max-height: 100%; max-width: 100%; object-fit: contain;" src="@imageFolderPath/@Images.Carousel[0]" alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[1]" alt="">
+                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[1]" alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[2]" alt="">
+                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[2]" alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[3]" alt="">
+                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[3]" alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[4]" alt="">
+                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[4]" alt="Katies Garden">
                         </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[5]" alt="">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[6]" alt="">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[7]" alt="">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="Images/ImagesWeLike/@Images.Values[8]" alt="">
-                        </div>
-                    </MudCarouselItem>
+                    </MudCarouselItem>                    
                 </ChildContent>
             </MudCarousel>
             <div class="center-left image-text bg-white">
@@ -69,6 +49,9 @@
 @code{
     private MudCarousel<string> _carousel;
 
+
+    private string imageFolderPath = "Images/ImagesWeLike/Compressed/Backgrounds/Carousel";
+
     private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
     private string imageWidth = "100%";
 
@@ -84,7 +67,7 @@
     private Color transitionColour = Color.Transparent;
     private int numberOfImages = 0;
 
-    public ContactUsBanner() => numberOfImages = Images.Values.Count();
+    public ContactUsBanner() => numberOfImages = Images.Carousel.Count();
 
     [Parameter]
     public string ButtonUrl { get; set; }
