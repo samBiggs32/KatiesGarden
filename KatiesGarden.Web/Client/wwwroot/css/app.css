@@ -1,8 +1,8 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 :root {
-    --background-colour: #d6d4d0;
-    --primary-colour: #902545;
+    --background-colour: #e8eaf6;
+    --primary-colour: #00796b;
     --secondary-colour: rgba(47, 79, 79);
 }
 
@@ -249,13 +249,19 @@ a, .btn-link {
         bottom: 8px;
         right: 16px;
     }
-
-    /* Centered text */
+    
     .centered {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+    }
+
+    .center-right {
+        position: absolute;
+        top: 50%;
+        left: 85%;
+        transform: translate(-25%, -65%);
     }
 
     .center-left {
