@@ -6,22 +6,20 @@
 @using Models
 @inject ILogger<Contact> Logger
 
-<ContactUsBanner HeadingText="Spring is just around the corner" ParagraphText="Some quick example text" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="true"/>
 
-<section id="promotional-text" class="m-2 break-banner">
-    <div class="row">        
-        <div class="col-lg-12 col-md-12 text-center break-banner">
-            <p>Professional horticulturists offering exceptional service</p>
-        </div>        
-    </div>
-</section>
-<br />
+<div class="ml-auto w-100 justify-content-center d-none d-sm-block pb-2" style="align-items: center; text-align: center;">
+    <h5 class="slogan-text m-0">Contact Us</h5>
+</div>
 
-<div class="row">
-    <div class="col-sm-6">
-        <div id="map" style="height:500px;width:100%;"></div>
+<div class="row carousel-width p-2">
+    <div class="col">
+        <div id="map" style="height:325px;width:100%;"></div>
     </div>
-    <div class="col-sm-6">
+</div>
+<MudDivider />
+
+<div class="row pt-3">
+    <div class="col desktop-article">
         <MudCard>
             <MudForm Model="@model" @ref="@form">
                 <MudCardContent>
@@ -32,13 +30,14 @@
                     <MudTextField @bind-Value="model.ContactNumber" Validation="@(orderValidator.ValidateValue)"
                                   For="@(() => model.ContactNumber)" Immediate="true" Label="Contact Number" />
                     <MudTextField @bind-Value="model.EmailSubject" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Message Title" />
+                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Title" />
                     <MudTextField @bind-Value="model.EmailBody" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.EmailBody)" Immediate="true" Label="Message" />
+                                  For="@(() => model.EmailBody)" Immediate="true" Label="Message"  Lines="3" />
                 </MudCardContent>
             </MudForm>
             <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await HandleSubmit())">Send</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           Class="ml-auto" OnClick="@(async () => await HandleSubmit())" Style="@($"background-color:{Colors.Teal.Darken1};")">Confirm</MudButton>
             </MudCardActions>
         </MudCard>
     </div>

@@ -6,9 +6,13 @@
 };
 
 function initMap() {
+    const center = { lat: 51.023371428786, lng: - 3.2553684238706695 };
+    const zoom = 13;
+
     const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 14,
-        center: { lat: 51.023371428786, lng: - 3.2553684238706695},        
+        zoom,
+        zoomControl: true,
+        center,
         mapTypeId: "roadmap",
     });
 
