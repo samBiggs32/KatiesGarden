@@ -1,6 +1,4 @@
-﻿@using KatiesGarden.Web.Client.Models
-
-<div class="m-1 background-colour-primary">
+﻿<div class="m-1 background-colour-primary">
     <div class="image-container">
         <div class="crop">
             <MudCarousel Class="carousel-size w-100 h-25" ShowArrows="@arrows" ShowDelimiters="@delimiters" AutoCycle="@autocycle" TData="object">
@@ -37,12 +35,9 @@
 </div>
 
 @code {
-    private MudCarousel<string> _carousel;
-
     private string imageFolderPath = "Images/ImagesWeLike/Compressed/Backgrounds/Carousel";
 
     private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
-    private string imageWidth = "100%";
 
     private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
 

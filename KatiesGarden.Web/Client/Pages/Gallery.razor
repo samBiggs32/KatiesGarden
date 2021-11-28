@@ -136,24 +136,17 @@
     </MudTabPanel>
 </MudTabs>
 
-@code {
-    private MudCarousel<string> _carousel;
+<ContactUsPrompt ShowGallery="false"/>
 
+@code {
     private const string imageFolderPath = "Images/ImagesWeLike/Compressed";
 
     private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
-    private string imageWidth = "100%";
-
     private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
 
     private const double sizeMultiple = 1.5;
     private const double ratio = 1.50149;
 
-    private bool arrows = true;
-    private bool delimiters = true;
-    private bool autocycle = false;
-    private Transition transition = Transition.Slide;
-    private Color transitionColour = Color.Transparent;
     private int numberOfImages = 0;
 
     public Gallery() => numberOfImages = Images.Carousel.Count();

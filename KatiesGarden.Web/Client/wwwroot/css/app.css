@@ -207,8 +207,7 @@ a, .btn-link {
     }
 
     ul.list-item-mobile > li {
-        width: 100%;
-        text-align: center;
+        width: 100%;        
     }
 
     .list-orientation {
