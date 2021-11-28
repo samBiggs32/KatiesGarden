@@ -4,79 +4,139 @@
     <h5 class="slogan-text m-0">Gallery</h5>
 </div>
 <hr />
-<div class="ml-auto w-100 justify-content-center d-none d-sm-block pb-2" style="align-items: center; text-align: center;">
-    <h6>Woodwork collection</h6>
-</div>
 
-<div id="woodworkCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
-    <ol class="carousel-indicators">
-        <li data-target="#woodworkCarousel" data-slide-to="0" class="active"></li>
-        <li data-target="#woodworkCarousel" data-slide-to="1"></li>
-        <li data-target="#woodworkCarousel" data-slide-to="2"></li>
-        <li data-target="#woodworkCarousel" data-slide-to="3"></li>
-    </ol>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0841.JPG" alt="Woodwork #1 Large Planter">
+<MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
+    <MudTabPanel Text="Woodwork">
+        <br />
+        <div id="woodworkCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
+            <ol class="carousel-indicators">
+                <li data-target="#woodworkCarousel" data-slide-to="0" class="active"></li>
+                <li data-target="#woodworkCarousel" data-slide-to="1"></li>
+                <li data-target="#woodworkCarousel" data-slide-to="2"></li>
+                <li data-target="#woodworkCarousel" data-slide-to="3"></li>
+            </ol>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0808.JPG" alt="Woodwork #1 Large Planter">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0841.JPG" alt="Woodwork #2 Drawer Flower Boxes">
+                </div>                
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0795.JPG" alt="Woodwork #4 Outdoor Boot Stand">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0827.JPG" alt="Woodwork #4 Outdoor Boot Stand">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0830.JPG" alt="Woodwork #5 Wooden blocks">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0805.JPG" alt="Woodwork #6 Small Planter">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#woodworkCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#woodworkCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
         </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0839.JPG" alt="Woodwork #2 Drawer Flower Boxes">
+        <p class="p-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis convallis ipsum, non gravida enim. Ut feugiat felis in sapien 
+            euismod tristique. Nulla orci nunc, gravida et ante et, mattis convallis mauris. Donec efficitur ultricies dolor id cursus. Nam sit amet ex massa. 
+            Suspendisse quis euismod nibh. Donec iaculis lorem eget nunc maximus vulputate. Nullam metus justo, lacinia a pharetra porttitor, scelerisque sed metus. 
+            Morbi ex orci, luctus id porta sit amet, vestibulum nec nulla. Morbi at dignissim arcu, eget cursus ex. Morbi in sodales massa, volutpat venenatis sapien.
+            Maecenas aliquet, orci ut consectetur bibendum, urna ante fermentum dolor, nec.</p>            
+    </MudTabPanel>
+    <MudTabPanel Text="Arrangements">
+        <br />
+        <div id="arrangementCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
+            <ol class="carousel-indicators">
+                <li data-target="#arrangementCarousel" data-slide-to="0" class="active"></li>
+                <li data-target="#arrangementCarousel" data-slide-to="1"></li>
+                <li data-target="#arrangementCarousel" data-slide-to="2"></li>
+                <li data-target="#arrangementCarousel" data-slide-to="3"></li>
+            </ol>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0775.JPG" alt="Arrangements #1">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0783.JPG" alt="Arrangements #2">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0788.JPG" alt="Arrangements #3">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0839.JPG" alt="Arrangements #4">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0798.JPG" alt="Arrangements #5">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#arrangementCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#arrangementCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
         </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0805.JPG" alt="Woodwork #3 Planter">
+        <p class="p-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at elit rutrum enim porta fermentum. Pellentesque maximus vehicula lectus, 
+            ut suscipit massa fermentum ut. Fusce volutpat eget ante dignissim varius. Integer rhoncus a nisi sit amet fringilla. Quisque cursus augue 
+            at hendrerit auctor. Proin aliquam efficitur erat, vel tempor lacus facilisis eget. Praesent condimentum augue et est fermentum, sit amet 
+            hendrerit mi aliquam. Suspendisse lobortis quis ligula non volutpat. Curabitur viverra orci eu gravida malesuada. Maecenas porttitor venenatis 
+            enim sed semper. Suspendisse nec augue a orci hendrerit commodo. Vivamus nulla magna, dignissim ac nulla non, hendrerit facilisis metus. Maecenas 
+            accumsan.</p>
+    </MudTabPanel>
+    <MudTabPanel Text="Maintenance">
+        <br />
+        <div id="maintainenceCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
+            <ol class="carousel-indicators">
+                <li data-target="#maintainenceCarousel" data-slide-to="0" class="active"></li>
+                <li data-target="#maintainenceCarousel" data-slide-to="1"></li>
+                <li data-target="#maintainenceCarousel" data-slide-to="2"></li>
+                <li data-target="#maintainenceCarousel" data-slide-to="3"></li>
+            </ol>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0851.JPG" alt="Maintenance #1">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0834.JPG" alt="Maintenance #3">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0808.JPG" alt="Maintenance #3">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0805.JPG" alt="Maintenance #4">
+                </div>
+                <div class="carousel-item">
+                    <img class="d-block w-100" src="@imageFolderPath/IMG_0792.JPG" alt="Maintenance #4">
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#maintainenceCarousel" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#maintainenceCarousel" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
         </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0827.JPG" alt="Woodwork #4 Outdoor Boot Stand">
-        </div>
-    </div>
-    <a class="carousel-control-prev" href="#woodworkCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#woodworkCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-    </a>
-</div>
+        <p class="p-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at elit rutrum enim porta fermentum. Pellentesque maximus vehicula lectus, 
+            ut suscipit massa fermentum ut. Fusce volutpat eget ante dignissim varius. Integer rhoncus a nisi sit amet fringilla. Quisque cursus augue 
+            at hendrerit auctor. Proin aliquam efficitur erat, vel tempor lacus facilisis eget. Praesent condimentum augue et est fermentum, sit amet 
+            hendrerit mi aliquam. Suspendisse lobortis quis ligula non volutpat. Curabitur viverra orci eu gravida malesuada. Maecenas porttitor venenatis 
+            enim sed semper. Suspendisse nec augue a orci hendrerit commodo. Vivamus nulla magna, dignissim ac nulla non, hendrerit facilisis metus. Maecenas 
+            accumsan.</p>
+    </MudTabPanel>
+</MudTabs>
 
-<hr />
-<div class="ml-auto w-100 justify-content-center d-none d-sm-block pb-2" style="align-items: center; text-align: center;">
-    <h6>Arrangements</h6>
-</div>
-
-<div id="arrangementCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
-    <ol class="carousel-indicators">
-        <li data-target="#arrangementCarousel" data-slide-to="0" class="active"></li>
-        <li data-target="#arrangementCarousel" data-slide-to="1"></li>
-        <li data-target="#arrangementCarousel" data-slide-to="2"></li>
-        <li data-target="#arrangementCarousel" data-slide-to="3"></li>
-    </ol>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_775.JPG" alt="Summer House Arrangement">
-        </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0783.JPG" alt="Floral Spot in the Sun">
-        </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_788.JPG" alt="Flower bed arrangement">
-        </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="@imageFolderPath/IMG_0795.JPG" alt="Wooden Chair">
-        </div>
-    </div>
-    <a class="carousel-control-prev" href="#arrangementCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#arrangementCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-    </a>
-</div>
-
-
-    @code {
+@code {
     private MudCarousel<string> _carousel;
 
     private const string imageFolderPath = "Images/ImagesWeLike/Compressed";
