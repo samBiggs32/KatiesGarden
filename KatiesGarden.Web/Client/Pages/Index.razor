@@ -2,17 +2,15 @@
 
 @inject HttpClient httpClient
 
-<ContactUsBanner HeadingText="From our home to yours..." 
-ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"/>
+<Carousel />
 
 <section id="promotional-text" class="m-2 break-banner">
-    <div class="row">        
+    <div class="row">
         <div class="col-lg-12 col-md-12 text-center break-banner">
             <p>Professional horticulturists offering exceptional service</p>
-        </div>        
+        </div>
     </div>
 </section>
-
 <br />
 
 <section id="company-history-area">
@@ -25,22 +23,26 @@ ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"
                         <h1><span>Milverton Garden Service</span></h1>
                     </div>
                     <div class="company-history-left-text">
-                        <p>Nam aliquam quis libero quis mattis. Vestibulum at nibh quis risus convallis euismod. 
-                        Aenean euismod, arcu et volutpat pellentesque, nisl turpis lobortis orci, at fermentum ligula odio ac felis. 
-                        Aliquam tempus sed purus at ullamcorper. Nam ac tempus turpis. Suspendisse tincidunt massa vel nibh volutpat, id congue purus venenatis. 
-                        Integer ipsum lorem, pellentesque vitae condimentum sed, gravida et risus.</p>
-                        <p>Nam in lacinia leo. Phasellus ut mollis lorem, ut tristique leo. Nam aliquam semper est. Donec congue nisi eu nisi tincidunt dignissim.
-                        Phasellus et odio sem. Aliquam euismod nisi id ipsum ultricies, 
-                        at venenatis tellus malesuada. Nunc lobortis, augue non hendrerit aliquam, erat sem sodales nunc, 
-                        ultrices laoreet elit urna tempor lorem.</p>
+                        <p>
+                            Nam aliquam quis libero quis mattis. Vestibulum at nibh quis risus convallis euismod.
+                            Aenean euismod, arcu et volutpat pellentesque, nisl turpis lobortis orci, at fermentum ligula odio ac felis.
+                            Aliquam tempus sed purus at ullamcorper. Nam ac tempus turpis. Suspendisse tincidunt massa vel nibh volutpat, id congue purus venenatis.
+                            Integer ipsum lorem, pellentesque vitae condimentum sed, gravida et risus.
+                        </p>
+                        <p>
+                            Nam in lacinia leo. Phasellus ut mollis lorem, ut tristique leo. Nam aliquam semper est. Donec congue nisi eu nisi tincidunt dignissim.
+                            Phasellus et odio sem. Aliquam euismod nisi id ipsum ultricies,
+                            at venenatis tellus malesuada. Nunc lobortis, augue non hendrerit aliquam, erat sem sodales nunc,
+                            ultrices laoreet elit urna tempor lorem.
+                        </p>
                     </div>
                     <div class="company-history-list">
-                        <ul class="history-left-list w-50">
+                        <ul class="history-left-list list-item-mobile w-50">
                             <li><i class="fa fa-angle-right"></i> Grounds Maintenance<br></li>
-                            <li><i class="fa fa-angle-right"></i> Hedge Trimming<br></li>
+                            <li><i class="fa fa-angle-right"></i> Woodwork design and build<br></li>
                             <li><i class="fa fa-angle-right"></i> Weed Control</li>
                         </ul>
-                        <ul class="history-left-list w-50">
+                        <ul class="history-left-list list-item-mobile w-50">
                             <li><i class="fa fa-angle-right"></i> Grass Cutting<br></li>
                             <li><i class="fa fa-angle-right"></i> Grounds Clearance<br></li>
                             <li><i class="fa fa-angle-right"></i> Planting Schemes</li>
@@ -54,14 +56,19 @@ ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"
                         <img src="@filePath/IMG_0775.JPG" />
                         <img src="@filePath/IMG_0841.JPG" />
                         <img src="@filePath/IMG_0834.JPG" />
-                    </div>                    
+                    </div>
                     <div class="section-title2 company-history-right-title">
                         <h3 class="text-center pt-2"><span>Experienced Horticulturists</span></h3>
                     </div>
                     <div class="company-history-right-text">
-                        <p>Donec semper in tortor sed efficitur. Duis congue pretium nunc, quis gravida leo ornare quis. Mauris ac magna dolor. 
-                        Maecenas lobortis neque nisi. Sed congue rhoncus sapien, eu iaculis justo gravida malesuada. 
-                        In interdum enim sed lectus elementum accumsan. Suspendisse convallis eget erat in blandit. Quisque non porttitor justo.</p>
+                        <p>
+                            Donec semper in tortor sed efficitur. Duis congue pretium nunc, quis gravida leo ornare quis. Mauris ac magna dolor.
+                            Maecenas lobortis neque nisi. Sed congue rhoncus sapien, eu iaculis justo gravida malesuada.
+                            In interdum enim sed lectus elementum accumsan. Suspendisse convallis eget erat in blandit. Quisque non porttitor justo.
+                        </p>
+                    </div>
+                    <div class="feature-image">
+                        <img src="@filePath/IMG_0834.JPG" alt="Woodwork and flower arrangement"/>
                     </div>
                 </div>
             </div>
@@ -69,7 +76,9 @@ ParagraphText="" ButtonText="Contact Us" ButtonUrl="/contact" HideButton="false"
     </div>
 </section>
 
-@code{
-    private string filePath = "Images/ImagesWeLike/Compressed";
+<ContactUsPrompt/>
 
+
+@code {
+    private string filePath = "Images/ImagesWeLike/Compressed";
 }

@@ -1,15 +1,37 @@
 ﻿@inherits LayoutComponentBase
 
-    <MudThemeProvider />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
+<MudThemeProvider Theme="CustomTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <header>
-        <NavMenu />
-    </header>
+<header>
+    <NavMenu />
+</header>
 
-    <div class="container m-0 p-0" style="max-width: 100%">
-        <main role="main" class="pb-3">            
-            @Body
-        </main>
-    </div>
+<div class="container m-0 p-0" style="max-width: 100%">
+    <main role="main" class="pb-3">
+        @Body
+    </main>
+</div>
+
+
+    @code {
+    MudTheme CustomTheme = new MudTheme()
+        {
+            Palette = new Palette()
+            {
+                Primary = Colors.Teal.Default,
+                Secondary = Colors.Green.Accent4,
+                AppbarBackground = Colors.Red.Default,
+            },
+
+            LayoutProperties = new LayoutProperties()
+            {
+                DrawerWidthLeft = "260px",
+                DrawerWidthRight = "300px"
+            }
+        };
+
+
+
+    }

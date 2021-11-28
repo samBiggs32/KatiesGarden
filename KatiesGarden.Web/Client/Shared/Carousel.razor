@@ -1,8 +1,9 @@
 ﻿@using KatiesGarden.Web.Client.Models
+
 <div class="m-1 background-colour-primary">
     <div class="image-container">
         <div class="crop">
-            <MudCarousel Class="carousel-width w-100 h-25" ShowArrows="@arrows" ShowDelimiters="@delimiters" AutoCycle="@autocycle" TData="object">                
+            <MudCarousel Class="carousel-size w-100 h-25" ShowArrows="@arrows" ShowDelimiters="@delimiters" AutoCycle="@autocycle" TData="object">
                 <ChildContent>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
@@ -28,27 +29,15 @@
                         <div class="d-flex">
                             <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[4]" alt="Katies Garden">
                         </div>
-                    </MudCarouselItem>                    
+                    </MudCarouselItem>
                 </ChildContent>
             </MudCarousel>
-            <div class="center-left image-text bg-white">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">@HeadingText</h5>
-                        <p class="card-text">@ParagraphText</p>
-                        @if(!HideButton){
-                            <a href="@ButtonUrl" class="button-primary btn btn-info contact-button">@ButtonText</a>
-                        }                        
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-@code{
+@code {
     private MudCarousel<string> _carousel;
-
 
     private string imageFolderPath = "Images/ImagesWeLike/Compressed/Backgrounds/Carousel";
 
@@ -67,20 +56,5 @@
     private Color transitionColour = Color.Transparent;
     private int numberOfImages = 0;
 
-    public ContactUsBanner() => numberOfImages = Images.Carousel.Count();
-
-    [Parameter]
-    public string ButtonUrl { get; set; }
-
-    [Parameter]
-    public string HeadingText { get; set; }
-
-    [Parameter]
-    public string ParagraphText { get; set; }
-
-    [Parameter]
-    public string ButtonText { get; set; }
-
-    [Parameter]
-    public bool HideButton { get; set; }
+    public Carousel() => numberOfImages = Images.Carousel.Count();
 }
