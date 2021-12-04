@@ -10,10 +10,19 @@ html, body {
     font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
+.section-title {
+    display: block;
+    font-size: 2em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+}
+
 .index-paragraph {
     text-align: justify;
 }
-
 
 .background-colour-primary {    
     background-color: var(--background-colour);
@@ -57,7 +66,7 @@ hr {
         height: auto;
         margin-left: auto;
         margin-right: auto;
-        width: 32.75%;
+        width: 32%;
     }
 
 
@@ -168,16 +177,12 @@ a, .btn-link {
 
 .carousel-size {
     /*min-width: 45%;*/
-    min-height: 275px;
-    height: 100% !important;
+    min-height: 10em;
+    /*height: 100% !important;*/
 }
 
 .article-section {
     padding: 3rem !important;
-}
-
-.mobile-logo {
-    display: none;
 }
 
 .contact{
@@ -188,10 +193,6 @@ a, .btn-link {
     display: inline-block;
 }
 
-/*#app > div.container.m-0.p-0 > main > div.mud-tabs > div.mud-tabs-toolbar.mud-tabs-rounded.mud-tabs-toolbar-primary.mud-elevation-4 {
-    background-color: var(--primary-colour);
-}
-*/
 .gallery-carousel {
     width: 50%;
     left: 25%;
@@ -204,28 +205,37 @@ a, .btn-link {
     width: 50%;
 }
 
-@media (max-width: 480px) {
+
+@media (max-width: 991.98px) {
     .gallery-carousel {
-        width: 100%;
+        width: 100% !important;
+        left: inherit;
+        padding-left: 1em;
+        padding-right: 1em;
     }
 
-    .carousel-size {
-        max-width: 65%;
+    .gallery-text {
+        width: 100% !important;
+        padding-left: 1em;
+        padding-right: 1em;
     }
+}
+
+
+/*Small bootstrap*/
+@media (max-width: 540) {    
+    .banner-index{
+        height: 4.7em !important;
+    }    
 
     ul.list-item-mobile > li {
-        width: 100%;        
+        width: 100%;
     }
 
     .list-orientation {
         display: block;
     }
-
-    .mobile-logo {
-        align-items: start;
-        display: block;
-    }
-
+    
     .hide-icon-mobile {
         display: none !important;
     }
@@ -253,12 +263,16 @@ a, .btn-link {
     }
 }
 
-@media (min-width:480px) {
-
+/*Extra large bootstrap*/
+@media (min-width: 1140px) {
     .index-paragraph {
-        padding-right:7em;
-    }    
+        padding-right: 7em;
+    }
+}
 
+/*Small bootstrap*/
+@media (min-width:540px) {
+    
     .desktop-article {
         max-width: 60%;
         justify-content: center;
@@ -298,7 +312,7 @@ a, .btn-link {
         bottom: 8px;
         right: 16px;
     }
-    
+
     .centered {
         position: absolute;
         top: 50%;
@@ -330,8 +344,7 @@ a, .btn-link {
 
 
 .crop {
-    width: 100%;
-    height: 325px;
+    width: 100%;    
     overflow: hidden;
 }
 
