@@ -9,7 +9,11 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.JPG
+
+# exclude everything
+KatiesGarden.Web\Client\wwwroot\Images\*
+
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
