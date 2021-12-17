@@ -175,10 +175,8 @@ a, .btn-link {
         top: 0.5rem;
     }
 
-.carousel-size {
-    /*min-width: 45%;*/
-    min-height: 10em;
-    /*height: 100% !important;*/
+.carousel-size {    
+    min-height: 40em;    
 }
 
 .article-section {
@@ -205,8 +203,17 @@ a, .btn-link {
     width: 50%;
 }
 
+@media (max-width: 1300px){
+    .carousel-size {
+        min-height: 25em;
+    }
+}
 
 @media (max-width: 991.98px) {
+    .carousel-size {
+        min-height: 10em;
+    }
+
     .gallery-carousel {
         width: 100% !important;
         left: inherit;
@@ -221,8 +228,6 @@ a, .btn-link {
     }
 }
 
-
-/*Small bootstrap*/
 @media (max-width: 540) {    
     .banner-index{
         height: 4.7em !important;
@@ -245,8 +250,7 @@ a, .btn-link {
     }
 
     .carousel-size {
-        min-width: 100%;
-        min-height: 11em;
+        min-width: 100%;        
     }
 
     .card-padding {
