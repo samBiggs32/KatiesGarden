@@ -4,11 +4,11 @@
     {
         public static readonly List<string> Carousel = new List<string>
             {
-                "IMG_0792.JPG",
-                "IMG_0796.JPG",
-                "IMG_0808.JPG",
-                "IMG_0848.JPG",
-                "IMG_0852.JPG",
+                "stones_background.jpg",
+                "yellow_flowers.jpg",
+                "planter_background.jpg",
+                "bees_background.jpg",
+                "hedge_arrangement_background.jpg",
             };
     }
 }
