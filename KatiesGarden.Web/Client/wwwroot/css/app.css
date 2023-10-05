@@ -206,7 +206,7 @@ a, .btn-link {
 @media (max-width: 1300px){
     .carousel-size {
         min-height: 25em;
-    }
+    }    
 }
 
 @media (max-width: 991.98px) {
@@ -215,7 +215,7 @@ a, .btn-link {
     }
 
     .gallery-carousel {
-        width: 100% !important;
+        /*width: 100% !important;*/
         left: inherit;
         padding-left: 1em;
         padding-right: 1em;
@@ -228,7 +228,7 @@ a, .btn-link {
     }
 }
 
-@media (max-width: 540) {    
+@media (max-width: 540) {
     .banner-index{
         height: 4.7em !important;
     }    
@@ -267,16 +267,11 @@ a, .btn-link {
     }
 }
 
-/*Extra large bootstrap*/
-@media (min-width: 1140px) {
-    .index-paragraph {
-        padding-right: 7em;
-    }
-}
-
-/*Small bootstrap*/
 @media (min-width:540px) {
-    
+    .map-location {
+        padding: 2em;
+    }
+
     .desktop-article {
         max-width: 60%;
         justify-content: center;
@@ -339,13 +334,21 @@ a, .btn-link {
     }
 }
 
+@media (min-width: 1140px) {
+    .index-paragraph {
+        padding-right: 7em;
+    }
+}
+
+/*Small bootstrap*/
+
+
 .carousel_img {
     float: left;
     width: 100px;
     height: 100px;
     object-fit: cover;
 }
-
 
 .crop {
     width: 100%;    
