@@ -10,6 +10,11 @@ html, body {
     font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
+.default-font {
+    /*font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;*/
+    font-family: var(--mud-typography-default-family);
+}
+
 .section-title {
     display: block;
     font-size: 2em;
@@ -220,7 +225,7 @@ a, .btn-link {
     }
 
     .gallery-carousel {
-        /*width: 100% !important;*/
+        width: 100% !important;
         left: inherit;
         padding-left: 1em;
         padding-right: 1em;

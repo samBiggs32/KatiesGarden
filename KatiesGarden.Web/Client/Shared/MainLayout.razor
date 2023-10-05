@@ -14,7 +14,39 @@
     </main>
 </div>
 
-    @code {
+<footer class="bd-footer py-4 py-md-5 mt-5 bg-body-tertiary">
+    <div class="container py-4 py-md-5 px-4 px-md-3 text-body-secondary">
+        <div class="row">
+            <div class="col-lg-3 mb-3">
+                <a class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/" aria-label="Bootstrap">
+                    <h5>
+                        <i class="fas fa-seedling d-block me-2" width="40" height="32" title="Katie's Garden Icon'"><span class="fs-5 default-font">  Katie's Garden</span></i>
+                    </h5>
+                </a>
+                <ul class="list-unstyled small">
+                    <li class="mb-2">Designed by the many hands of the Porter family, built by Samuel Biggs using .NET Blazor</li>
+                    <li class="mb-2">Site Version v1.0.1</li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2 offset-lg-1 mb-3">
+                <h5>Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="/">Home</a></li>
+                    <li class="mb-2"><a href="/gallery">Gallery</a></li>
+                    <li class="mb-2"><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2 offset-lg-1 mb-3">
+                <h5>Tech</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="https://github.com/samBiggs32/KatiesGarden"><img src="Images/github.svg" height="17" /> GitHub</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+@code {
     MudTheme CustomTheme = new MudTheme()
         {
             Palette = new Palette()
@@ -30,4 +62,4 @@
                 DrawerWidthRight = "300px"
             }
         };
-    }
+}
