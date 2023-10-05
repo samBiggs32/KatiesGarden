@@ -203,6 +203,11 @@ a, .btn-link {
     width: 50%;
 }
 
+.map-location {
+    justify-content: center;
+    max-width: 100%;
+}
+
 @media (max-width: 1300px){
     .carousel-size {
         min-height: 25em;
@@ -269,7 +274,7 @@ a, .btn-link {
 
 @media (min-width:540px) {
     .map-location {
-        padding: 2em;
+        padding: 2em;        
     }
 
     .desktop-article {
@@ -335,6 +340,10 @@ a, .btn-link {
 }
 
 @media (min-width: 1140px) {
+    .map-location {
+        max-width: 50%
+    }
+
     .index-paragraph {
         padding-right: 7em;
     }
