@@ -8,8 +8,6 @@ namespace KatiesGarden.Web.Client.Pages;
 
 public partial class Contact
 {
-    [Inject] ISnackbar Snackbar { get; set; }
-
     [Inject] IJSRuntime JSRuntime { get; set; }
 
     ContactUsFormValidator orderValidator = new ContactUsFormValidator();
@@ -26,14 +24,5 @@ public partial class Contact
 
         await JSRuntime.InvokeAsync<object>("blazorExtensions.SendLocalEmail",
             new object[] { email, model.EmailSubject, model.EmailBody, model.FirstName, model.LastName, model.ContactNumber });
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("initMap", null);
-            StateHasChanged();
-        }
     }
 }
