@@ -25,6 +25,9 @@ async function onInstall(event) {
 async function onActivate(event) {
     console.info('Service worker: Activate');
 
+    // Activate the new service worker as soon as the old one is retired.
+    self.skipWaiting();
+
     // Delete unused caches
     const cacheKeys = await caches.keys();
     await Promise.all(cacheKeys
