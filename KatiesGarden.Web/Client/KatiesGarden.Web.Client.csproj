@@ -139,6 +139,9 @@
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\large_arrangement.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Update="wwwroot\Images\KatiesGardenLogo.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Update="wwwroot\Images\location\Location.png">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
