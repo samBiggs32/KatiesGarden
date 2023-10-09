@@ -22,36 +22,36 @@
                         <p class="index-paragraph">
                             Katie's Garden, nestled in the heart of picturesque Milverton, is your trusted local partner for a wide array of garden services. Our skilled team takes pride in enhancing the beauty and functionality of your outdoor space. With a passion for nature and a commitment to excellence, we offer comprehensive garden maintenance services that keep your garden in pristine condition throughout the seasons.
                         </p>
-                        <div class="company-history-list">                            
-                                <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
+                        <div class="company-history-list">
+                            <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
                                 <li><i class="fa fa-angle-right" /> Grounds Maintenance</li>
                                 <li><i class="fa fa-angle-right" /> Woodwork</li>
                                 <li><i class="fa fa-angle-right" /> Weed Control</li>
                             </ul>
-                                <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
+                            <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
                                 <li><i class="fa fa-angle-right" /> Grass Cutting</li>
                                 <li><i class="fa fa-angle-right" /> Grounds Clearance</li>
                                 <li><i class="fa fa-angle-right" /> Planting Schemes</li>
-                            </ul>                            
+                            </ul>
                         </div>
                         <p class="index-paragraph">
                             Our expertise extends far beyond maintenance. We're also your go-to destination for landscaping that transforms your garden into any desired form. Our design consultations allow us to understand your vision, creating tailored solutions that bring your dream garden to life. Additionally, our team prides itself on our stunning flower arrangements, and our handcrafted woodwork products add a touch of rustic elegance to your outdoor haven. At Katie's Garden, we're dedicated to making your garden dreams a reality, right here in the heart of Somerset.
                         </p>
-                        <p class="index-paragraph">                            
+                        <p class="index-paragraph">
                             Katie's Garden showcases their versatility, commitment, and horticultural expertise, delivering exceptional results in both urban and rural settings, earning praise and trust from satisfied clients from Bristol to the surrounding Taunton area.
                         </p>
                         <div style="text-align: center;">
                             <i class="fa-solid fa-trowel"></i>
-                        </div>                        
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-5 col-md-5 col-sm-12">
                 <div class="company-history-right">
                     <div class="tri-images">
-                        <img src="@filePath/flower_tall.jpg" loading="eager" />
-                        <img src="@filePath/dark_planter_tall.jpg" loading="eager" />
-                        <img src="@filePath/flower_2_tall.jpg" loading="eager" />
+                        <img src="@filePath/flower_tall.jpg" loading="eager" alt="A canopey of climbing flowers over a pergola" />
+                        <img src="@filePath/dark_planter_tall.jpg" loading="eager" alt="Dark wood planter" />
+                        <img src="@filePath/flower_2_tall.jpg" loading="eager" alt="Pergola and garden path with climbing flowers"/>
                     </div>
                     <div class="section-title2 company-history-right-title pt-1">
                         <h3 class="text-center pt-2"><span>Katie's Garden</span></h3>
@@ -62,7 +62,10 @@
                         </p>
                     </div>
                     <div class="feature-image">
-                        <img src="@filePath/pink_roses_and_chair.jpg" loading="eager" alt="Flower arrangement" />
+                        <img sizes="(max-width: 1400px) 100vw"                             
+                             src="@filePath/pink_roses_and_chair.jpg"
+                             srcset=@PinkRosesAndChairSrcSet
+                             alt="Pink Roses and Chair Flower Arrangement" loading="eager">
                     </div>
                 </div>
             </div>
@@ -70,11 +73,25 @@
     </div>
 </section>
 
-
 <ContactUsPrompt ShowGallery="true" />
 
-
-
 @code {
-    const string filePath = "Images/ImagesWeLike/Compressed";
+    const string filePath = "Images";
+
+    static string PinkRosesAndChairSrcSet = $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_200.jpg 200w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_340.jpg 340w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_446.jpg 446w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_469.jpg 469w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_783.jpg 783w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_800.jpg 800w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_894.jpg 894w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_956.jpg 956w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1030.jpg 1030w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1100.jpg 1100w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1184.jpg 1184w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1241.jpg 1241w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1300.jpg 1300w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1385.jpg 1385w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1393.jpg 1393w, " +
+                                            $"{filePath}/pink_roses_and_chair/pink_roses_and_chair_w_1400.jpg 1400w";
 }

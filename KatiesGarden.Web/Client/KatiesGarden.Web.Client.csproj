@@ -27,40 +27,175 @@
 		<Content Update="wwwroot\Images\github.svg">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\Carousel\stones_background.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_1133.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_1356.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_551.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background\bees_background_w_900.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1025.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1118.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1191.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1261.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1345.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1397.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_405.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_543.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_660.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_772.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_851.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background\hedge_arrangement_background_w_929.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1032.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1140.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1249.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1341.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1377.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_407.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_556.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_694.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_814.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background\planter_background_w_920.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\Carousel\yellow_flowers.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_1129.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_1396.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_474.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_668.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_834.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\stones_background\stones_background_w_972.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\Carousel\planter_background.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\planter_background.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\Carousel\bees_background.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\bees_background.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\Carousel\hedge_arrangement_background.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\hedge_arrangement_background.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\summer_house_arrangement.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers\yellow_flowers_w_1248.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers\yellow_flowers_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers\yellow_flowers_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers\yellow_flowers_w_652.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\Carousel\yellow_flowers\yellow_flowers_w_984.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\Backgrounds\summer_house_arrangement.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\butterfly.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\butterfly.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\summerhouse_background.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\summerhouse_background.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\yellow_flowers.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\yellow_flowers.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\red_flowers.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\red_flowers.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\bees.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\bees.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\Backgrounds\hedge_and_flowers.jpg">
+		<Content Update="wwwroot\Images\Backgrounds\hedge_and_flowers.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_2.jpg">
@@ -75,13 +210,13 @@
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_5_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\dark_planter_tall.jpg">
+		<Content Update="wwwroot\Images\dark_planter_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\flower_2_tall.jpg">
+		<Content Update="wwwroot\Images\flower_2_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\flower_tall.jpg">
+		<Content Update="wwwroot\Images\flower_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\summer_house.jpg">
@@ -93,7 +228,7 @@
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\tall_flower.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\pink_roses_and_chair.jpg">
+		<Content Update="wwwroot\Images\pink_roses_and_chair.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\stones_and_planters.jpg">
@@ -140,6 +275,54 @@
 		</Content>
 		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\large_arrangement.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1030.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1100.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1184.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1241.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1300.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1385.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1393.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1400.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_200.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_340.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_446.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_469.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_783.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_800.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_894.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_956.jpg">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\KatiesGardenLogo.png">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>

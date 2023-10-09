@@ -1,31 +1,32 @@
 ﻿<div class="m-1 background-colour-primary">
     <div class="image-container">
         <div class="crop">
-            <MudCarousel Class="carousel-size w-100 h-25" ShowArrows="@arrows" ShowDelimiters="@delimiters" AutoCycle="@autocycle" TData="object">
+            <MudCarousel Class="carousel-size w-100" ShowArrows="@arrows" ShowBullets="@showBullets" AutoCycle="@autocycle" TData="object">
                 <ChildContent>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block" loading="eager" style="max-height: 100%; max-width: 100%; object-fit: contain;" src="@imageFolderPath/@Images.Carousel[0]" alt="Katies Garden">
+                            <img class="d-block" loading="eager" style="max-height: 100%; max-width: 100%; object-fit: contain;"
+                                 src="@Images.Lookup.ElementAt(0).Key" srcset=@Images.Lookup.ElementAt(0).Value alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[1]" alt="Katies Garden">
+                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(1).Key" srcset=@Images.Lookup.ElementAt(1).Value alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[2]" alt="Katies Garden">
+                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(2).Key" srcset=@Images.Lookup.ElementAt(2).Value alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[3]" alt="Katies Garden">
+                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(3).Key" srcset=@Images.Lookup.ElementAt(3).Value alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                     <MudCarouselItem Transition="transition" Color="@transitionColour">
                         <div class="d-flex">
-                            <img class="d-block w-100" src="@imageFolderPath/@Images.Carousel[4]" alt="Katies Garden">
+                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(4).Key" srcset=@Images.Lookup.ElementAt(4).Value alt="Katies Garden">
                         </div>
                     </MudCarouselItem>
                 </ChildContent>
@@ -35,7 +36,7 @@
 </div>
 
 @code {
-    private string imageFolderPath = "Images/ImagesWeLike/Compressed/Backgrounds/Carousel";
+    private string imageFolderPath = "";
 
     private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
 
@@ -45,11 +46,11 @@
     private const double ratio = 1.50149;
 
     private bool arrows = false;
-    private bool delimiters = false;
+    private bool showBullets = false;
     private bool autocycle = true;
     private Transition transition = Transition.Fade;
     private Color transitionColour = Color.Transparent;
     private int numberOfImages = 0;
 
-    public Carousel() => numberOfImages = Images.Carousel.Count();
+    public Carousel() => numberOfImages = Images.Lookup.Count();
 }
