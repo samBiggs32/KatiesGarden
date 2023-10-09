@@ -198,16 +198,16 @@
 		<Content Update="wwwroot\Images\Backgrounds\hedge_and_flowers.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_2.jpg">
+		<Content Update="wwwroot\Images\Gallery\bug_house_2.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_3.jpeg">
+		<Content Update="wwwroot\Images\Gallery\bug_house_3.jpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_4.jpeg">
+		<Content Update="wwwroot\Images\Gallery\bug_house_4.jpeg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_5_tall.jpg">
+		<Content Update="wwwroot\Images\Gallery\bug_house_5_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\dark_planter_tall.jpg">
@@ -219,61 +219,49 @@
 		<Content Update="wwwroot\Images\flower_tall.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\summer_house.jpg">
+		<Content Update="wwwroot\Images\Gallery\summer_house.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\pergolas.jpg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\tall_flower.jpg">
+		<Content Update="wwwroot\Images\Gallery\pergolas.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\pink_roses_and_chair.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\stones_and_planters.jpg">
+		<Content Update="wwwroot\Images\Gallery\stones_and_planters.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\wooden_chair.jpg">
+		<Content Update="wwwroot\Images\Gallery\wooden_chair.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\wooden_frame.jpg">
+		<Content Update="wwwroot\Images\Gallery\wooden_frame.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bench.jpg">
+		<Content Update="wwwroot\Images\Gallery\bench.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\small_planter.jpg">
+		<Content Update="wwwroot\Images\Gallery\small_planter.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\tall_flower_2.jpg">
+		<Content Update="wwwroot\Images\Gallery\large_planter.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\large_planter.jpg">
+		<Content Update="wwwroot\Images\Gallery\boot_box.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\IMG_0815.JPG">
+		<Content Update="wwwroot\Images\Gallery\bug_house_1.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\boot_box.jpg">
+		<Content Update="wwwroot\Images\Gallery\long_planter.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\bug_house_1.jpg">
+		<Content Update="wwwroot\Images\Gallery\drawer_boxes.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\long_planter.jpg">
+		<Content Update="wwwroot\Images\Gallery\pallet_boxes.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\dark_planter.jpg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\drawer_boxes.jpg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\pallet_boxes.jpg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Update="wwwroot\Images\ImagesWeLike\Compressed\large_arrangement.jpg">
+		<Content Update="wwwroot\Images\Gallery\large_arrangement.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="wwwroot\Images\pink_roses_and_chair\pink_roses_and_chair_w_1030.jpg">
