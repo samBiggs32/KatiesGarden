@@ -1,6 +1,7 @@
 ﻿@page "/gallery"
 @inject IJSRuntime JSRuntime
 @using KatiesGarden.Web.Client.Components
+@using Shared
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-8">
     <MudText Typo="Typo.h4" Class="text-center mb-6 font-weight-bold">Our Gallery</MudText>
@@ -15,14 +16,25 @@
                                          Images="@WoodworkImages" />
                     </div>
 
-                    <MudPaper Elevation="0" Class="px-4 py-4 rounded-lg mud-theme-primary" Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1);">
-                        <MudText Typo="Typo.body1" Class="gallery-text">
-                            Welcome to Katie's Garden, where nature meets craftsmanship. We are a bespoke business that specializes in creating exquisite woodwork products to elevate your outdoor spaces. With a passion for both gardening and woodworking, Katie's Garden offers a unique blend of creativity and craftsmanship.
+                    <MudPaper Elevation="0" Class="rounded-lg overflow-hidden">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12" md="6" Class="pa-5" Style="background-color: var(--mud-palette-primary); color: white;">
+                                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: 500;">Welcome to Katie's Garden</MudText>
 
-                            Our skilled artisans handcraft every piece with love and dedication, ensuring that each product is not just functional but also a feature piece for your outdoor space. From custom garden furniture to personalized planters and trellises, our creations are designed to complement your garden's beauty.
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Where nature meets craftsmanship. We are a bespoke business that specializes in creating exquisite woodwork products to elevate your outdoor spaces.
+                                </MudText>
 
-                            Explore our gallery to witness the essence of Katie's Garden – where nature-inspired woodwork transforms your outdoor oasis into a haven of beauty and tranquility. Join us in celebrating the magic of bespoke garden craftsmanship.
-                        </MudText>
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Our skilled artisans handcraft every piece with love and dedication, ensuring that each product is not just functional but also a feature piece for your outdoor space.
+                                </MudText>
+
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Explore our gallery to witness the essence of Katie's Garden – where nature-inspired woodwork transforms your outdoor oasis into a haven of beauty and tranquility.
+                                </MudText>
+                            </MudItem>
+                            <Boots />
+                        </MudGrid>
                     </MudPaper>
 
                     <div class="text-center mt-4">
@@ -41,14 +53,25 @@
                                          Images="@BugHouseImages" />
                     </div>
 
-                    <MudPaper Elevation="0" Class="px-4 py-4 rounded-lg mud-theme-primary" Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1);">
-                        <MudText Typo="Typo.body1" Class="gallery-text">
-                            Discover the enchanting world of bespoke bug houses at Katie's Garden. We take pride in crafting handmade bug houses to order, designed to provide a safe and inviting haven for our tiny, invaluable garden friends.
+                    <MudPaper Elevation="0" Class="rounded-lg overflow-hidden">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12" md="6" Class="pa-5" Style="background-color: var(--mud-palette-primary); color: white;">
+                                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: 500;">Welcome to Katie's Garden</MudText>
 
-                            Each bug house is a labor of love, meticulously crafted using sustainable materials to create a cozy habitat for beneficial insects like ladybugs, solitary bees, and butterflies. Whether you want to encourage pollinators or simply appreciate the beauty of nature up close, our custom bug houses are the perfect addition to your garden.
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Discover the enchanting world of bespoke bug houses at Katie's Garden. We take pride in crafting handmade bug houses to order, designed to provide a safe and inviting haven for our tiny, invaluable garden friends.
+                                </MudText>
 
-                            Elevate your outdoor space while supporting local biodiversity with our personalized bug houses, tailored to your unique preferences and garden needs. Experience the wonder of handmade insect sanctuaries with Katie's Garden today.
-                        </MudText>
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Each bug house is a labor of love, meticulously crafted using sustainable materials to create a cozy habitat for beneficial insects like ladybugs, solitary bees, and butterflies. Whether you want to encourage pollinators or simply appreciate the beauty of nature up close, our custom bug houses are the perfect addition to your garden.
+                                </MudText>
+
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Elevate your outdoor space while supporting local biodiversity with our personalized bug houses, tailored to your unique preferences and garden needs. Experience the wonder of handmade insect sanctuaries with Katie's Garden today.
+                                </MudText>
+                            </MudItem>
+                            <Boots />
+                        </MudGrid>
                     </MudPaper>
 
                     <div class="text-center mt-4">
@@ -67,14 +90,25 @@
                                          Images="@MaintenanceImages" />
                     </div>
 
-                    <MudPaper Elevation="0" Class="px-4 py-4 rounded-lg mud-theme-primary" Style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1);">
-                        <MudText Typo="Typo.body1" Class="gallery-text">
-                            At Katie's Garden, we go beyond creating beautiful outdoor spaces; we also offer top-notch garden maintenance services to keep your garden flourishing year-round. Our expert team of horticulturists and landscapers is dedicated to preserving the pristine beauty of your garden.
+                    <MudPaper Elevation="0" Class="rounded-lg overflow-hidden">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12" md="6" Class="pa-5" Style="background-color: var(--mud-palette-primary); color: white;">
+                                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: 500;">Welcome to Katie's Garden</MudText>
 
-                            Our comprehensive maintenance packages encompass everything from regular lawn mowing and weed control to seasonal pruning and fertilization. We tailor our services to your garden's unique needs, ensuring it remains a thriving and vibrant space to enjoy.
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    At Katie's Garden, we go beyond creating beautiful outdoor spaces; we also offer top-notch garden maintenance services to keep your garden flourishing year-round. Our expert team of horticulturists and landscapers is dedicated to preserving the pristine beauty of your garden.
+                                </MudText>
 
-                            With a commitment to sustainable practices, we prioritize eco-friendly solutions to promote a healthier environment. Experience the convenience of professional garden care, allowing you to relax in the splendor of your well-maintained garden. Trust Katie's Garden for all your garden maintenance needs.
-                        </MudText>
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    Our comprehensive maintenance packages encompass everything from regular lawn mowing and weed control to seasonal pruning and fertilization. We tailor our services to your garden's unique needs, ensuring it remains a thriving and vibrant space to enjoy.
+                                </MudText>
+
+                                <MudText Typo="Typo.body1" Class="mb-3" Style="line-height: 1.7;">
+                                    With a commitment to sustainable practices, we prioritize eco-friendly solutions to promote a healthier environment. Experience the convenience of professional garden care, allowing you to relax in the splendor of your well-maintained garden. Trust Katie's Garden for all your garden maintenance needs.
+                                </MudText>
+                            </MudItem>
+                            <Boots />
+                        </MudGrid>
                     </MudPaper>
 
                     <div class="text-center mt-4">
