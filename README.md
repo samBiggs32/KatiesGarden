@@ -1,113 +1,128 @@
 <a name="readme-top"></a>
 
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/samBiggs32/KatiesGarden">
     <img src="\Images\Katies-Garden.gif" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Katie's Garden Readme</h3>
+  <h1 align="center">Katie's Garden</h1>
 
   <p align="center">
-    A summary of Katie's Garden Project and core technologies
+    A modern web application for a family-run garden business in Milverton, Taunton, UK
+    <br />
+    <a href="https://github.com/samBiggs32/KatiesGarden"><strong>View Repository »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/samBiggs32/KatiesGarden"><strong>Explore the docs »</strong></a>    
-    <br />    
     <a href="https://github.com/samBiggs32/KatiesGarden/issues">Report Bug</a>
-    <br />
+    ·
     <a href="https://github.com/samBiggs32/KatiesGarden/issues">Request Feature</a>
   </p>
 </div>
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+## 📋 Table of Contents
 
+- [About The Project](#about-the-project)
+  - [Built With](#built-with)
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Development Roadmap](#development-roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
+## 🌱 About The Project
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+Katie's Garden is a family-run garden center and landscaping service based in Milverton, Taunton, UK. This web application showcases our products, services, and finished garden projects while providing an online shopping experience for customers.
 
-Katie's Garden is a family run business based in Milverton, Taunton, UK which offers several gardening services for the local community. This website is intended to showcase some of what the team has to offer including gallery photos and activity descriptions.
+Our site features a responsive design that works beautifully on both desktop and mobile devices, allowing customers to browse our plant selection, view our garden design gallery, and place orders online.
 
 ### Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+The application is built using the following technologies:
 
-* [ASP.NET Blazor][Blazor-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+* [ASP.NET Core 8](https://dotnet.microsoft.com/en-us/apps/aspnet) - Backend framework
+* [Blazor WebAssembly](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) - Frontend framework
+* [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - Data access
+* [Bootstrap 5](https://getbootstrap.com) - UI framework
+* [Azure Static Web Apps](https://azure.microsoft.com/en-us/services/app-service/static/) - Hosting
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## ✨ Features
+
+- **Home Page** - Featuring seasonal highlights and business introduction
+- **Gallery** - Showcase of completed garden projects and available plants
+- **Contact Page** - Business information and inquiry form
+- **Shop** (Coming Soon) - Online ordering for:
+  - Indoor Plants
+  - Perennials
+  - Vegetables
+  - Herbs
+  - Woodwork Products (Bug Houses, Boot Stands, etc.)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 🚀 Getting Started
+
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Git
+- A code editor (recommended: [Visual Studio 2022](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/))
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
-1. Download the .NET runtiime and CLI following an [appropriate guide](https://learn.microsoft.com/en-us/dotnet/core/install)
-2. Clone the repo
+1. Clone the repository
    ```sh
    git clone https://github.com/samBiggs32/KatiesGarden.git
    ```
-2. Navigate to KatiesGarden.Web\Client
 
-3. Execute dotnet run in an appropriate CLI
+2. Navigate to the project directory
+   ```sh
+   cd KatiesGarden
+   ```
 
-```cli
-dotnet run
-```
+3. Navigate to the client project directory
+   ```sh
+   cd KatiesGarden.Web/Client
+   ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+4. Run the application
+   ```sh
+   dotnet run
+   ```
 
-<!-- USAGE EXAMPLES -->
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [x] Add Changelog
-- [x] Implementation of home page
-- [x] Implementation of gallery
-- [x] Implementation of contacts page
-- [x] Initial pipeline setup
-- [x] DNS Configuration and deployment to static webapps
-- [ ] Add Additional Gallery content
-- [ ] Create orders page and storefront
-
-See the [open issues]([https://github.com/samBiggs32/KatiesGarden/issues) for a full list of proposed features (and known issues).
+5. Open your browser and go to `https://localhost:5001` or `http://localhost:5000`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTRIBUTING -->
-## Contributing
+## 📈 Development Roadmap
+
+- [x] Implement responsive home page
+- [x] Create gallery with project showcase
+- [x] Develop contact page with form
+- [x] Set up CI/CD pipeline 
+- [x] Configure DNS and deploy to Azure Static Web Apps
+- [ ] Implement shop/ordering functionality
+  - [ ] Product catalog with categories
+  - [ ] Shopping cart functionality
+  - [ ] Checkout process
+  - [ ] Order management
+- [ ] Add user accounts and authentication
+- [ ] Expand gallery with new projects
+- [ ] Implement seasonal specials and promotions
+
+See the [open issues](https://github.com/samBiggs32/KatiesGarden/issues) for a list of proposed features and known issues.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 🤝 Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -115,39 +130,25 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+### Development Standards
+
+- Follow the existing code style and patterns
+- Write unit tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting a pull request
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- LICENSE -->
-## License
+## 📝 License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
-## Contact
-[Find me on LinkedIn](https://www.linkedin.com/in/sambiggs32/)
+## 📬 Contact
+
+Sam Biggs - [LinkedIn](https://www.linkedin.com/in/sambiggs32/)
+
+Project Link: [https://github.com/samBiggs32/KatiesGarden](https://github.com/samBiggs32/KatiesGarden)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/sambiggs32/
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
-[Blazor-url]: https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor
