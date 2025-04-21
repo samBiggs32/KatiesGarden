@@ -1,55 +1,128 @@
 ﻿@page "/contact"
-
 @inject ILogger<Contact> Logger
 
-<div class="ml-auto w-100 justify-content-center d-none d-sm-block pb-2" style="align-items: center; text-align: center;">
-    <h5 class="m-0">Contact Us</h5>
-</div>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    <MudText Typo="Typo.h4" Class="text-center mb-6 font-weight-bold">Get in Touch</MudText>
 
-<section id="promotional-text" class="break-banner">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 text-center break-banner" style="font-size: 1.5em">
-                    <p>We work in Milverton, Somertset</p>
-                </div>
+    <!-- Location Section -->
+    <MudCard Elevation="3" Class="mb-6">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Our Location</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudText Typo="Typo.body1" Class="mb-4 text-center">
+                We're based in the beautiful countryside of Milverton, Somerset
+            </MudText>
+            <div class="d-flex justify-center mb-4">
+                <img class="rounded" style="max-width: 100%; height: auto;" src="Images/location/Location.png" alt="Location of Katie's Garden" />
             </div>
-</section>
+        </MudCardContent>
+    </MudCard>
 
-<div class="row">
-    <div class="col" style="justify-content: center; display: flex">
-        <img class="d-block map-location" src="Images/location/Location.png" alt="Location of Katie's Garden" />
-    </div>
-</div>
-
-<MudDivider />
-
-<div class="row pt-3">
-    <div class="col desktop-article">
-        <MudCard>
-            <section id="promotional-text" class="break-banner">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 text-center break-banner" style="font-size: 1.5em">
-                    <p>Send us a query about your garden</p>
-                </div>
-            </div>
-            </section>
-            <MudForm Model="@model" @ref="@form">
-                <MudCardContent>
-                    <MudTextField @bind-Value="model.FirstName" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.FirstName)" Immediate="true" Label="First Name" />
-                    <MudTextField @bind-Value="model.LastName" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.LastName)" Immediate="true" Label="Last Name" />
-                    <MudTextField @bind-Value="model.ContactNumber" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.ContactNumber)" Immediate="true" Label="Contact Number" />
-                    <MudTextField @bind-Value="model.EmailSubject" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.EmailSubject)" Immediate="true" Label="Title" />
-                    <MudTextField @bind-Value="model.EmailBody" Validation="@(orderValidator.ValidateValue)"
-                                  For="@(() => model.EmailBody)" Immediate="true" Label="Message"  Lines="3" />
-                </MudCardContent>
-            </MudForm>
-            <MudCardActions>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                           Class="ml-auto" OnClick="@(async () => await HandleSubmit())" Style="@($"background-color:{Colors.Teal.Darken1};")">Confirm</MudButton>
+    <!-- Contact Form Section -->
+    <MudCard Elevation="3">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Send us a Query</MudText>
+        </MudCardHeader>
+        <MudForm Model="@model" @ref="@form">
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="model.FirstName"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.FirstName)"
+                                      Immediate="true"
+                                      Label="First Name"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-3" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="model.LastName"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.LastName)"
+                                      Immediate="true"
+                                      Label="Last Name"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-3" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="model.ContactNumber"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.ContactNumber)"
+                                      Immediate="true"
+                                      Label="Phone Number"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-3" />
+                    </MudItem>
+                    @* If your ContactUsForm has an EmailAddress property, add this: *@
+                    @* <MudItem xs="12">
+                        <MudTextField @bind-Value="model.EmailAddress" 
+                                     Validation="@(orderValidator.ValidateValue)"
+                                     For="@(() => model.EmailAddress)" 
+                                     Immediate="true" 
+                                     Label="Email Address" 
+                                     Variant="Variant.Outlined"
+                                     Class="mb-3" />
+                    </MudItem> *@
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="model.EmailSubject"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.EmailSubject)"
+                                      Immediate="true"
+                                      Label="Subject"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-3" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="model.EmailBody"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.EmailBody)"
+                                      Immediate="true"
+                                      Label="Message"
+                                      Lines="5"
+                                      Variant="Variant.Outlined"
+                                      HelperText="Tell us about your garden and how we can help" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+            <MudCardActions Class="pb-4 px-4 justify-end">
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Secondary"
+                           Class="mr-2"
+                           OnClick="ResetFormAsync">Reset</MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Send"
+                           OnClick="@(async () => await HandleSubmitAsync())"
+                           Disabled="@isSubmitting">
+                    @(isSubmitting ? "Sending..." : "Send Message")
+                </MudButton>
             </MudCardActions>
-        </MudCard>
-    </div>
-</div>
+        </MudForm>
+    </MudCard>
+
+    <!-- Additional Contact Information -->
+    <MudGrid Class="mt-6">
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
+                <MudIcon Icon="@Icons.Material.Filled.Phone" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                <MudText Typo="Typo.h6">Phone</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2">+44 1234 567890</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
+                <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                <MudText Typo="Typo.h6">Email</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2">info@katiesgarden.com</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
+                <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
+                <MudText Typo="Typo.h6">Business Hours</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2">Mon-Fri: 9am - 5pm</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
