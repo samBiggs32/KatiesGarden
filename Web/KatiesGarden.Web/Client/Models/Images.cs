@@ -1,10 +1,10 @@
 ﻿namespace KatiesGarden.Web.Client.Models
 {
     public class Images
-    {        
+    {
         const string imageBaseUrl = "Images/Backgrounds/Carousel";
 
-        static readonly string stonesSrcSet = 
+        static readonly string stonesSrcSet =
                              $"{imageBaseUrl}/stones_background/stones_background_w_200.jpg 200w, " +
                              $"{imageBaseUrl}/stones_background/stones_background_w_474.jpg 474w, " +
                              $"{imageBaseUrl}/stones_background/stones_background_w_668.jpg 668w, " +
@@ -14,14 +14,14 @@
                              $"{imageBaseUrl}/stones_background/stones_background_w_1396.jpg 1396w, " +
                              $"{imageBaseUrl}/stones_background/stones_background_w_1400.jpg 1400w";
 
-        static readonly string yellowFlowersSrcSet = 
+        static readonly string yellowFlowersSrcSet =
                              $"{imageBaseUrl}/yellow_flowers/yellow_flowers_w_200.jpg 200w, " +
                              $"{imageBaseUrl}/yellow_flowers/yellow_flowers_w_652.jpg 652w, " +
                              $"{imageBaseUrl}/yellow_flowers/yellow_flowers_w_984.jpg 984w, " +
                              $"{imageBaseUrl}/yellow_flowers/yellow_flowers_w_1248.jpg 1248w," +
                              $"{imageBaseUrl}/yellow_flowers/yellow_flowers_w_1400.jpg 1400w";
 
-        static readonly string plantedBackgroundSrcSet = 
+        static readonly string plantedBackgroundSrcSet =
                              $"{imageBaseUrl}/planter_background/planter_background_w_200.jpg 200w, " +
                              $"{imageBaseUrl}/planter_background/planter_background_w_407.jpg 407w, " +
                              $"{imageBaseUrl}/planter_background/planter_background_w_556.jpg 556w, " +
@@ -35,7 +35,7 @@
                              $"{imageBaseUrl}/planter_background/planter_background_w_1377.jpg 1377w, " +
                              $"{imageBaseUrl}/planter_background/planter_background_w_1400.jpg 1400w";
 
-        static readonly string beesBackgroundSrcSet = 
+        static readonly string beesBackgroundSrcSet =
                              $"{imageBaseUrl}/bees_background/bees_background_w_200.jpg 200w," +
                              $"{imageBaseUrl}/bees_background/bees_background_w_551.jpg 551w," +
                              $"{imageBaseUrl}/bees_background/bees_background_w_900.jpg 900w," +
@@ -43,7 +43,7 @@
                              $"{imageBaseUrl}/bees_background/bees_background_w_1356.jpg 1356w, " +
                              $"{imageBaseUrl}/bees_background/bees_background_w_1400.jpg 1400w";
 
-        static readonly string hedgeArrangementBackground = 
+        static readonly string hedgeArrangementBackground =
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_200.jpg 200w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_405.jpg 405w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_543.jpg 543w, " +
