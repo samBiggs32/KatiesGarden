@@ -1,0 +1,29 @@
+# production-deploy.yml
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy to Production
+        id: builddeployprod
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          # No token needed with GitHub authentication
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "Web/KatiesGarden.Web/Client"
+          api_location: "Api"
+          output_location: "wwwroot"
+          # Add this to specify which Static Web App to deploy to
+          deployment_environment: "production" # Specify your production environment name

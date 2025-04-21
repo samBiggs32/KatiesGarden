@@ -16,14 +16,14 @@ namespace KatiesGarden.Web.Client.Pages
             "Explore our gallery to witness the essence of Katie's Garden – where nature-inspired woodwork transforms your outdoor oasis into a haven of beauty and tranquility."
         };
 
-            private List<string> BugsAndHugsDescription = new List<string>
+        private List<string> BugsAndHugsDescription = new List<string>
         {
             "Discover the enchanting world of bespoke bug houses at Katie's Garden. We take pride in crafting handmade bug houses to order, designed to provide a safe and inviting haven for our tiny, invaluable garden friends.",
             "Each bug house is a labor of love, meticulously crafted using sustainable materials to create a cozy habitat for beneficial insects like ladybugs, solitary bees, and butterflies. Whether you want to encourage pollinators or simply appreciate the beauty of nature up close, our custom bug houses are the perfect addition to your garden.",
             "Elevate your outdoor space while supporting local biodiversity with our personalized bug houses, tailored to your unique preferences and garden needs. Experience the wonder of handmade insect sanctuaries with Katie's Garden today."
         };
 
-            private List<string> MaintenanceDescription = new List<string>
+        private List<string> MaintenanceDescription = new List<string>
         {
             "At Katie's Garden, we go beyond creating beautiful outdoor spaces; we also offer top-notch garden maintenance services to keep your garden flourishing year-round. Our expert team of horticulturists and landscapers is dedicated to preserving the pristine beauty of your garden.",
             "Our comprehensive maintenance packages encompass everything from regular lawn mowing and weed control to seasonal pruning and fertilization. We tailor our services to your garden's unique needs, ensuring it remains a thriving and vibrant space to enjoy.",
