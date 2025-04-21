@@ -25,7 +25,24 @@
     }
 };
 
+// Scroll to an element by ID with smooth animation
+window.scrollToElement = function (elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+};
 
 function isEmpty(str) {
     return (!str || str.length === 0);
 }
+
+// Check if a carousel exists in the DOM
+window.carouselExists = function (id) {
+    const exists = document.getElementById(id) !== null;
+    console.log(`Carousel ${id} exists: ${exists}`);
+    return exists;
+};

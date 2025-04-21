@@ -1,0 +1,36 @@
+﻿@namespace KatiesGarden.Web.Client.Components
+
+<div class="mb-4">
+    <GalleryCarousel Id="@CarouselId"
+                     Images="@Images" />
+</div>
+
+<MudPaper Elevation="0" Class="rounded-lg overflow-hidden">
+    <MudItem xs="9" md="9" Class="pa-5 mx-auto d-flex flex-column align-center" Style="background-color: var(--mud-palette-primary); color: white;">
+        <MudText Typo="Typo.h5" Class="mb-4 text-center" Style="font-weight: 500;">@Title</MudText>
+
+        @foreach (var paragraph in Description)
+        {
+            <MudText Typo="Typo.body1" Class="mb-3 text-center" Style="line-height: 1.7;">
+                @paragraph
+            </MudText>
+        }
+    </MudItem>
+</MudPaper>
+
+<div class="text-center pa-5">
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Secondary"
+               OnClick="@ButtonAction">
+        @ButtonText
+    </MudButton>
+</div>
+
+@code {
+    [Parameter] public string CarouselId { get; set; }
+    [Parameter] public IEnumerable<GalleryCarousel.GalleryImage> Images { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public List<string> Description { get; set; }
+    [Parameter] public string ButtonText { get; set; }
+    [Parameter] public EventCallback ButtonAction { get; set; }
+}

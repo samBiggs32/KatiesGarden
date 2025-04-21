@@ -1,146 +1,49 @@
 ﻿@page "/gallery"
+@inject IJSRuntime JSRuntime
+@using KatiesGarden.Web.Client.Components
+@using Shared
 
-<div class="ml-auto w-100 justify-content-center d-none d-sm-block pb-2" style="align-items: center; text-align: center;">
-    <h5 class="m-0">Gallery</h5>
-</div>
-<hr />
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-8">
+    <MudText Typo="Typo.h4" Class="text-center mb-6 font-weight-bold">Our Gallery</MudText>
 
-<MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
-    <MudTabPanel Text="Woodwork">
-        <br />
-        <div id="woodworkCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
-            <ol class="carousel-indicators">
-                <li data-target="#woodworkCarousel" data-slide-to="0" class="active"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="1"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="2"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="3"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="4"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="5"></li>
-            </ol>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img class="d-block w-100" loading="eager" src="@imageFolderPath/small_planter.jpg" alt="Woodwork #1 Small Planter">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/large_planter.jpg" alt="Woodwork #2 Large Planter">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/pallet_boxes.jpg" alt="Woodwork #3 Drawer Flower Boxes">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/wooden_chair.jpg" alt="Woodwork #4 Wooden Chair">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/bench.jpg" alt="Woodwork #5 Bench">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/boot_box.jpg" alt="Woodwork #6 Outdoor Boot Stand">
-                </div>
-            </div>
-            <a class="carousel-control-prev" href="#woodworkCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#woodworkCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        </div>
-        <div class="gallery-text pt-1">
-            <p>
-                Welcome to Katie's Garden, where nature meets craftsmanship. We are a bespoke business that specializes in creating exquisite woodwork products to elevate your outdoor spaces. With a passion for both gardening and woodworking, Katie's Garden offers a unique blend of creativity and craftsmanship. 
-                Our skilled artisans handcraft every piece with love and dedication, ensuring that each product is not just functional but also a feature piece or your outdoor space. From custom garden furniture to personalized planters and trellises, our creations are designed to complement your garden's beauty. Explore our gallery to witness the essence 
-                of Katie's Garden – where nature-inspired woodwork transforms your outdoor oasis into a haven of beauty and tranquility. Join us in celebrating the magic of bespoke garden craftsmanship.
-            </p>
-        </div>
-    </MudTabPanel>
-    <MudTabPanel Text="Bugs and Hugs">
-        <br />
-        <div id="woodworkCarousel" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
-            <ol class="carousel-indicators">
-                <li data-target="#woodworkCarousel" data-slide-to="0" class="active"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="1"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="2"></li>
-                <li data-target="#woodworkCarousel" data-slide-to="3"></li>
-            </ol>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img class="d-block w-100" loading="eager" src="@imageFolderPath/bug_house_1.jpg" alt="Woodwork #7 Bug House Disassembled">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/bug_house_2.jpg" alt="Woodwork #8 Bug House">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/bug_house_3.jpeg" alt="Woodwork #9 Bug House">
-                </div>
-                <div class="carousel-item">                    
-                    <img class="d-block w-100" src="@imageFolderPath/bug_house_4.jpeg" alt="Woodwork #10 Bug House">
-                </div>
-            </div>
-            <a class="carousel-control-prev" href="#woodworkCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#woodworkCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        </div>
-        <div class="gallery-text pt-1">
-            <p>
-                Discover the enchanting world of bespoke bug houses at Katie's Garden. We take pride in crafting handmade bug houses to order, designed to provide a safe and inviting haven for our tiny, invaluable garden friends. Each bug house is a labor of love, meticulously crafted using sustainable materials to create a cozy habitat for beneficial insects like ladybugs, solitary bees, and butterflies. Whether you want to encourage pollinators or simply appreciate the beauty of nature up close, our custom bug houses are the perfect addition to your garden. Elevate your outdoor space while supporting local biodiversity with our personalized bug houses, tailored to your unique preferences and garden needs. Experience the wonder of handmade insect sanctuaries with Katie's Garden today.
-            </p>
-        </div>
-    </MudTabPanel>    
-    <MudTabPanel Text="Maintenance">
-        <br />
-        <div id="maintainenceCarousel" loading="eager" class="carousel slide gallery-carousel" data-ride="carousel" data-interval="false">
-            <ol class="carousel-indicators">
-                <li data-target="#maintainenceCarousel" data-slide-to="0" class="active"></li>
-                <li data-target="#maintainenceCarousel" data-slide-to="1"></li>
-                <li data-target="#maintainenceCarousel" data-slide-to="2"></li>
-            </ol>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img class="d-block w-100" src="@imageFolderPath/large_arrangement.jpg" alt="Maintenance #1">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/long_planter.jpg" alt="Maintenance #2">
-                </div>
-                <div class="carousel-item">
-                    <img class="d-block w-100" src="@imageFolderPath/stones_and_planters.jpg" alt="Maintenance #3">
-                </div>
-            </div>
-            <a class="carousel-control-prev" href="#maintainenceCarousel" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-            <a class="carousel-control-next" href="#maintainenceCarousel" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-        </div>
-        <div class="gallery-text pt-1">
-            <p>
-                At Katie's Garden, we go beyond creating beautiful outdoor spaces; we also offer top-notch garden maintenance services to keep your garden flourishing year-round. Our expert team of horticulturists and landscapers is dedicated to preserving the pristine beauty of your garden. Our comprehensive maintenance packages encompass everything from regular lawn mowing and weed control to seasonal pruning and fertilization. We tailor our services to your garden's unique needs, ensuring it remains a thriving and vibrant space to enjoy. 
-                With a commitment to sustainable practices, we prioritize eco-friendly solutions to promote a healthier environment. Experience the convenience of professional garden care, allowing you to relax in the splendor of your well-maintained garden. Trust Katie's Garden for all your garden maintenance needs.
-            </p>
-        </div>
-    </MudTabPanel>
-</MudTabs>
+    <MudCard Elevation="3" Class="mb-6">
+        <MudCardContent>
+            <MudTabs Elevation="2" Rounded="true" Centered="true" Color="Color.Primary" ApplyEffectsToContainer="true" PanelClass="pt-6 px-2">
+                <MudTabPanel Text="Woodwork" Icon="@Icons.Material.Filled.Nature">
+                    <GalleryTabContent 
+                        CarouselId="woodworkCarousel"
+                        Images="@WoodworkImages"
+                        Title="Welcome to Katie's Garden"
+                        Description="@WoodworkDescription"
+                        ButtonText="Request Custom Woodwork"
+                        ButtonAction="@(() => NavigateToContact("Custom Woodwork Enquiry"))" />
+                </MudTabPanel>
 
-<ContactUsPrompt ShowGallery="false" />
+                <MudTabPanel Text="Bugs and Hugs" Icon="@Icons.Material.Filled.Pets">
+                    <GalleryTabContent 
+                        CarouselId="bugsCarousel"
+                        Images="@BugHouseImages"
+                        Title="Welcome to Katie's Garden"
+                        Description="@BugsAndHugsDescription"
+                        ButtonText="Order Custom Bug House"
+                        ButtonAction="@(() => NavigateToContact("Bug House Order"))" />
+                </MudTabPanel>
 
-@code {
-    private const string imageFolderPath = "Images/Gallery";
+                <MudTabPanel Text="Maintenance" Icon="@Icons.Material.Filled.Grass">
+                    <GalleryTabContent 
+                        CarouselId="maintenanceCarousel"                        
+                        Images="@MaintenanceImages"
+                        Title="Welcome to Katie's Garden"
+                        Description="@MaintenanceDescription"
+                        ButtonText="Enquire About Maintenance"
+                        ButtonAction="@(() => NavigateToContact("Maintenance Service Enquiry"))" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudCardContent>
+    </MudCard>
 
-    private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
-    private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
+    <ServiceOverview 
+        Services="@GardenServices.AsEnumerable()" 
+        NavigateToContact="@NavigateToContact" />
+</MudContainer>
 
-    private const double sizeMultiple = 1.5;
-    private const double ratio = 1.50149;
-
-    private int numberOfImages = 0;
-
-    public Gallery() => numberOfImages = Images.Lookup.Count();
-    }
