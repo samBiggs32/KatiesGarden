@@ -1,0 +1,33 @@
+﻿@namespace KatiesGarden.Web.Client.Components
+@using KatiesGarden.Web.Client.Constants
+
+<MudGrid Class="mt-8">
+    <MudItem xs="12">
+        <MudText Typo="Typo.h5" Class="mb-4 text-center">Our Garden Services</MudText>
+    </MudItem>
+
+    @foreach (var service in Services)
+    {
+        <MudItem xs="12" md="4">
+            <MudCard Elevation="2" Class="h-100">
+                <MudCardMedia Image="@($"{ImagePaths.GalleryBasePath + service.ImageFile}")" Height="200" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">@service.Title</MudText>
+                    <MudText Typo="Typo.body2">@service.Description</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                    Color="Color.Primary"
+                    OnClick="@(() => NavigateToContact($"{service.Title} Enquiry"))">
+                        Learn More
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [Parameter] public IEnumerable<GardenService> Services { get; set; }
+    [Parameter] public Action<string> NavigateToContact { get; set; }    
+}

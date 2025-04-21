@@ -1,24 +1,25 @@
 ﻿@namespace KatiesGarden.Web.Client.Components
+@using KatiesGarden.Web.Client.Constants
 
 <div id="@Id" class="carousel slide gallery-carousel" style="border-radius: 8px; overflow: hidden;">
     <ol class="carousel-indicators">
-        @for (int i = 0; i < Images.Count; i++)
+        @for (int i = 0; i < Images.Count(); i++)
         {
             <li data-target="#@Id" data-slide-to="@i" class="@(i == 0 ? "active" : "")"></li>
         }
     </ol>
     <div class="carousel-inner">
-        @for (int i = 0; i < Images.Count; i++)
+        @for (int i = 0; i < Images.Count(); i++)
         {
-            var image = Images[i];
+            var image = Images.ElementAt(i);
             <div class="carousel-item @(i == 0 ? "active" : "")">
                 @if (i == 0)
                 {
-                    <img class="d-block w-100" loading="eager" src="@($"{ImageFolderPath}/{image.FileName}")" alt="@image.Alt">
+                    <img class="d-block w-100" loading="eager" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
                 }
                 else
                 {
-                    <img class="d-block w-100" src="@($"{ImageFolderPath}/{image.FileName}")" alt="@image.Alt">
+                    <img class="d-block w-100" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
                 }
                 <div class="carousel-caption d-none d-md-block">
                     <h5>@image.Title</h5>
@@ -39,8 +40,7 @@
 
 @code {
     [Parameter] public string Id { get; set; } = "carousel";
-    [Parameter] public string ImageFolderPath { get; set; } = "Images/Gallery";
-    [Parameter] public List<GalleryImage> Images { get; set; } = new List<GalleryImage>();
+    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = new List<GalleryImage>();
 
     public class GalleryImage
     {
