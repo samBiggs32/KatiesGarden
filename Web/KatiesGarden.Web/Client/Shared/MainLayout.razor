@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@inject IJSRuntime JSRuntime
+
 <MudThemeProvider Theme="CustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -49,19 +51,23 @@
 <UpdateAvailableDetector />
 
 @code {
+    // Create a minimal theme with only essential properties
     MudTheme CustomTheme = new MudTheme()
         {
             PaletteLight = new PaletteLight()
             {
-                Primary = Colors.Teal.Default,
-                Secondary = Colors.Green.Accent4,
-                AppbarBackground = Colors.Red.Default,
-            },
-
-            LayoutProperties = new LayoutProperties()
-            {
-                DrawerWidthLeft = "260px",
-                DrawerWidthRight = "300px"
+                Primary = "#24937F",
+                Secondary = "#E7AEC9",
+                Background = "#F0F5F3",
+                Surface = "#FFFFFF",
+                TextPrimary = "#2D3E40",
+                TextSecondary = "#5B7876",
+                AppbarBackground = "#FFFFFF",
+                AppbarText = "#24937F",
+                DrawerBackground = "#F8FDFB",
+                DrawerText = "#2D3E40",
+                Success = "#5FAD7E",
+                Error = "#D03838"
             }
         };
 
