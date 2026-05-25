@@ -1,3 +1,4 @@
+@using KatiesGarden.Web.Client.Models.Validators
 @inject HttpClient Http
 
 <section class="newsletter-section">
@@ -33,8 +34,8 @@
                                               InputType="InputType.Email"
                                               Class="newsletter-field"
                                               Disabled="_loading"
-                                              Error="@(!string.IsNullOrEmpty(_error))"
-                                              ErrorText="@_error" />
+                                              Error="@(!string.IsNullOrEmpty(_emailError))"
+                                              ErrorText="@_emailError" />
                             </div>
                             <div class="col-sm-auto">
                                 <MudButton Variant="Variant.Filled"
@@ -50,6 +51,22 @@
                                 </MudButton>
                             </div>
                         </div>
+                        <div class="row justify-content-center mt-2">
+                            <div class="col-lg-9 text-start">
+                                <MudCheckbox @bind-Value="_consent"
+                                             Dense="true"
+                                             Color="Color.Primary">
+                                    <p class="mb-0" style="font-size:0.85rem">
+                                        I agree to receive occasional email updates from Katie's Garden.
+                                        You can unsubscribe at any time. We will never share your email with third parties.
+                                    </p>
+                                </MudCheckbox>
+                                @if (_consentError)
+                                {
+                                    <p class="mud-error-text" style="font-size:0.75rem; margin-left:2rem">Please tick the box to subscribe.</p>
+                                }
+                            </div>
+                        </div>
                     </div>
                 }
             </div>
@@ -58,39 +75,48 @@
 </section>
 
 @code {
+    private static readonly SubscribeRequestValidator _validator = new();
+
     string _email = string.Empty;
     string _firstName = string.Empty;
-    string _error = string.Empty;
+    string _emailError = string.Empty;
+    bool _consent;
+    bool _consentError;
     bool _loading;
     bool _submitted;
 
     async Task SubscribeAsync()
     {
-        _error = string.Empty;
+        _emailError = string.Empty;
+        _consentError = false;
 
-        if (string.IsNullOrWhiteSpace(_email) || !_email.Contains('@'))
+        var request = new SubscribeRequest(_email.Trim(), string.IsNullOrWhiteSpace(_firstName) ? null : _firstName.Trim());
+        var validation = _validator.Validate(request);
+
+        if (!validation.IsValid)
         {
-            _error = "Please enter a valid email address.";
-            return;
+            _emailError = validation.Errors.First().ErrorMessage;
         }
+
+        if (!_consent)
+        {
+            _consentError = true;
+        }
+
+        if (!validation.IsValid || !_consent) return;
 
         _loading = true;
         try
         {
-            var response = await Http.PostAsJsonAsync("api/subscribe", new
-            {
-                email = _email.Trim(),
-                firstName = string.IsNullOrWhiteSpace(_firstName) ? null : _firstName.Trim()
-            });
-
+            var response = await Http.PostAsJsonAsync("api/subscribe", request);
             if (response.IsSuccessStatusCode)
                 _submitted = true;
             else
-                _error = "Something went wrong — please try again.";
+                _emailError = "Something went wrong — please try again.";
         }
         catch
         {
-            _error = "Something went wrong — please try again.";
+            _emailError = "Something went wrong — please try again.";
         }
         finally
         {

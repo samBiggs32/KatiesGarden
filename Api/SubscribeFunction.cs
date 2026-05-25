@@ -1,4 +1,6 @@
 using KatiesGarden.Api.Data;
+using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Web.Client.Models.Validators;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
@@ -7,15 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.RegularExpressions;
 
 namespace KatiesGarden.Api;
 
 public class SubscribeFunction
 {
-    private static readonly Regex EmailRegex =
-        new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     private readonly ILogger _logger;
     private readonly IServiceProvider _services;
     private readonly IHttpClientFactory _http;
@@ -48,10 +46,18 @@ public class SubscribeFunction
             return bad;
         }
 
-        if (request is null || string.IsNullOrWhiteSpace(request.Email) || !EmailRegex.IsMatch(request.Email))
+        if (request is null)
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("A valid email address is required.");
+            await bad.WriteStringAsync("Request body is required.");
+            return bad;
+        }
+
+        var validation = new SubscribeRequestValidator().Validate(request);
+        if (!validation.IsValid)
+        {
+            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+            await bad.WriteStringAsync(validation.Errors.First().ErrorMessage);
             return bad;
         }
 
@@ -104,7 +110,6 @@ public class SubscribeFunction
 
             var response = await client.PostAsJsonAsync("https://api.brevo.com/v3/contacts", payload);
 
-            // 400 with "Contact already exist" is fine — not an error for us
             if (!response.IsSuccessStatusCode && (int)response.StatusCode != 400)
                 response.EnsureSuccessStatusCode();
         }

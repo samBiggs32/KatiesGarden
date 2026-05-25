@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -16,11 +17,18 @@ var host = new HostBuilder()
     })
     .Build();
 
-// Create tables on first run if they don't exist
 using (var scope = host.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetService<AppDbContext>();
-    db?.Database.EnsureCreated();
+    try
+    {
+        var db = scope.ServiceProvider.GetService<AppDbContext>();
+        db?.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database initialisation failed — subscribe endpoint will be unavailable");
+    }
 }
 
 await host.RunAsync();

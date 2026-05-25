@@ -1,3 +1,5 @@
+using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Web.Client.Models.Validators;
 using MailKit.Net.Smtp;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -20,10 +22,10 @@ public class ContactFormFunction
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "contact")] HttpRequestData req)
     {
-        ContactFormRequest? request;
+        ContactUsForm? request;
         try
         {
-            request = await req.ReadFromJsonAsync<ContactFormRequest>();
+            request = await req.ReadFromJsonAsync<ContactUsForm>();
         }
         catch (Exception ex)
         {
@@ -33,16 +35,18 @@ public class ContactFormFunction
             return bad;
         }
 
-        if (request is null ||
-            string.IsNullOrWhiteSpace(request.FirstName) ||
-            string.IsNullOrWhiteSpace(request.LastName) ||
-            string.IsNullOrWhiteSpace(request.EmailAddress) ||
-            string.IsNullOrWhiteSpace(request.ContactNumber) ||
-            string.IsNullOrWhiteSpace(request.EmailSubject) ||
-            string.IsNullOrWhiteSpace(request.EmailBody))
+        if (request is null)
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("All fields are required.");
+            await bad.WriteStringAsync("Request body is required.");
+            return bad;
+        }
+
+        var validation = new ContactUsFormValidator().Validate(request);
+        if (!validation.IsValid)
+        {
+            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+            await bad.WriteStringAsync(validation.Errors.First().ErrorMessage);
             return bad;
         }
 
@@ -61,7 +65,7 @@ public class ContactFormFunction
         }
     }
 
-    private static async Task SendEmailAsync(ContactFormRequest request)
+    private static async Task SendEmailAsync(ContactUsForm request)
     {
         var smtpHost = Env("SMTP_HOST");
         var smtpPort = int.Parse(Env("SMTP_PORT", "587"));
