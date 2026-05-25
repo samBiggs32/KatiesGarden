@@ -45,7 +45,7 @@
                                       Variant="Variant.Outlined"
                                       Class="mb-3" />
                     </MudItem>
-                    <MudItem xs="12">
+                    <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="model.ContactNumber"
                                       Validation="@(orderValidator.ValidateValue)"
                                       For="@(() => model.ContactNumber)"
@@ -54,16 +54,16 @@
                                       Variant="Variant.Outlined"
                                       Class="mb-3" />
                     </MudItem>
-                    @* If your ContactUsForm has an EmailAddress property, add this: *@
-                    @* <MudItem xs="12">
-                        <MudTextField @bind-Value="model.EmailAddress" 
-                                     Validation="@(orderValidator.ValidateValue)"
-                                     For="@(() => model.EmailAddress)" 
-                                     Immediate="true" 
-                                     Label="Email Address" 
-                                     Variant="Variant.Outlined"
-                                     Class="mb-3" />
-                    </MudItem> *@
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="model.EmailAddress"
+                                      Validation="@(orderValidator.ValidateValue)"
+                                      For="@(() => model.EmailAddress)"
+                                      Immediate="true"
+                                      Label="Email Address"
+                                      InputType="InputType.Email"
+                                      Variant="Variant.Outlined"
+                                      Class="mb-3" />
+                    </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="model.EmailSubject"
                                       Validation="@(orderValidator.ValidateValue)"

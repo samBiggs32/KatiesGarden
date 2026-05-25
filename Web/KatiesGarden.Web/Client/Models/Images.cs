@@ -50,14 +50,12 @@
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_660.jpg 660w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_772.jpg 772w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_851.jpg 851w, " +
-                             $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_851.jpg 851w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_929.jpg 929w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1025.jpg 1025w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1118.jpg 1118w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1191.jpg 1191w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1261.jpg 1261w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1345.jpg 1345w, " +
-                             $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1397.jpg 1397w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1397.jpg 1397w, " +
                              $"{imageBaseUrl}/hedge_arrangement_background/hedge_arrangement_background_w_1400.jpg 1400w";
 

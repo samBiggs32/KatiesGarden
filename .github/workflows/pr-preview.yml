@@ -1,22 +1,20 @@
-# production-deploy.yml
-name: Production Deployment
+name: PR Preview
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches:
       - main
 
 jobs:
-  build_and_deploy_production:
+  build_and_deploy_preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
-    name: Deploy to Production
+    name: Deploy Preview
     outputs:
-      site_url: ${{ steps.deploy.outputs.static_web_app_url }}
+      preview_url: ${{ steps.deploy.outputs.static_web_app_url }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -32,7 +30,7 @@ jobs:
       - name: Publish client
         run: dotnet publish Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release --output publish_output
 
-      - name: Deploy to Production
+      - name: Deploy Preview
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -44,21 +42,21 @@ jobs:
           api_location: "Api"
           output_location: ""
 
-  smoke_test_production:
-    needs: build_and_deploy_production
+  smoke_test:
+    needs: build_and_deploy_preview
     runs-on: ubuntu-latest
-    name: Smoke Test Production
+    name: Smoke Test Preview
     env:
-      BASE_URL: ${{ needs.build_and_deploy_production.outputs.site_url }}
+      BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
     steps:
-      - name: Wait for deployment to propagate
+      - name: Wait for preview to be ready
         run: sleep 20
 
-      - name: Homepage loads
+      - name: Homepage loads and contains expected content
         run: |
           for i in 1 2 3 4 5; do
             BODY=$(curl -sf "$BASE_URL" 2>/dev/null) && break
-            echo "Attempt $i: not ready, retrying in 15s..."
+            echo "Attempt $i: site not ready, retrying in 15s..."
             sleep 15
           done
           echo "$BODY" | grep -qi "katie" || (echo "ERROR: homepage body does not mention Katie's Garden" && exit 1)
@@ -68,26 +66,26 @@ jobs:
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/_framework/blazor.webassembly.js")
           [ "$STATUS" = "200" ] || (echo "ERROR: blazor.webassembly.js returned $STATUS" && exit 1)
-          echo "PASS: Blazor runtime reachable"
+          echo "PASS: Blazor runtime reachable ($STATUS)"
 
       - name: SPA fallback - /gallery returns 200
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/gallery")
-          [ "$STATUS" = "200" ] || (echo "ERROR: /gallery returned $STATUS" && exit 1)
-          echo "PASS: /gallery"
+          [ "$STATUS" = "200" ] || (echo "ERROR: /gallery returned $STATUS (SPA fallback broken)" && exit 1)
+          echo "PASS: /gallery returned $STATUS"
 
       - name: SPA fallback - /contact returns 200
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/contact")
-          [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS" && exit 1)
-          echo "PASS: /contact"
+          [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS (SPA fallback broken)" && exit 1)
+          echo "PASS: /contact returned $STATUS"
 
       - name: API health check
         run: |
           for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health")
             if [ "$STATUS" = "200" ]; then
-              echo "PASS: /api/health returned 200"
+              echo "PASS: /api/health returned $STATUS"
               exit 0
             fi
             echo "Attempt $i: API returned $STATUS, retrying in 15s..."
@@ -95,3 +93,14 @@ jobs:
           done
           echo "ERROR: /api/health never returned 200"
           exit 1
+
+  close_preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Preview
+    steps:
+      - name: Close Preview Environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
