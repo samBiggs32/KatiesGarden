@@ -13,10 +13,11 @@
     <meta name="author" content="Sam Biggs">
 
 
-    <title>Katies Garden</title>
+    <title>Katie's Garden</title>
     <base href="/" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <script src="https://kit.fontawesome.com/1fb14096ce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet" />
     <link href="KatiesGarden.Web.Client.styles.css" rel="stylesheet" />
     <link href="manifest.json" rel="manifest" />
@@ -51,6 +52,36 @@
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
     <script src="sw-registrator.js"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LandscapingBusiness",
+      "name": "Katie's Garden",
+      "description": "Garden services, woodwork, and maintenance in Milverton, Somerset",
+      "telephone": "+447804784522",
+      "email": "team@katiesgarden.uk",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Milverton",
+        "addressRegion": "Somerset",
+        "postalCode": "TA4",
+        "addressCountry": "GB"
+      },
+      "areaServed": [
+        { "@type": "City", "name": "Taunton" },
+        { "@type": "City", "name": "Milverton" },
+        { "@type": "AdministrativeArea", "name": "Somerset" }
+      ],
+      "url": "https://www.katiesgarden.uk",
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
+    }
+    </script>
 </body>
 
 </html>

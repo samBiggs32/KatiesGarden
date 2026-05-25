@@ -1,33 +1,29 @@
-﻿
+
 <nav class="navbar navbar-expand-sm navbar-light background-colour-primary p-0">
-    <div class="d-flex">
-        <button class="navbar-toggler border-0" type="button" data-toggle="collapse"
-                data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="true" aria-label="Toggle navigation">
+    <div class="d-flex align-items-center w-100">
+        <button class="navbar-toggler border-0" type="button"
+                @onclick="ToggleNavMenu"
+                aria-label="Toggle navigation"
+                aria-expanded="@(!collapseNavMenu)">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="d-block d-sm-none">
+        <div class="d-block d-sm-none flex-grow-1">
             <a href="">
                 <img src="Images/Katies-Garden-(long) 2.gif" alt="Katie's Garden" style="width: 100%" />
             </a>
         </div>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" style="opacity: 0"
-                data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="true" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
     </div>
 
-    <div class="navbar-collapse collapse ml-auto" id="navbarsExample03">
+    <div class="navbar-collapse @NavMenuCssClass ml-auto">
         <div class="nav navbar-nav ml-auto w-100">
             <div class="w-100 text-center" style="font-size:1.1em">
-                <span class="phone-number-text">
-                    Contact Katie on
-                </span>
-                <a data-testid="linkElement" href="tel:+44 7804 784522" aria-disabled="false">
+                <span class="phone-number-text">Contact Katie on </span>
+                <a href="tel:+447804784522">
                     <span class="phone-number-text"><strong>07804 784522</strong></span>
                 </a>
             </div>
-            <div class="w-100 text-center" style="font-size:1.1em">                
-                <a href="mailto: team@katiesgarden.uk" aria-disabled="false"><strong>team@katiesgarden.uk</strong></a>
+            <div class="w-100 text-center" style="font-size:1.1em">
+                <a href="mailto:team@katiesgarden.uk"><strong>team@katiesgarden.uk</strong></a>
             </div>
         </div>
         <div class="nav navbar-nav ml-auto w-100 justify-content-center d-none d-sm-block" style="align-items: center; text-align: center;">
@@ -40,21 +36,21 @@
             <ul class="text-center w-100">
                 <li class="nav-item active pt-1 list-orientation">
                     <div class="w-100">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
                             <span class="oi oi-home" aria-hidden="true"></span> Home
                         </NavLink>
                     </div>
                 </li>
                 <li class="nav-item pt-1 list-orientation">
                     <div class="w-100">
-                        <NavLink class="nav-link" href="gallery">
+                        <NavLink class="nav-link" href="gallery" @onclick="CloseNavMenu">
                             <span class="oi oi-image" aria-hidden="true"></span> Gallery
                         </NavLink>
                     </div>
                 </li>
                 <li class="nav-item pt-1 list-orientation">
                     <div class="w-100">
-                        <NavLink class="nav-link" href="contact">
+                        <NavLink class="nav-link" href="contact" @onclick="CloseNavMenu">
                             <span class="oi oi-chat" aria-hidden="true"></span> Contact
                         </NavLink>
                     </div>
@@ -69,8 +65,7 @@
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+
+    private void CloseNavMenu() => collapseNavMenu = true;
 }

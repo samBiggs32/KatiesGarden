@@ -1,5 +1,5 @@
-using KatiesGarden.Web.Client.Models;
-using KatiesGarden.Web.Client.Models.Validators;
+using KatiesGarden.Models;
+using KatiesGarden.Models.Validators;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http.Json;
@@ -15,10 +15,14 @@ namespace KatiesGarden.Web.Client.Pages
         [SupplyParameterFromQuery(Name = "subject")]
         public string Subject { get; set; }
 
-        ContactUsFormValidator orderValidator = new ContactUsFormValidator();
+        readonly ContactUsFormValidator orderValidator = new();
         ContactUsForm model = new();
         MudForm form;
         private bool isSubmitting = false;
+
+        private Func<object, string, Task<IEnumerable<string>>>? _validateField;
+        public Func<object, string, Task<IEnumerable<string>>> ValidateField =>
+            _validateField ??= orderValidator.ToFieldValidator();
 
         protected override void OnInitialized()
         {

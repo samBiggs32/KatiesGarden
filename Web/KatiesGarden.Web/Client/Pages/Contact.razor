@@ -29,7 +29,7 @@
                 <MudGrid>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="model.FirstName"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.FirstName)"
                                       Immediate="true"
                                       Label="First Name"
@@ -38,7 +38,7 @@
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="model.LastName"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.LastName)"
                                       Immediate="true"
                                       Label="Last Name"
@@ -47,7 +47,7 @@
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="model.ContactNumber"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.ContactNumber)"
                                       Immediate="true"
                                       Label="Phone Number"
@@ -56,7 +56,7 @@
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="model.EmailAddress"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.EmailAddress)"
                                       Immediate="true"
                                       Label="Email Address"
@@ -66,7 +66,7 @@
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="model.EmailSubject"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.EmailSubject)"
                                       Immediate="true"
                                       Label="Subject"
@@ -75,7 +75,7 @@
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="model.EmailBody"
-                                      Validation="@(orderValidator.ValidateValue)"
+                                      Validation="@(ValidateField)"
                                       For="@(() => model.EmailBody)"
                                       Immediate="true"
                                       Label="Message"

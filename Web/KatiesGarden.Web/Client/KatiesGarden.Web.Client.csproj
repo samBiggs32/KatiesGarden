@@ -3,7 +3,7 @@
 		<WriteLinesToFile File="$(PublishDir)wwwroot\service-worker.js" Lines="/* $([System.Guid]::NewGuid()) */" />
 	</Target>
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
@@ -11,11 +11,12 @@
 		<BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="11.11.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.4" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" />
 		<PackageReference Include="MudBlazor" Version="8.5.1" />
-		<PackageReference Include="System.Net.Http.Json" Version="9.0.4" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="../../../Shared/KatiesGarden.Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />

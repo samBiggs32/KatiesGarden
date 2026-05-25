@@ -5,6 +5,7 @@
 
 # Azure Functions local secrets — never commit real credentials
 local.settings.json
+appsettings.Development.json
 
 # User-specific files
 *.rsuser

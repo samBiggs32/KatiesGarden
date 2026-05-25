@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main  # production-deploy.yml handles main
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    name: Build & Unit Tests
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build client
+        run: dotnet build Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release
+
+      - name: Build API
+        run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --logger "trx;LogFileName=results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: unit-test-results-${{ github.sha }}
+          path: "**/*.trx"

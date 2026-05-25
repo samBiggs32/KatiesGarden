@@ -1,0 +1,125 @@
+@inject HttpClient Http
+
+<section class="newsletter-section">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9 text-center">
+                <h3 class="newsletter-title"><i class="fas fa-seedling me-2"></i>Seasonal Updates</h3>
+                <p class="newsletter-subtitle">Sign up for planting tips, seasonal offers, and news from the garden.</p>
+
+                @if (_submitted)
+                {
+                    <MudAlert Severity="Severity.Success" Class="mt-2">
+                        Thanks for signing up — we'll be in touch when there's something worth sharing.
+                    </MudAlert>
+                }
+                else
+                {
+                    <div class="newsletter-form">
+                        <div class="row g-2 justify-content-center">
+                            <div class="col-sm-4">
+                                <MudTextField @bind-Value="_firstName"
+                                              Placeholder="First name (optional)"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="newsletter-field"
+                                              Disabled="_loading" />
+                            </div>
+                            <div class="col-sm-5">
+                                <MudTextField @bind-Value="_email"
+                                              Placeholder="Your email address"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              InputType="InputType.Email"
+                                              Class="newsletter-field"
+                                              Disabled="_loading"
+                                              Error="@(!string.IsNullOrEmpty(_emailError))"
+                                              ErrorText="@_emailError" />
+                            </div>
+                            <div class="col-sm-auto">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           OnClick="SubscribeAsync"
+                                           Disabled="_loading"
+                                           Class="newsletter-btn">
+                                    @if (_loading)
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-1" />
+                                    }
+                                    Subscribe
+                                </MudButton>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-2">
+                            <div class="col-lg-9 text-start">
+                                <MudCheckBox T="bool" @bind-Value="_consent"
+                                             Dense="true"
+                                             Color="Color.Primary">
+                                    <p class="mb-0" style="font-size:0.85rem">
+                                        I agree to receive occasional email updates from Katie's Garden.
+                                        You can unsubscribe at any time. We will never share your email with third parties.
+                                    </p>
+                                </MudCheckBox>
+                                @if (_consentError)
+                                {
+                                    <p class="mud-error-text" style="font-size:0.75rem; margin-left:2rem">Please tick the box to subscribe.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private static readonly SubscribeRequestValidator _validator = new();
+
+    string _email = string.Empty;
+    string _firstName = string.Empty;
+    string _emailError = string.Empty;
+    bool _consent { get; set; }
+    bool _consentError;
+    bool _loading;
+    bool _submitted;
+
+    async Task SubscribeAsync()
+    {
+        _emailError = string.Empty;
+        _consentError = false;
+
+        var request = new SubscribeRequest(_email.Trim(), string.IsNullOrWhiteSpace(_firstName) ? null : _firstName.Trim());
+        var validation = _validator.Validate(request);
+
+        if (!validation.IsValid)
+        {
+            _emailError = validation.Errors.First().ErrorMessage;
+        }
+
+        if (!_consent)
+        {
+            _consentError = true;
+        }
+
+        if (!validation.IsValid || !_consent) return;
+
+        _loading = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/subscribe", request);
+            if (response.IsSuccessStatusCode)
+                _submitted = true;
+            else
+                _emailError = "Something went wrong — please try again.";
+        }
+        catch
+        {
+            _emailError = "Something went wrong — please try again.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -7,30 +7,53 @@ on:
       - main
 
 jobs:
+  verify_secrets:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    name: Verify Secrets
+    uses: ./.github/workflows/verify-secrets.yml
+    secrets: inherit
+
+  unit_tests:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run unit tests
+        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --logger "trx;LogFileName=results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: unit-test-results-pr-${{ github.event.pull_request.number }}
+          path: "**/*.trx"
+
   build_and_deploy_preview:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: [unit_tests, verify_secrets]
     runs-on: ubuntu-latest
     name: Deploy Preview
     outputs:
       preview_url: ${{ steps.deploy.outputs.static_web_app_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
-      - name: Build client
-        run: dotnet build Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release
-
-      - name: Build API
-        run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
-
-      - name: Publish client
+      - name: Build and publish client
         run: dotnet publish Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release --output publish_output
 
-      - name: Deploy Preview
+      - name: Deploy preview to Azure Static Web Apps
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -52,47 +75,88 @@ jobs:
       - name: Wait for preview to be ready
         run: sleep 20
 
-      - name: Homepage loads and contains expected content
+      - name: Homepage loads
         run: |
           for i in 1 2 3 4 5; do
             BODY=$(curl -sf "$BASE_URL" 2>/dev/null) && break
             echo "Attempt $i: site not ready, retrying in 15s..."
             sleep 15
           done
-          echo "$BODY" | grep -qi "katie" || (echo "ERROR: homepage body does not mention Katie's Garden" && exit 1)
+          echo "$BODY" | grep -qi "katie" || (echo "ERROR: homepage body missing Katie's Garden content" && exit 1)
           echo "PASS: homepage loaded"
 
       - name: Blazor WASM runtime is published
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/_framework/blazor.webassembly.js")
           [ "$STATUS" = "200" ] || (echo "ERROR: blazor.webassembly.js returned $STATUS" && exit 1)
-          echo "PASS: Blazor runtime reachable ($STATUS)"
-
-      - name: SPA fallback - /gallery returns 200
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/gallery")
-          [ "$STATUS" = "200" ] || (echo "ERROR: /gallery returned $STATUS (SPA fallback broken)" && exit 1)
-          echo "PASS: /gallery returned $STATUS"
-
-      - name: SPA fallback - /contact returns 200
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/contact")
-          [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS (SPA fallback broken)" && exit 1)
-          echo "PASS: /contact returned $STATUS"
+          echo "PASS: Blazor runtime reachable"
 
       - name: API health check
         run: |
-          for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health")
-            if [ "$STATUS" = "200" ]; then
-              echo "PASS: /api/health returned $STATUS"
-              exit 0
-            fi
-            echo "Attempt $i: API returned $STATUS, retrying in 15s..."
-            sleep 15
-          done
-          echo "ERROR: /api/health never returned 200"
-          exit 1
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health")
+          [ "$STATUS" = "200" ] || (echo "ERROR: /api/health returned $STATUS" && exit 1)
+          echo "PASS: API healthy"
+
+      - name: SPA fallback — /gallery
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/gallery")
+          [ "$STATUS" = "200" ] || (echo "ERROR: /gallery returned $STATUS (SPA fallback broken)" && exit 1)
+          echo "PASS: /gallery"
+
+      - name: SPA fallback — /contact
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/contact")
+          [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS (SPA fallback broken)" && exit 1)
+          echo "PASS: /contact"
+
+  e2e_tests:
+    needs: smoke_test
+    runs-on: ubuntu-latest
+    name: E2E Tests (Chromium)
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build E2E tests
+        run: dotnet build Tests/KatiesGarden.E2E/KatiesGarden.E2E.csproj --configuration Release
+
+      - name: Install Playwright browsers
+        run: pwsh Tests/KatiesGarden.E2E/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
+
+      - name: Run E2E tests
+        run: dotnet test Tests/KatiesGarden.E2E/KatiesGarden.E2E.csproj --configuration Release --no-build --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-results-pr-${{ github.event.pull_request.number }}
+          path: "**/*.trx"
+
+  lighthouse:
+    needs: smoke_test
+    runs-on: ubuntu-latest
+    name: Lighthouse CI
+    env:
+      BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.14.x
+          lhci autorun \
+            --collect.url="$BASE_URL" \
+            --collect.url="$BASE_URL/gallery" \
+            --collect.url="$BASE_URL/contact" \
+            --config=lighthouserc.json
+        continue-on-error: true
 
   close_preview:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

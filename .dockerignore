@@ -1,0 +1,9 @@
+**/.git
+**/.github
+**/obj
+**/bin
+Web/
+Tests/
+Shared/
+*.md
+.gitignore

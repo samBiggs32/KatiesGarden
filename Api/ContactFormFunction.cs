@@ -1,8 +1,12 @@
-using MailKit.Net.Smtp;
+using FluentValidation;
+using KatiesGarden.Api.Configuration;
+using KatiesGarden.Api.Email;
+using KatiesGarden.Models;
+using KatiesGarden.Models.Email;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using MimeKit;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace KatiesGarden.Api;
@@ -10,86 +14,62 @@ namespace KatiesGarden.Api;
 public class ContactFormFunction
 {
     private readonly ILogger _logger;
+    private readonly IValidator<ContactUsForm> _validator;
+    private readonly IEmailSender _emailSender;
+    private readonly SmtpOptions _smtp;
 
-    public ContactFormFunction(ILoggerFactory loggerFactory)
+    public ContactFormFunction(
+        ILoggerFactory loggerFactory,
+        IValidator<ContactUsForm> validator,
+        IEmailSender emailSender,
+        IOptions<SmtpOptions> smtpOptions)
     {
         _logger = loggerFactory.CreateLogger<ContactFormFunction>();
+        _validator = validator;
+        _emailSender = emailSender;
+        _smtp = smtpOptions.Value;
     }
 
     [Function("ContactForm")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "contact")] HttpRequestData req)
     {
-        ContactFormRequest? request;
+        var ct = req.FunctionContext.CancellationToken;
+
+        ContactUsForm? request;
         try
         {
-            request = await req.ReadFromJsonAsync<ContactFormRequest>();
+            request = await req.ReadFromJsonAsync<ContactUsForm>();
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to deserialise contact form request");
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Invalid request body.");
-            return bad;
+            return await Responses.BadRequest(req, "Invalid request body.");
         }
 
-        if (request is null ||
-            string.IsNullOrWhiteSpace(request.FirstName) ||
-            string.IsNullOrWhiteSpace(request.LastName) ||
-            string.IsNullOrWhiteSpace(request.EmailAddress) ||
-            string.IsNullOrWhiteSpace(request.ContactNumber) ||
-            string.IsNullOrWhiteSpace(request.EmailSubject) ||
-            string.IsNullOrWhiteSpace(request.EmailBody))
+        if (request is null)
+            return await Responses.BadRequest(req, "Request body is required.");
+
+        var validation = await _validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
         {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("All fields are required.");
-            return bad;
+            _logger.LogInformation("Contact form validation failed: {Errors}",
+                string.Join(", ", validation.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}")));
+            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
         }
 
         try
         {
-            await SendEmailAsync(request);
+            var message = ContactEmailBuilder.Build(request, _smtp.EffectiveSenderEmail, _smtp.RecipientEmail);
+            await _emailSender.SendAsync(message, ct);
+
             _logger.LogInformation("Contact form email sent from {FirstName} {LastName}", request.FirstName, request.LastName);
             return req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send contact form email");
-            var error = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await error.WriteStringAsync("Failed to send message. Please try again later.");
-            return error;
+            _logger.LogError(ex, "Failed to send contact form email from {EmailAddress}", request.EmailAddress);
+            return await Responses.InternalError(req, "Failed to send message. Please try again later.");
         }
     }
-
-    private static async Task SendEmailAsync(ContactFormRequest request)
-    {
-        var smtpHost = Env("SMTP_HOST");
-        var smtpPort = int.Parse(Env("SMTP_PORT", "587"));
-        var smtpUsername = Env("SMTP_USERNAME");
-        var smtpPassword = Env("SMTP_PASSWORD");
-        var recipientEmail = Env("RECIPIENT_EMAIL", "team@katiesgarden.uk");
-
-        var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Katie's Garden Website", smtpUsername));
-        message.To.Add(new MailboxAddress("Katie's Garden", recipientEmail));
-        message.ReplyTo.Add(new MailboxAddress($"{request.FirstName} {request.LastName}", request.EmailAddress));
-        message.Subject = $"[Website Enquiry] {request.EmailSubject}";
-        message.Body = new TextPart("plain")
-        {
-            Text = $"Dear Katie,\n\n{request.EmailBody}\n\n" +
-                   $"--\nMany thanks\n{request.FirstName} {request.LastName}" +
-                   $"\nEmail: {request.EmailAddress}\nPhone: {request.ContactNumber}"
-        };
-
-        using var client = new SmtpClient();
-        await client.ConnectAsync(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-        await client.AuthenticateAsync(smtpUsername, smtpPassword);
-        await client.SendAsync(message);
-        await client.DisconnectAsync(true);
-    }
-
-    private static string Env(string key, string? fallback = null) =>
-        Environment.GetEnvironmentVariable(key)
-            ?? fallback
-            ?? throw new InvalidOperationException($"Required environment variable '{key}' is not set.");
 }
