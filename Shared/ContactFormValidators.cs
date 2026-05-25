@@ -1,7 +1,7 @@
 using FluentValidation;
 using System.Text.RegularExpressions;
 
-namespace KatiesGarden.Web.Client.Models.Validators
+namespace KatiesGarden.Models.Validators
 {
     public class ContactUsFormValidator : AbstractValidator<ContactUsForm>
     {
@@ -42,16 +42,5 @@ namespace KatiesGarden.Web.Client.Models.Validators
                         context.AddFailure("Invalid phone number");
                 });
         }
-
-        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
-        {
-            var result = await ValidateAsync(ValidationContext<ContactUsForm>
-                .CreateWithOptions((ContactUsForm)model, x => x.IncludeProperties(propertyName)));
-
-            if (result.IsValid)
-                return Array.Empty<string>();
-
-            return result.Errors.Select(e => e.ErrorMessage);
-        };
     }
 }

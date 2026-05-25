@@ -1,12 +1,13 @@
 using FluentValidation;
 using KatiesGarden.Api.Data;
-using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -14,6 +15,8 @@ namespace KatiesGarden.Api;
 
 public class SubscribeFunction
 {
+    private const string PostgresUniqueViolation = "23505";
+
     private readonly ILogger _logger;
     private readonly IServiceProvider _services;
     private readonly IHttpClientFactory _http;
@@ -40,53 +43,48 @@ public class SubscribeFunction
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe")] HttpRequestData req)
     {
+        var ct = req.FunctionContext.CancellationToken;
+
         SubscribeRequest? request;
         try { request = await req.ReadFromJsonAsync<SubscribeRequest>(); }
         catch
         {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Invalid request body.");
-            return bad;
+            return await Responses.BadRequest(req, "Invalid request body.");
         }
 
         if (request is null)
-        {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Request body is required.");
-            return bad;
-        }
+            return await Responses.BadRequest(req, "Request body is required.");
 
-        var validation = _validator.Validate(request);
+        var validation = await _validator.ValidateAsync(request, ct);
         if (!validation.IsValid)
-        {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync(validation.Errors.First().ErrorMessage);
-            return bad;
-        }
+            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
 
         var email = request.Email.Trim().ToLowerInvariant();
         var firstName = request.FirstName?.Trim();
 
-        await SaveToDatabase(email, firstName);
-        await AddToBrevo(email, firstName);
+        await SaveToDatabase(email, firstName, ct);
+        await AddToBrevo(email, firstName, ct);
 
         _logger.LogInformation("Newsletter subscription: {Email}", email);
         return req.CreateResponse(HttpStatusCode.OK);
     }
 
-    private async Task SaveToDatabase(string email, string? firstName)
+    private async Task SaveToDatabase(string email, string? firstName, CancellationToken ct)
     {
         var db = _services.GetService<AppDbContext>();
         if (db is null) return;
 
+        db.Subscribers.Add(new Subscriber { Email = email, FirstName = firstName });
         try
         {
-            var exists = await db.Subscribers.AnyAsync(s => s.Email == email);
-            if (!exists)
-            {
-                db.Subscribers.Add(new Subscriber { Email = email, FirstName = firstName });
-                await db.SaveChangesAsync();
-            }
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            // Idempotent: another request already inserted this email. Detach so EF
+            // doesn't keep the conflicting entity tracked for the rest of the request.
+            db.ChangeTracker.Clear();
+            _logger.LogInformation("Subscriber {Email} already exists; treated as success", email);
         }
         catch (Exception ex)
         {
@@ -94,7 +92,7 @@ public class SubscribeFunction
         }
     }
 
-    private async Task AddToBrevo(string email, string? firstName)
+    private async Task AddToBrevo(string email, string? firstName, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(_brevoApiKey) || _brevoListId is null) return;
 
@@ -111,8 +109,10 @@ public class SubscribeFunction
                 updateEnabled = true
             };
 
-            var response = await client.PostAsJsonAsync("https://api.brevo.com/v3/contacts", payload);
+            var response = await client.PostAsJsonAsync("https://api.brevo.com/v3/contacts", payload, ct);
 
+            // Brevo returns 400 when the contact already exists in the list — that's
+            // a benign success for us (the email IS on the list). Anything else, raise.
             if (!response.IsSuccessStatusCode && (int)response.StatusCode != 400)
                 response.EnsureSuccessStatusCode();
         }
@@ -121,4 +121,7 @@ public class SubscribeFunction
             _logger.LogError(ex, "Failed to add {Email} to Brevo list {ListId}", email, _brevoListId);
         }
     }
+
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException is PostgresException pg && pg.SqlState == PostgresUniqueViolation;
 }

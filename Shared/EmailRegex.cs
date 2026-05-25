@@ -1,4 +1,4 @@
-namespace KatiesGarden.Web.Client.Models.Validators;
+namespace KatiesGarden.Models.Validators;
 
 internal static class EmailRegex
 {

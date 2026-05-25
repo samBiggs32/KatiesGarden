@@ -1,6 +1,6 @@
 using FluentAssertions;
-using KatiesGarden.Web.Client.Models;
-using KatiesGarden.Web.Client.Models.Validators;
+using KatiesGarden.Models;
+using KatiesGarden.Models.Validators;
 using Xunit;
 
 namespace KatiesGarden.Tests.Validators;

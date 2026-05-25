@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace KatiesGarden.Web.Client.Models.Validators
+namespace KatiesGarden.Models.Validators
 {
     public class SubscribeRequestValidator : AbstractValidator<SubscribeRequest>
     {

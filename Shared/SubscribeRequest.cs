@@ -1,4 +1,4 @@
-namespace KatiesGarden.Web.Client.Models
+namespace KatiesGarden.Models
 {
     public record SubscribeRequest(string Email, string? FirstName);
 }

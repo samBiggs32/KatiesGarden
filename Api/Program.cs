@@ -1,7 +1,8 @@
 using FluentValidation;
 using KatiesGarden.Api.Data;
-using KatiesGarden.Web.Client.Models;
-using KatiesGarden.Web.Client.Models.Validators;
+using KatiesGarden.Api.Email;
+using KatiesGarden.Models;
+using KatiesGarden.Models.Validators;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ var host = new HostBuilder()
 
         services.AddSingleton<IValidator<ContactUsForm>, ContactUsFormValidator>();
         services.AddSingleton<IValidator<SubscribeRequest>, SubscribeRequestValidator>();
+
+        services.AddSingleton<IEmailSender, MailKitEmailSender>();
     })
     .Build();
 
