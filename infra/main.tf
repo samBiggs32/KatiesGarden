@@ -17,5 +17,8 @@ resource "azurerm_static_web_app" "main" {
     SMTP_PASSWORD   = var.smtp_password
     SENDER_EMAIL    = var.smtp_sender_email
     RECIPIENT_EMAIL = var.recipient_email
+    DATABASE_URL    = var.database_url
+    BREVO_API_KEY   = var.brevo_api_key
+    BREVO_LIST_ID   = var.brevo_list_id
   }
 }

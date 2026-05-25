@@ -8,6 +8,9 @@
     "SMTP_USERNAME": "your-brevo-login-email@example.com",
     "SMTP_PASSWORD": "your-brevo-smtp-key",
     "SENDER_EMAIL": "noreply@katiesgarden.uk",
-    "RECIPIENT_EMAIL": "team@katiesgarden.uk"
+    "RECIPIENT_EMAIL": "team@katiesgarden.uk",
+    "DATABASE_URL": "postgresql://user:password@host.neon.tech/katiesgarden?sslmode=require",
+    "BREVO_API_KEY": "your-brevo-rest-api-key",
+    "BREVO_LIST_ID": "1"
   }
 }

@@ -56,3 +56,23 @@ variable "recipient_email" {
   type        = string
   default     = "team@katiesgarden.uk"
 }
+
+variable "database_url" {
+  description = "Neon PostgreSQL connection string (postgresql://user:pass@host/db?sslmode=require)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "brevo_api_key" {
+  description = "Brevo REST API key — different from the SMTP key. Found under Brevo → SMTP & API → API Keys."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "brevo_list_id" {
+  description = "Brevo contact list ID to add newsletter subscribers to. Create a list in Brevo → Contacts → Lists, then copy its numeric ID."
+  type        = string
+  default     = ""
+}

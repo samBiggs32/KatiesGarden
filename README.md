@@ -95,7 +95,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ## 🏗 Infrastructure
 
-Azure resources are managed with Terraform. The config lives in the `infra/` directory and provisions a single **Azure Static Web App (Free tier)**, which hosts both the Blazor frontend and the Azure Functions API at no cost.
+Azure resources are managed with Terraform. The config lives in the `infra/` directory and provisions a single **Azure Static Web App (Free tier)**, which hosts both the Blazor frontend and the Azure Functions API at no cost. Subscriber data is stored in a **Neon serverless PostgreSQL** database (free tier).
 
 ### Provisioning with Terraform
 
@@ -106,13 +106,20 @@ Create `infra/terraform.tfvars` (gitignored — never commit this file):
 ```hcl
 subscription_id   = "your-azure-subscription-id"
 
-# SMTP — see "Email sending" below for provider options
-smtp_host         = "smtp.brevo.com"
+# SMTP (Brevo) — see "Email sending" below
+smtp_host         = "smtp-relay.brevo.com"
 smtp_port         = "587"
-smtp_username     = "your-smtp-login"
-smtp_password     = "your-smtp-password-or-api-key"
+smtp_username     = "your-brevo-login-email@example.com"
+smtp_password     = "your-brevo-smtp-key"
 smtp_sender_email = "noreply@katiesgarden.uk"
 recipient_email   = "team@katiesgarden.uk"
+
+# Neon PostgreSQL — see "Database" below
+database_url      = "postgresql://user:password@host.neon.tech/katiesgarden?sslmode=require"
+
+# Brevo newsletter list — see "Email sending" below
+brevo_api_key     = "your-brevo-rest-api-key"
+brevo_list_id     = "1"
 ```
 
 Then run:
@@ -148,6 +155,18 @@ terraform output -raw deployment_token
 
 Set this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in **GitHub → Settings → Secrets and variables → Actions**.
 
+### Database (Neon PostgreSQL)
+
+Newsletter subscribers are stored in a free-tier [Neon](https://neon.tech) serverless PostgreSQL database. Neon scales to zero when idle — ideal for a low-traffic site.
+
+1. Sign up at [neon.tech](https://neon.tech) — no credit card required
+2. Create a project, then copy the **connection string** from the dashboard (looks like `postgresql://user:pass@host.neon.tech/dbname?sslmode=require`)
+3. Paste it into `database_url` in `terraform.tfvars`
+
+The `subscribers` table is created automatically on first deploy via `EnsureCreated()`. No manual migrations needed to get started.
+
+> If `DATABASE_URL` is not set, the subscribe endpoint degrades gracefully — it still adds contacts to Brevo, it just won't store them locally.
+
 ### Email sending
 
 The contact form posts to an Azure Function which sends email via SMTP. You need a provider and credentials — nothing is sent without them.
@@ -155,9 +174,11 @@ The contact form posts to an Azure Function which sends email via SMTP. You need
 **Recommended: Brevo (free tier, 300 emails/day)**
 
 1. Sign up at [brevo.com](https://www.brevo.com) — no credit card required
-2. Go to **Senders & IPs → Domains** and add `katiesgarden.uk`. Follow the DNS verification steps (adds a few TXT/CNAME records to your DNS). This lets you send from any `@katiesgarden.uk` address.
-3. Go to **SMTP & API → SMTP** and generate an SMTP key.
-4. Your `terraform.tfvars` SMTP entries should be:
+2. Go to **Senders & IPs → Domains** and add `katiesgarden.uk`. Follow the DNS verification steps (a few TXT/CNAME records). This lets you send from any `@katiesgarden.uk` address.
+3. Go to **SMTP & API → SMTP** and generate an **SMTP key** (for sending contact form emails).
+4. Go to **SMTP & API → API Keys** and generate a separate **API key** (for adding newsletter subscribers to a contact list). Copy this to `brevo_api_key`.
+5. Go to **Contacts → Lists**, create a list (e.g. "Website Newsletter"), and copy its numeric ID to `brevo_list_id`.
+6. Your `terraform.tfvars` SMTP entries should be:
 
 ```hcl
 smtp_host         = "smtp-relay.brevo.com"

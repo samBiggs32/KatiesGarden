@@ -1,0 +1,100 @@
+@inject HttpClient Http
+
+<section class="newsletter-section">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9 text-center">
+                <h3 class="newsletter-title"><i class="fas fa-seedling me-2"></i>Seasonal Updates</h3>
+                <p class="newsletter-subtitle">Sign up for planting tips, seasonal offers, and news from the garden.</p>
+
+                @if (_submitted)
+                {
+                    <MudAlert Severity="Severity.Success" Class="mt-2">
+                        Thanks for signing up — we'll be in touch when there's something worth sharing.
+                    </MudAlert>
+                }
+                else
+                {
+                    <div class="newsletter-form">
+                        <div class="row g-2 justify-content-center">
+                            <div class="col-sm-4">
+                                <MudTextField @bind-Value="_firstName"
+                                              Placeholder="First name (optional)"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="newsletter-field"
+                                              Disabled="_loading" />
+                            </div>
+                            <div class="col-sm-5">
+                                <MudTextField @bind-Value="_email"
+                                              Placeholder="Your email address"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              InputType="InputType.Email"
+                                              Class="newsletter-field"
+                                              Disabled="_loading"
+                                              Error="@(!string.IsNullOrEmpty(_error))"
+                                              ErrorText="@_error" />
+                            </div>
+                            <div class="col-sm-auto">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           OnClick="SubscribeAsync"
+                                           Disabled="_loading"
+                                           Class="newsletter-btn">
+                                    @if (_loading)
+                                    {
+                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-1" />
+                                    }
+                                    Subscribe
+                                </MudButton>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    string _email = string.Empty;
+    string _firstName = string.Empty;
+    string _error = string.Empty;
+    bool _loading;
+    bool _submitted;
+
+    async Task SubscribeAsync()
+    {
+        _error = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_email) || !_email.Contains('@'))
+        {
+            _error = "Please enter a valid email address.";
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/subscribe", new
+            {
+                email = _email.Trim(),
+                firstName = string.IsNullOrWhiteSpace(_firstName) ? null : _firstName.Trim()
+            });
+
+            if (response.IsSuccessStatusCode)
+                _submitted = true;
+            else
+                _error = "Something went wrong — please try again.";
+        }
+        catch
+        {
+            _error = "Something went wrong — please try again.";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}
