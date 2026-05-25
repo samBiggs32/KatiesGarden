@@ -76,3 +76,18 @@ variable "brevo_list_id" {
   type        = string
   default     = ""
 }
+
+# ---------------------------------------------------------------------------
+# Cloudflare
+# ---------------------------------------------------------------------------
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with Zone:DNS:Edit, Zone:Settings:Edit, and Zone:Zone WAF:Edit permissions for the katiesgarden.uk zone."
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for katiesgarden.uk — found in the Cloudflare dashboard under the domain's Overview tab."
+  type        = string
+}

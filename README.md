@@ -30,6 +30,7 @@
 - [Infrastructure](#infrastructure)
   - [Provisioning with Terraform](#provisioning-with-terraform)
   - [GitHub Actions Secret](#github-actions-secret)
+  - [Cloudflare](#cloudflare)
 - [Development Roadmap](#development-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -48,6 +49,7 @@ Our site features a responsive design that works beautifully on both desktop and
 * [MudBlazor](https://mudblazor.com) - UI component library
 * [MailKit](https://github.com/jstedfast/MailKit) - SMTP email sending
 * [Azure Static Web Apps](https://azure.microsoft.com/en-us/services/app-service/static/) - Hosting (Free tier)
+* [Cloudflare](https://www.cloudflare.com) - CDN, DDoS protection, and rate limiting (free tier)
 * [Terraform](https://www.terraform.io) - Infrastructure as code
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -120,6 +122,10 @@ database_url      = "postgresql://user:password@host.neon.tech/katiesgarden?sslm
 # Brevo newsletter list — see "Email sending" below
 brevo_api_key     = "your-brevo-rest-api-key"
 brevo_list_id     = "1"
+
+# Cloudflare — see "Cloudflare" below
+cloudflare_api_token = "your-cloudflare-api-token"
+cloudflare_zone_id   = "your-zone-id"
 ```
 
 Then run:
@@ -197,6 +203,44 @@ Use `smtp.sendgrid.net`, port `587`, username `apikey`, and a SendGrid API key w
 
 **Local development**
 Copy `Api/local.settings.json.example` to `Api/local.settings.json` (gitignored) and fill in your credentials to test the contact form locally with the Azure Functions emulator.
+
+### Cloudflare
+
+Cloudflare sits in front of the Azure Static Web App and provides:
+
+- **CDN** — static assets cached at Cloudflare's edge, reducing latency globally
+- **DDoS protection** — automatic, always-on at the free tier
+- **Rate limiting** — blocks IPs that submit more than 5 requests per minute to `/api/contact` or `/api/subscribe`, preventing spam and abuse
+- **SSL termination** — Cloudflare manages the public HTTPS certificate; traffic to Azure SWA goes over HTTPS (full mode)
+- **HTTP → HTTPS redirect** — enforced at the Cloudflare edge
+
+#### Setup
+
+1. Sign up at [cloudflare.com](https://www.cloudflare.com) — the free tier covers everything here
+2. Add your domain (`katiesgarden.uk`) and follow the prompts to update your domain registrar's nameservers to Cloudflare's
+3. Once active, find your **Zone ID** in the dashboard under the domain's **Overview** tab (right-hand panel) — copy it to `cloudflare_zone_id` in `terraform.tfvars`
+4. Go to **My Profile → API Tokens → Create Token** and create a custom token with these permissions on the `katiesgarden.uk` zone:
+   - **Zone → DNS → Edit**
+   - **Zone → Zone Settings → Edit**
+   - **Zone → Zone WAF → Edit**
+5. Copy the token to `cloudflare_api_token` in `terraform.tfvars`
+
+After running `terraform apply`, Terraform will:
+- Create CNAME records pointing `katiesgarden.uk` and `www.katiesgarden.uk` to your Azure SWA hostname
+- Apply zone security settings (TLS 1.2+, HTTP→HTTPS redirect, full SSL, medium security level)
+- Configure rate limiting on the API endpoints
+
+#### Custom domain on Azure SWA
+
+Connecting your custom domain in Azure SWA is a **one-time manual step** (not managed by Terraform for the free tier):
+
+1. In the [Azure Portal](https://portal.azure.com), open your Static Web App
+2. Go to **Custom domains → Add**
+3. Enter `katiesgarden.uk` — Azure will give you a TXT record to verify ownership
+4. Add that TXT record in Cloudflare's DNS dashboard, then click **Validate** in Azure
+5. Repeat for `www.katiesgarden.uk` using a CNAME validation record
+
+Azure SWA generates its own TLS certificate for the custom domain. Because the DNS CNAMEs point to Azure via Cloudflare's proxy, set SSL mode to **Full** (already done by Terraform) — not "Flexible".
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
