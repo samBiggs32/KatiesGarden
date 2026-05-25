@@ -1,12 +1,13 @@
 using FluentValidation;
+using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Net;
 using System.Net.Http.Json;
@@ -21,22 +22,20 @@ public class SubscribeFunction
     private readonly IServiceProvider _services;
     private readonly IHttpClientFactory _http;
     private readonly IValidator<SubscribeRequest> _validator;
-    private readonly string? _brevoApiKey;
-    private readonly int? _brevoListId;
+    private readonly BrevoOptions _brevo;
 
     public SubscribeFunction(
         ILoggerFactory loggerFactory,
         IServiceProvider services,
         IHttpClientFactory http,
         IValidator<SubscribeRequest> validator,
-        IConfiguration config)
+        IOptions<BrevoOptions> brevoOptions)
     {
         _logger = loggerFactory.CreateLogger<SubscribeFunction>();
         _services = services;
         _http = http;
         _validator = validator;
-        _brevoApiKey = config["BREVO_API_KEY"];
-        _brevoListId = int.TryParse(config["BREVO_LIST_ID"], out var id) ? id : null;
+        _brevo = brevoOptions.Value;
     }
 
     [Function("Subscribe")]
@@ -47,8 +46,9 @@ public class SubscribeFunction
 
         SubscribeRequest? request;
         try { request = await req.ReadFromJsonAsync<SubscribeRequest>(); }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to deserialise subscribe request");
             return await Responses.BadRequest(req, "Invalid request body.");
         }
 
@@ -57,7 +57,11 @@ public class SubscribeFunction
 
         var validation = await _validator.ValidateAsync(request, ct);
         if (!validation.IsValid)
+        {
+            _logger.LogInformation("Subscribe validation failed: {Errors}",
+                string.Join(", ", validation.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}")));
             return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
+        }
 
         var email = request.Email.Trim().ToLowerInvariant();
         var firstName = request.FirstName?.Trim();
@@ -72,7 +76,11 @@ public class SubscribeFunction
     private async Task SaveToDatabase(string email, string? firstName, CancellationToken ct)
     {
         var db = _services.GetService<AppDbContext>();
-        if (db is null) return;
+        if (db is null)
+        {
+            _logger.LogWarning("AppDbContext not registered — skipping DB write for {Email}", email);
+            return;
+        }
 
         db.Subscribers.Add(new Subscriber { Email = email, FirstName = firstName });
         try
@@ -94,31 +102,41 @@ public class SubscribeFunction
 
     private async Task AddToBrevo(string email, string? firstName, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(_brevoApiKey) || _brevoListId is null) return;
+        if (!_brevo.IsConfigured)
+        {
+            _logger.LogDebug("Brevo not configured — skipping list sync for {Email}", email);
+            return;
+        }
 
         try
         {
             var client = _http.CreateClient();
-            client.DefaultRequestHeaders.Add("api-key", _brevoApiKey);
+            client.DefaultRequestHeaders.Add("api-key", _brevo.ApiKey);
 
+            // updateEnabled=true: Brevo updates an existing contact in-place instead of
+            // returning duplicate_parameter. With this set, any 4xx response is a real
+            // error (bad payload, invalid attribute) that deserves a log entry.
             var payload = new
             {
                 email,
                 attributes = new { FIRSTNAME = firstName ?? string.Empty },
-                listIds = new[] { _brevoListId.Value },
+                listIds = new[] { _brevo.ListId!.Value },
                 updateEnabled = true
             };
 
             var response = await client.PostAsJsonAsync("https://api.brevo.com/v3/contacts", payload, ct);
 
-            // Brevo returns 400 when the contact already exists in the list — that's
-            // a benign success for us (the email IS on the list). Anything else, raise.
-            if (!response.IsSuccessStatusCode && (int)response.StatusCode != 400)
-                response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(ct);
+                _logger.LogWarning(
+                    "Brevo returned {Status} for {Email}: {Body}",
+                    (int)response.StatusCode, email, body);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to add {Email} to Brevo list {ListId}", email, _brevoListId);
+            _logger.LogError(ex, "Failed to add {Email} to Brevo list {ListId}", email, _brevo.ListId);
         }
     }
 
