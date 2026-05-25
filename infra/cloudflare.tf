@@ -24,6 +24,16 @@ resource "cloudflare_record" "www" {
   proxied = true
 }
 
+# DMARC — "monitor only" (p=none) to start; tighten to p=quarantine once you
+# have confirmed all legitimate mail sources appear in rua reports.
+resource "cloudflare_record" "dmarc" {
+  zone_id = var.cloudflare_zone_id
+  name    = "_dmarc"
+  type    = "TXT"
+  content = "v=DMARC1; p=none; rua=mailto:team@katiesgarden.uk"
+  proxied = false
+}
+
 # ---------------------------------------------------------------------------
 # Zone-level security settings
 # ---------------------------------------------------------------------------
