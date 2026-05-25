@@ -96,6 +96,14 @@ jobs:
           [ "$STATUS" = "200" ] || (echo "ERROR: /api/health returned $STATUS" && exit 1)
           echo "PASS: API healthy"
 
+      - name: API diagnostics check
+        run: |
+          BODY=$(curl -sf "$BASE_URL/api/diagnostics")
+          echo "$BODY" | jq .
+          STATUS=$(echo "$BODY" | jq -r '.status')
+          [ "$STATUS" = "ready" ] || (echo "ERROR: /api/diagnostics reports $STATUS" && exit 1)
+          echo "PASS: All dependencies ready"
+
       - name: SPA fallback — /gallery
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/gallery")

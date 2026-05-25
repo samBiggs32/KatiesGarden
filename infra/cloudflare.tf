@@ -98,4 +98,30 @@ resource "cloudflare_ruleset" "rate_limit_api" {
     # Matches POST requests to /api/contact and /api/subscribe
     expression = "(http.request.method eq \"POST\" and http.request.uri.path matches \"^/api/(contact|subscribe)$\")"
   }
+
+  # Diagnostics is read-only but each call hits Brevo's API. Cap at
+  # 10 req/min per IP so uptime monitors (typically one call per
+  # minute) work fine but a hostile actor can't burn our Brevo quota.
+  rules {
+    action      = "block"
+    description = "Cap /api/diagnostics at 10 req/min per IP to protect Brevo API quota"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics         = ["ip.src"]
+      period                  = 60
+      requests_per_period     = 10
+      mitigation_timeout      = 60
+    }
+
+    expression = "(http.request.uri.path eq \"/api/diagnostics\")"
+  }
 }

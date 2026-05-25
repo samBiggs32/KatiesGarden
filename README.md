@@ -27,6 +27,9 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+- [Operations](#-operations)
+  - [Live readiness check](#live-readiness-check)
+  - [Logs](#logs)
 - [Infrastructure](#infrastructure)
   - [Provisioning with Terraform](#provisioning-with-terraform)
   - [GitHub Actions Secret](#github-actions-secret)
@@ -94,6 +97,69 @@ Follow these instructions to get a copy of the project up and running on your lo
 3. Open your browser and go to `https://localhost:5001`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 🩺 Operations
+
+### Live readiness check
+
+Public endpoint at `https://katiesgarden.uk/api/diagnostics`. Returns JSON with the status of each external dependency the API touches at runtime:
+
+```sh
+curl https://katiesgarden.uk/api/diagnostics
+```
+
+```json
+{
+  "status": "ready",
+  "checks": {
+    "api": "ok",
+    "database": "ok",
+    "brevo_api": "ok",
+    "smtp": "skipped"
+  },
+  "timestamp": "2026-05-25T18:00:00Z"
+}
+```
+
+- HTTP **200** when everything green; HTTP **503** when any check is `"fail"`
+- Individual values: `"ok"` (reachable), `"fail"` (unreachable), `"not_configured"` (env var not set — endpoint degrades gracefully), `"skipped"` (intentionally not run on each call)
+- `smtp` is deliberately skipped on every call — a full STARTTLS + AUTH LOGIN round-trip is 1–3s, too slow for per-minute uptime polling. The daily `verify-secrets` GitHub Action covers SMTP end-to-end
+- Rate limited at the Cloudflare edge to 10 requests per minute per IP, so uptime monitors are fine but the Brevo API quota is protected from abuse
+
+Point an uptime monitor (UptimeRobot, BetterStack, etc.) at this URL and alert on non-200 responses for a low-effort production health signal.
+
+### Logs
+
+Logs are emitted via `ILogger` throughout the API. In production they're collected by **Azure Application Insights** when the SWA-linked Functions runtime has `APPLICATIONINSIGHTS_CONNECTION_STRING` set. To enable:
+
+1. In the [Azure Portal](https://portal.azure.com), find your Static Web App's linked Functions app (or the SWA-managed Functions environment)
+2. Go to **Settings → Configuration** and add `APPLICATIONINSIGHTS_CONNECTION_STRING` pointing at an Application Insights resource (free 5 GB/month tier is plenty)
+3. View logs at **Application Insights → Logs** with KQL, or **Live Metrics** for real-time tailing
+
+Log levels in use:
+
+| Level | When |
+|---|---|
+| `Information` | Successful operations, validation failures, "already-subscribed" idempotent hits |
+| `Warning` | Malformed request bodies, Brevo non-2xx responses, missing DB context, diagnostics check failures |
+| `Error` | SMTP send failures, DB persistence failures, host startup DB init failures |
+| `Debug` | Skipped Brevo sync (expected in dev; quiet in production) |
+
+Logs are structured: every entry uses templated parameters (`{Email}`, `{StatusCode}` etc.) so they're queryable in Application Insights via KQL. Example queries:
+
+```kql
+// Recent contact form failures
+traces | where customDimensions["CategoryName"] startswith "ContactFormFunction"
+       | where severityLevel >= 3
+       | order by timestamp desc
+
+// Validation failure patterns
+traces | where message contains "validation failed"
+       | summarize count() by tostring(customDimensions["Errors"])
+       | order by count_ desc
+```
+
+If Application Insights isn't connected, logs still go to the Functions runtime stdout — visible via `az functionapp logs tail` or the SWA portal's **Logs** tab.
 
 ## 🏗 Infrastructure
 
