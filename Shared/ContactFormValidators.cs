@@ -1,15 +1,12 @@
-﻿using FluentValidation;
+using FluentValidation;
 using System.Text.RegularExpressions;
 
 namespace KatiesGarden.Web.Client.Models.Validators
 {
-    /// <summary>
-    /// A standard AbstractValidator which contains multiple rules and can be shared with the back end API
-    /// </summary>
-    /// <typeparam name="OrderModel"></typeparam>
     public class ContactUsFormValidator : AbstractValidator<ContactUsForm>
     {
-        private Regex _phoneNumberRegex = new Regex(@"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$",
+        private readonly Regex _phoneNumberRegex = new(
+            @"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
 
         public ContactUsFormValidator()
@@ -40,10 +37,8 @@ namespace KatiesGarden.Web.Client.Models.Validators
                 .NotEmpty()
                 .Custom((x, context) =>
                 {
-                    var matches = _phoneNumberRegex.Match(x);
-
-                    if (!matches.Success)
-                        context.AddFailure($"Invalid phone number");
+                    if (!_phoneNumberRegex.IsMatch(x))
+                        context.AddFailure("Invalid phone number");
                 });
         }
 
