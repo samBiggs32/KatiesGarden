@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: unit-test-results-pr-${{ github.event.pull_request.number }}
           path: "**/*.trx"
@@ -43,10 +43,10 @@ jobs:
     outputs:
       preview_url: ${{ steps.deploy.outputs.static_web_app_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -116,10 +116,10 @@ jobs:
     env:
       PLAYWRIGHT_BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload E2E results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-results-pr-${{ github.event.pull_request.number }}
           path: "**/*.trx"
@@ -146,7 +146,7 @@ jobs:
     env:
       BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Run Lighthouse CI
         run: |
