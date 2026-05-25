@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
+    <!-- Azure Functions abstractions needed for FakeHttpRequestData -->
+    <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.23.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <!--
+      Reference the client project for ContactUsForm + ContactUsFormValidator.
+      If this causes build issues due to the BlazorWebAssembly SDK, the fix is
+      to extract models/validators into a KatiesGarden.Shared class library.
+    -->
+    <ProjectReference Include="../../Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj" />
+    <ProjectReference Include="../../Api/KatiesGarden.Api.csproj" />
+  </ItemGroup>
+</Project>
