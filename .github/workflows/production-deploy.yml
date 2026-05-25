@@ -6,6 +6,11 @@ on:
       - main
 
 jobs:
+  verify_secrets:
+    name: Verify Secrets
+    uses: ./.github/workflows/verify-secrets.yml
+    secrets: inherit
+
   unit_tests:
     runs-on: ubuntu-latest
     name: Unit Tests
@@ -28,7 +33,7 @@ jobs:
           path: "**/*.trx"
 
   build_and_deploy_production:
-    needs: unit_tests
+    needs: [unit_tests, verify_secrets]
     runs-on: ubuntu-latest
     name: Deploy to Production
     outputs:

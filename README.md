@@ -151,15 +151,26 @@ terraform import azurerm_static_web_app.main \
   /subscriptions/<sub-id>/resourceGroups/katiesgarden-rg/providers/Microsoft.Web/staticSites/katiesgarden
 ```
 
-### GitHub Actions Secret
+### GitHub Actions Secrets
 
-After `terraform apply`, retrieve the deployment token and add it to GitHub:
+The deploy pipeline is gated by a `verify-secrets` job that checks every external dependency is reachable before letting a deploy proceed. Set the following under **GitHub → Settings → Secrets and variables → Actions**:
+
+| Secret | Used for | How verified |
+|---|---|---|
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deploy | Presence + length check (full check at deploy) |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare DNS/WAF management | `GET /user/tokens/verify` returns `status: active` |
+| `BREVO_API_KEY` | Newsletter contact-list management | `GET /v3/account` returns 200 |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_USERNAME` `SMTP_PASSWORD` | Contact form email sending | Live SMTP STARTTLS handshake + AUTH LOGIN |
+| `DATABASE_URL` | Subscriber persistence (Neon Postgres) | `psql ... -c "SELECT 1"` (optional — warns rather than fails if unset) |
+
+Retrieve the SWA token from Terraform:
 
 ```sh
+cd infra
 terraform output -raw deployment_token
 ```
 
-Set this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in **GitHub → Settings → Secrets and variables → Actions**.
+These secrets are duplicated between Azure (set by Terraform as SWA app settings — that's how the deployed Functions read them at runtime) and GitHub (read by the verify-secrets workflow during CI). Keep them in sync. A scheduled run of the verify workflow (daily at 06:00 UTC) catches drift — for example, a rotated SMTP password that you only updated in Azure.
 
 ### Database (Neon PostgreSQL)
 
