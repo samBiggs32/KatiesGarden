@@ -36,6 +36,7 @@ public class ContactFormFunction
         if (request is null ||
             string.IsNullOrWhiteSpace(request.FirstName) ||
             string.IsNullOrWhiteSpace(request.LastName) ||
+            string.IsNullOrWhiteSpace(request.EmailAddress) ||
             string.IsNullOrWhiteSpace(request.ContactNumber) ||
             string.IsNullOrWhiteSpace(request.EmailSubject) ||
             string.IsNullOrWhiteSpace(request.EmailBody))
@@ -71,11 +72,13 @@ public class ContactFormFunction
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Katie's Garden Website", smtpUsername));
         message.To.Add(new MailboxAddress("Katie's Garden", recipientEmail));
+        message.ReplyTo.Add(new MailboxAddress($"{request.FirstName} {request.LastName}", request.EmailAddress));
         message.Subject = $"[Website Enquiry] {request.EmailSubject}";
         message.Body = new TextPart("plain")
         {
             Text = $"Dear Katie,\n\n{request.EmailBody}\n\n" +
-                   $"--\nMany thanks\n{request.FirstName} {request.LastName}\nPhone: {request.ContactNumber}"
+                   $"--\nMany thanks\n{request.FirstName} {request.LastName}" +
+                   $"\nEmail: {request.EmailAddress}\nPhone: {request.ContactNumber}"
         };
 
         using var client = new SmtpClient();

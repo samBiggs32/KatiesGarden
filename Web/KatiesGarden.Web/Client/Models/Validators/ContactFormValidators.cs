@@ -22,13 +22,18 @@ namespace KatiesGarden.Web.Client.Models.Validators
                 .NotEmpty()
                 .Length(1, 100);
 
+            RuleFor(x => x.EmailAddress)
+                .NotEmpty()
+                .EmailAddress()
+                .MaximumLength(254);
+
             RuleFor(x => x.EmailSubject)
                 .NotEmpty()
                 .Length(1, 100);
 
             RuleFor(x => x.EmailBody)
-            .NotEmpty()
-            .Length(1, 255);
+                .NotEmpty()
+                .Length(1, 2000);
 
             RuleFor(x => x.ContactNumber)
                 .Cascade(CascadeMode.Stop)
