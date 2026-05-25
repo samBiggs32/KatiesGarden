@@ -1,6 +1,5 @@
 using KatiesGarden.Models;
 using KatiesGarden.Models.Validators;
-using KatiesGarden.Web.Client.Extensions;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http.Json;
@@ -23,7 +22,7 @@ namespace KatiesGarden.Web.Client.Pages
 
         private Func<object, string, Task<IEnumerable<string>>>? _validateField;
         public Func<object, string, Task<IEnumerable<string>>> ValidateField =>
-            _validateField ??= orderValidator.ToMudFormValidator();
+            _validateField ??= orderValidator.ToFieldValidator();
 
         protected override void OnInitialized()
         {
