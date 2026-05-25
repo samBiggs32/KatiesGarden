@@ -1,15 +1,15 @@
-﻿using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Models.Validators;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using MudBlazor;
+using System.Net.Http.Json;
 
 namespace KatiesGarden.Web.Client.Pages
 {
     public partial class Contact
     {
-        [Inject] IJSRuntime JSRuntime { get; set; }
         [Inject] ISnackbar Snackbar { get; set; }
+        [Inject] HttpClient Http { get; set; }
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "subject")]
@@ -17,17 +17,13 @@ namespace KatiesGarden.Web.Client.Pages
 
         ContactUsFormValidator orderValidator = new ContactUsFormValidator();
         ContactUsForm model = new();
-        string[] errors = { };
         MudForm form;
         private bool isSubmitting = false;
 
         protected override void OnInitialized()
         {
-            // If subject is provided via query parameter, set it in the form
             if (!string.IsNullOrEmpty(Subject))
-            {
                 model.EmailSubject = Subject;
-            }
 
             base.OnInitialized();
         }
@@ -36,31 +32,37 @@ namespace KatiesGarden.Web.Client.Pages
         {
             await form.Validate();
 
-            if (form.IsValid)
+            if (!form.IsValid)
+                return;
+
+            isSubmitting = true;
+
+            try
             {
-                isSubmitting = true;
+                Logger.LogInformation("Submitting contact form");
 
-                try
+                var response = await Http.PostAsJsonAsync("api/contact", model);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    Logger.LogInformation("Opening email client for contact form submission");
-                    const string email = "team@katiesgarden.uk";
-                    await JSRuntime.InvokeAsync<object>("blazorExtensions.SendLocalEmail",
-                        new object[] { email, model.EmailSubject, model.EmailBody, model.FirstName, model.LastName, model.ContactNumber });
-
-                    Snackbar.Add("Your email client should now open — please send the pre-filled email to reach us.", Severity.Info);
-
+                    Snackbar.Add("Your message has been sent! We'll be in touch soon.", Severity.Success);
                     model = new ContactUsForm();
                     await form.ResetAsync();
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logger.LogError(ex, "Error submitting contact form");
-                    Snackbar.Add("There was an error sending your message. Please try again.", Severity.Error);
+                    Logger.LogError("Contact form API returned {StatusCode}", response.StatusCode);
+                    Snackbar.Add("There was a problem sending your message. Please try calling or emailing us directly.", Severity.Error);
                 }
-                finally
-                {
-                    isSubmitting = false;
-                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error submitting contact form");
+                Snackbar.Add("Unable to reach the server. Please try calling or emailing us directly.", Severity.Error);
+            }
+            finally
+            {
+                isSubmitting = false;
             }
         }
 

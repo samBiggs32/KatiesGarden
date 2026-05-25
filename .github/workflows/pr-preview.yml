@@ -19,10 +19,13 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Build
+      - name: Build client
         run: dotnet build Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release
 
-      - name: Publish
+      - name: Build API
+        run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
+
+      - name: Publish client
         run: dotnet publish Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release --output publish_output
 
       - name: Deploy Preview
@@ -33,6 +36,7 @@ jobs:
           action: "upload"
           skip_app_build: true
           app_location: "publish_output/wwwroot"
+          api_location: "Api"
           output_location: ""
 
   close_preview:
