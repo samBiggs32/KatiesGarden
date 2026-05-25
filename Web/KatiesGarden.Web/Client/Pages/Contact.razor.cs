@@ -42,15 +42,13 @@ namespace KatiesGarden.Web.Client.Pages
 
                 try
                 {
-                    Logger.LogInformation("HandleValidSubmit called");
-                    string email = "eeysb11@gmail.com";
+                    Logger.LogInformation("Opening email client for contact form submission");
+                    const string email = "team@katiesgarden.uk";
                     await JSRuntime.InvokeAsync<object>("blazorExtensions.SendLocalEmail",
                         new object[] { email, model.EmailSubject, model.EmailBody, model.FirstName, model.LastName, model.ContactNumber });
 
-                    // Show success notification
-                    Snackbar.Add("Your message has been sent successfully!", Severity.Success);
+                    Snackbar.Add("Your email client should now open — please send the pre-filled email to reach us.", Severity.Info);
 
-                    // Reset the form
                     model = new ContactUsForm();
                     await form.ResetAsync();
                 }

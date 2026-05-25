@@ -1,20 +1,18 @@
-# production-deploy.yml
-name: Production Deployment
+name: PR Preview
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches:
       - main
 
 jobs:
-  build_and_deploy_production:
+  build_and_deploy_preview:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
-    name: Deploy to Production
+    name: Deploy Preview
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -27,8 +25,7 @@ jobs:
       - name: Publish
         run: dotnet publish Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release --output publish_output
 
-      - name: Deploy to Production
-        id: builddeployprod
+      - name: Deploy Preview
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
@@ -37,3 +34,14 @@ jobs:
           skip_app_build: true
           app_location: "publish_output/wwwroot"
           output_location: ""
+
+  close_preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Preview
+    steps:
+      - name: Close Preview Environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
