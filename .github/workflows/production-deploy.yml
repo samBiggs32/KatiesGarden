@@ -1,4 +1,3 @@
-# production-deploy.yml
 name: Production Deployment
 
 on:
@@ -7,7 +6,29 @@ on:
       - main
 
 jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    name: Unit Tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run unit tests
+        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --logger "trx;LogFileName=results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: "**/*.trx"
+
   build_and_deploy_production:
+    needs: unit_tests
     runs-on: ubuntu-latest
     name: Deploy to Production
     outputs:
@@ -21,7 +42,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Build client
         run: dotnet build Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release
@@ -70,13 +91,13 @@ jobs:
           [ "$STATUS" = "200" ] || (echo "ERROR: blazor.webassembly.js returned $STATUS" && exit 1)
           echo "PASS: Blazor runtime reachable"
 
-      - name: SPA fallback - /gallery returns 200
+      - name: SPA fallback — /gallery
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/gallery")
           [ "$STATUS" = "200" ] || (echo "ERROR: /gallery returned $STATUS" && exit 1)
           echo "PASS: /gallery"
 
-      - name: SPA fallback - /contact returns 200
+      - name: SPA fallback — /contact
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/contact")
           [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS" && exit 1)
