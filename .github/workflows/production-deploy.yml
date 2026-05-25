@@ -47,19 +47,7 @@ jobs:
       - name: Build and publish client
         run: dotnet publish Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release --output publish_output
 
-      - name: Build and publish API
-        run: dotnet publish Api/KatiesGarden.Api.csproj --configuration Release --output api_publish
-
-      - name: Upload API artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-production-${{ github.sha }}
-          path: api_publish/
-
-      # --- Provider: Azure Static Web Apps ---
-      # To switch hosting providers, replace this step.
-      # The client is in publish_output/wwwroot (standard static files).
-      - name: Deploy frontend to Azure Static Web Apps
+      - name: Deploy to Azure Static Web Apps
         id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -68,7 +56,7 @@ jobs:
           action: "upload"
           skip_app_build: true
           app_location: "publish_output/wwwroot"
-          api_location: ""
+          api_location: "Api"
           output_location: ""
 
   smoke_test_production:
@@ -96,6 +84,12 @@ jobs:
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/_framework/blazor.webassembly.js")
           [ "$STATUS" = "200" ] || (echo "ERROR: blazor.webassembly.js returned $STATUS" && exit 1)
           echo "PASS: Blazor runtime reachable"
+
+      - name: API health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health")
+          [ "$STATUS" = "200" ] || (echo "ERROR: /api/health returned $STATUS" && exit 1)
+          echo "PASS: API healthy"
 
       - name: SPA fallback — /gallery
         run: |
