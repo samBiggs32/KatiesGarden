@@ -22,8 +22,9 @@ variable "app_name" {
 }
 
 variable "smtp_host" {
-  description = "SMTP server hostname (e.g. smtp.brevo.com, smtp.sendgrid.net, smtp.office365.com)"
+  description = "SMTP server hostname"
   type        = string
+  default     = "smtp-relay.brevo.com"
 }
 
 variable "smtp_port" {

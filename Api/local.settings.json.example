@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "SMTP_HOST": "smtp-relay.brevo.com",
+    "SMTP_PORT": "587",
+    "SMTP_USERNAME": "your-brevo-login-email@example.com",
+    "SMTP_PASSWORD": "your-brevo-smtp-key",
+    "SENDER_EMAIL": "noreply@katiesgarden.uk",
+    "RECIPIENT_EMAIL": "team@katiesgarden.uk"
+  }
+}

@@ -150,24 +150,32 @@ Set this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in **GitHub → S
 
 ### Email sending
 
-The contact form submits to an Azure Function that sends email via SMTP. You need an SMTP provider and credentials — nothing is sent without them.
+The contact form posts to an Azure Function which sends email via SMTP. You need a provider and credentials — nothing is sent without them.
 
-**Option A — Brevo (recommended, free tier)**
-300 emails/day free. No credit card required.
-1. Sign up at [brevo.com](https://www.brevo.com)
-2. Go to **SMTP & API** → **SMTP**
-3. Use `smtp.brevo.com`, port `587`, your Brevo login email, and the generated SMTP key as the password
+**Recommended: Brevo (free tier, 300 emails/day)**
 
-**Option B — Your existing email host**
-If `team@katiesgarden.uk` is already hosted (e.g. Google Workspace, Microsoft 365, Krystal), use those SMTP credentials directly. Check your host's outbound SMTP settings.
+1. Sign up at [brevo.com](https://www.brevo.com) — no credit card required
+2. Go to **Senders & IPs → Domains** and add `katiesgarden.uk`. Follow the DNS verification steps (adds a few TXT/CNAME records to your DNS). This lets you send from any `@katiesgarden.uk` address.
+3. Go to **SMTP & API → SMTP** and generate an SMTP key.
+4. Your `terraform.tfvars` SMTP entries should be:
 
-**Option C — SendGrid (free tier)**
-100 emails/day free.
-1. Sign up at [sendgrid.com](https://sendgrid.com)
-2. Create an API key with **Mail Send** permission
-3. Use `smtp.sendgrid.net`, port `587`, username `apikey`, and the API key as the password
+```hcl
+smtp_host         = "smtp-relay.brevo.com"
+smtp_port         = "587"
+smtp_username     = "your-brevo-login-email@example.com"  # your Brevo account email
+smtp_password     = "xsmtpsib-..."                        # the generated SMTP key, not your login password
+smtp_sender_email = "noreply@katiesgarden.uk"
+recipient_email   = "team@katiesgarden.uk"
+```
 
-Whichever provider you choose, verify that `smtp_sender_email` (the From address) is an address or domain you have verified/authenticated with that provider — most will reject unverified senders.
+**Alternative: your existing email host**
+If `team@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), you can use their outbound SMTP credentials instead. Check your host's SMTP settings page.
+
+**Alternative: SendGrid (free tier, 100 emails/day)**
+Use `smtp.sendgrid.net`, port `587`, username `apikey`, and a SendGrid API key with Mail Send permission as the password.
+
+**Local development**
+Copy `Api/local.settings.json.example` to `Api/local.settings.json` (gitignored) and fill in your credentials to test the contact form locally with the Azure Functions emulator.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
