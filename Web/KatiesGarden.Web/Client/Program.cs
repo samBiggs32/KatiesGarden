@@ -11,6 +11,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddMudServices(config => {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
 });
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+var apiBase = builder.Configuration["ApiBaseUrl"];
+var apiBaseUri = string.IsNullOrWhiteSpace(apiBase)
+    ? new Uri(builder.HostEnvironment.BaseAddress)
+    : new Uri(apiBase.TrimEnd('/') + "/");
+builder.Services.AddScoped(_ => new HttpClient { BaseAddress = apiBaseUri });
 
 await builder.Build().RunAsync();

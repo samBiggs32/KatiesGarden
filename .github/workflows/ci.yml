@@ -20,8 +20,8 @@ jobs:
       - name: Build client
         run: dotnet build Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj --configuration Release
 
-      - name: Build API
-        run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
+      - name: Publish API
+        run: dotnet publish Api/KatiesGarden.Api.csproj --configuration Release --output api_publish
 
       - name: Run unit tests
         run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --logger "trx;LogFileName=results.trx"
