@@ -67,10 +67,11 @@ public class ContactFormFunction
         var smtpPort = int.Parse(Env("SMTP_PORT", "587"));
         var smtpUsername = Env("SMTP_USERNAME");
         var smtpPassword = Env("SMTP_PASSWORD");
+        var senderEmail = Env("SENDER_EMAIL", smtpUsername);
         var recipientEmail = Env("RECIPIENT_EMAIL", "team@katiesgarden.uk");
 
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Katie's Garden Website", smtpUsername));
+        message.From.Add(new MailboxAddress("Katie's Garden Website", senderEmail));
         message.To.Add(new MailboxAddress("Katie's Garden", recipientEmail));
         message.ReplyTo.Add(new MailboxAddress($"{request.FirstName} {request.LastName}", request.EmailAddress));
         message.Subject = $"[Website Enquiry] {request.EmailSubject}";

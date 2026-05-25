@@ -9,4 +9,13 @@ resource "azurerm_static_web_app" "main" {
   location            = azurerm_resource_group.main.location
   sku_tier            = "Free"
   sku_size            = "Free"
+
+  app_settings = {
+    SMTP_HOST       = var.smtp_host
+    SMTP_PORT       = var.smtp_port
+    SMTP_USERNAME   = var.smtp_username
+    SMTP_PASSWORD   = var.smtp_password
+    SENDER_EMAIL    = var.smtp_sender_email
+    RECIPIENT_EMAIL = var.recipient_email
+  }
 }

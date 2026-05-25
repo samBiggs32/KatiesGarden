@@ -20,3 +20,38 @@ variable "app_name" {
   type        = string
   default     = "katiesgarden"
 }
+
+variable "smtp_host" {
+  description = "SMTP server hostname (e.g. smtp.brevo.com, smtp.sendgrid.net, smtp.office365.com)"
+  type        = string
+}
+
+variable "smtp_port" {
+  description = "SMTP port — 587 for STARTTLS (recommended), 465 for SSL"
+  type        = string
+  default     = "587"
+}
+
+variable "smtp_username" {
+  description = "SMTP login username (often your sending email address)"
+  type        = string
+  sensitive   = true
+}
+
+variable "smtp_password" {
+  description = "SMTP password or API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "smtp_sender_email" {
+  description = "From address shown on outbound emails"
+  type        = string
+  default     = "noreply@katiesgarden.uk"
+}
+
+variable "recipient_email" {
+  description = "Email address that receives contact form submissions"
+  type        = string
+  default     = "team@katiesgarden.uk"
+}

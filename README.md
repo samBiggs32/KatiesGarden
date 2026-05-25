@@ -101,15 +101,27 @@ Azure resources are managed with Terraform. The config lives in the `infra/` dir
 
 **Prerequisites:** [Terraform ≥ 1.7](https://developer.hashicorp.com/terraform/install) and the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
 
+Create `infra/terraform.tfvars` (gitignored — never commit this file):
+
+```hcl
+subscription_id   = "your-azure-subscription-id"
+
+# SMTP — see "Email sending" below for provider options
+smtp_host         = "smtp.brevo.com"
+smtp_port         = "587"
+smtp_username     = "your-smtp-login"
+smtp_password     = "your-smtp-password-or-api-key"
+smtp_sender_email = "noreply@katiesgarden.uk"
+recipient_email   = "team@katiesgarden.uk"
+```
+
+Then run:
+
 ```sh
 az login
 az account show   # confirm the correct subscription is active
 
 cd infra
-
-# Create a local vars file (gitignored)
-echo 'subscription_id = "your-subscription-id"' > terraform.tfvars
-
 terraform init
 terraform validate
 terraform plan
@@ -135,6 +147,27 @@ terraform output -raw deployment_token
 ```
 
 Set this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in **GitHub → Settings → Secrets and variables → Actions**.
+
+### Email sending
+
+The contact form submits to an Azure Function that sends email via SMTP. You need an SMTP provider and credentials — nothing is sent without them.
+
+**Option A — Brevo (recommended, free tier)**
+300 emails/day free. No credit card required.
+1. Sign up at [brevo.com](https://www.brevo.com)
+2. Go to **SMTP & API** → **SMTP**
+3. Use `smtp.brevo.com`, port `587`, your Brevo login email, and the generated SMTP key as the password
+
+**Option B — Your existing email host**
+If `team@katiesgarden.uk` is already hosted (e.g. Google Workspace, Microsoft 365, Krystal), use those SMTP credentials directly. Check your host's outbound SMTP settings.
+
+**Option C — SendGrid (free tier)**
+100 emails/day free.
+1. Sign up at [sendgrid.com](https://sendgrid.com)
+2. Create an API key with **Mail Send** permission
+3. Use `smtp.sendgrid.net`, port `587`, username `apikey`, and the API key as the password
+
+Whichever provider you choose, verify that `smtp_sender_email` (the From address) is an address or domain you have verified/authenticated with that provider — most will reject unverified senders.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
