@@ -27,6 +27,9 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+- [Infrastructure](#infrastructure)
+  - [Provisioning with Terraform](#provisioning-with-terraform)
+  - [GitHub Actions Secret](#github-actions-secret)
 - [Development Roadmap](#development-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -40,13 +43,12 @@ Our site features a responsive design that works beautifully on both desktop and
 
 ### Built With
 
-The application is built using the following technologies:
-
-* [ASP.NET Core 8](https://dotnet.microsoft.com/en-us/apps/aspnet) - Backend framework
-* [Blazor WebAssembly](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) - Frontend framework
-* [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) - Data access
-* [Bootstrap 5](https://getbootstrap.com) - UI framework
-* [Azure Static Web Apps](https://azure.microsoft.com/en-us/services/app-service/static/) - Hosting
+* [Blazor WebAssembly (.NET 10)](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) - Frontend
+* [Azure Functions v4 (.NET 9)](https://learn.microsoft.com/en-us/azure/azure-functions/) - Backend API
+* [MudBlazor](https://mudblazor.com) - UI component library
+* [MailKit](https://github.com/jstedfast/MailKit) - SMTP email sending
+* [Azure Static Web Apps](https://azure.microsoft.com/en-us/services/app-service/static/) - Hosting (Free tier)
+* [Terraform](https://www.terraform.io) - Infrastructure as code
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -70,7 +72,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - Git
 - A code editor (recommended: [Visual Studio 2022](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/))
 
@@ -79,24 +81,60 @@ Follow these instructions to get a copy of the project up and running on your lo
 1. Clone the repository
    ```sh
    git clone https://github.com/samBiggs32/KatiesGarden.git
-   ```
-
-2. Navigate to the project directory
-   ```sh
    cd KatiesGarden
    ```
 
-3. Navigate to the client project directory
+2. Run the Blazor frontend
    ```sh
-   cd KatiesGarden.Web/Client
+   dotnet run --project Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj
    ```
 
-4. Run the application
-   ```sh
-   dotnet run
-   ```
+3. Open your browser and go to `https://localhost:5001`
 
-5. Open your browser and go to `https://localhost:5001` or `http://localhost:5000`
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 🏗 Infrastructure
+
+Azure resources are managed with Terraform. The config lives in the `infra/` directory and provisions a single **Azure Static Web App (Free tier)**, which hosts both the Blazor frontend and the Azure Functions API at no cost.
+
+### Provisioning with Terraform
+
+**Prerequisites:** [Terraform ≥ 1.7](https://developer.hashicorp.com/terraform/install) and the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
+
+```sh
+az login
+az account show   # confirm the correct subscription is active
+
+cd infra
+
+# Create a local vars file (gitignored)
+echo 'subscription_id = "your-subscription-id"' > terraform.tfvars
+
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+
+If the Static Web App **already exists** in Azure, import it before applying:
+
+```sh
+terraform import azurerm_resource_group.main \
+  /subscriptions/<sub-id>/resourceGroups/katiesgarden-rg
+
+terraform import azurerm_static_web_app.main \
+  /subscriptions/<sub-id>/resourceGroups/katiesgarden-rg/providers/Microsoft.Web/staticSites/katiesgarden
+```
+
+### GitHub Actions Secret
+
+After `terraform apply`, retrieve the deployment token and add it to GitHub:
+
+```sh
+terraform output -raw deployment_token
+```
+
+Set this value as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret in **GitHub → Settings → Secrets and variables → Actions**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
