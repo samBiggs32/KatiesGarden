@@ -1,6 +1,6 @@
+using FluentValidation;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Web.Client.Models;
-using KatiesGarden.Web.Client.Models.Validators;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +17,7 @@ public class SubscribeFunction
     private readonly ILogger _logger;
     private readonly IServiceProvider _services;
     private readonly IHttpClientFactory _http;
+    private readonly IValidator<SubscribeRequest> _validator;
     private readonly string? _brevoApiKey;
     private readonly int? _brevoListId;
 
@@ -24,11 +25,13 @@ public class SubscribeFunction
         ILoggerFactory loggerFactory,
         IServiceProvider services,
         IHttpClientFactory http,
+        IValidator<SubscribeRequest> validator,
         IConfiguration config)
     {
         _logger = loggerFactory.CreateLogger<SubscribeFunction>();
         _services = services;
         _http = http;
+        _validator = validator;
         _brevoApiKey = config["BREVO_API_KEY"];
         _brevoListId = int.TryParse(config["BREVO_LIST_ID"], out var id) ? id : null;
     }
@@ -53,7 +56,7 @@ public class SubscribeFunction
             return bad;
         }
 
-        var validation = new SubscribeRequestValidator().Validate(request);
+        var validation = _validator.Validate(request);
         if (!validation.IsValid)
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);

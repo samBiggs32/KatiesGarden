@@ -1,5 +1,5 @@
+using FluentValidation;
 using KatiesGarden.Web.Client.Models;
-using KatiesGarden.Web.Client.Models.Validators;
 using MailKit.Net.Smtp;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -12,10 +12,12 @@ namespace KatiesGarden.Api;
 public class ContactFormFunction
 {
     private readonly ILogger _logger;
+    private readonly IValidator<ContactUsForm> _validator;
 
-    public ContactFormFunction(ILoggerFactory loggerFactory)
+    public ContactFormFunction(ILoggerFactory loggerFactory, IValidator<ContactUsForm> validator)
     {
         _logger = loggerFactory.CreateLogger<ContactFormFunction>();
+        _validator = validator;
     }
 
     [Function("ContactForm")]
@@ -42,7 +44,7 @@ public class ContactFormFunction
             return bad;
         }
 
-        var validation = new ContactUsFormValidator().Validate(request);
+        var validation = _validator.Validate(request);
         if (!validation.IsValid)
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);

@@ -177,14 +177,5 @@ namespace KatiesGarden.Web.Client.Pages
             // Navigation with query parameters to pre-fill the subject
             NavigationManager.NavigateTo($"/contact?subject={Uri.EscapeDataString(subject)}");
         }
-
-        private int numberOfImages = 0;
-
-        public Gallery()
-        {
-            // If Images.Lookup exists in your current implementation, 
-            // uncomment the line below, otherwise leave it commented out
-            // numberOfImages = Images.Lookup.Count();
-        }
     }
 }

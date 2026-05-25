@@ -22,7 +22,7 @@ public class ContactUsFormValidatorTests
     [Fact]
     public async Task AllValid_Passes()
     {
-        var result = await _validator.ValidateAsync(ValidForm());
+        var result = await _validator.ValidateAsync(ValidForm(), TestContext.Current.CancellationToken);
         result.IsValid.Should().BeTrue();
     }
 
@@ -32,7 +32,7 @@ public class ContactUsFormValidatorTests
     public async Task EmptyFirstName_Fails(string value)
     {
         var form = ValidForm(); form.FirstName = value;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.FirstName));
     }
 
@@ -40,8 +40,16 @@ public class ContactUsFormValidatorTests
     public async Task FirstNameOver100Chars_Fails()
     {
         var form = ValidForm(); form.FirstName = new string('a', 101);
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.FirstName));
+    }
+
+    [Fact]
+    public async Task FirstNameExactly100Chars_Passes()
+    {
+        var form = ValidForm(); form.FirstName = new string('a', 100);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ContactUsForm.FirstName));
     }
 
     [Theory]
@@ -50,7 +58,7 @@ public class ContactUsFormValidatorTests
     public async Task EmptyLastName_Fails(string value)
     {
         var form = ValidForm(); form.LastName = value;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.LastName));
     }
 
@@ -59,10 +67,13 @@ public class ContactUsFormValidatorTests
     [InlineData("notanemail")]
     [InlineData("@nodomain")]
     [InlineData("missing-at-sign.com")]
+    [InlineData("missing@tld")]
+    [InlineData("two@@signs.com")]
+    [InlineData("spaces in@example.com")]
     public async Task InvalidEmail_Fails(string email)
     {
         var form = ValidForm(); form.EmailAddress = email;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailAddress));
     }
 
@@ -74,7 +85,7 @@ public class ContactUsFormValidatorTests
     public async Task ValidEmail_Passes(string email)
     {
         var form = ValidForm(); form.EmailAddress = email;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().NotContain(e => e.PropertyName == nameof(ContactUsForm.EmailAddress));
     }
 
@@ -85,7 +96,7 @@ public class ContactUsFormValidatorTests
     public async Task InvalidPhone_Fails(string phone)
     {
         var form = ValidForm(); form.ContactNumber = phone;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.ContactNumber));
     }
 
@@ -98,7 +109,7 @@ public class ContactUsFormValidatorTests
     public async Task ValidPhone_Passes(string phone)
     {
         var form = ValidForm(); form.ContactNumber = phone;
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().NotContain(e => e.PropertyName == nameof(ContactUsForm.ContactNumber));
     }
 
@@ -106,7 +117,7 @@ public class ContactUsFormValidatorTests
     public async Task EmptySubject_Fails()
     {
         var form = ValidForm(); form.EmailSubject = "";
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailSubject));
     }
 
@@ -114,15 +125,23 @@ public class ContactUsFormValidatorTests
     public async Task SubjectOver100Chars_Fails()
     {
         var form = ValidForm(); form.EmailSubject = new string('a', 101);
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailSubject));
+    }
+
+    [Fact]
+    public async Task SubjectExactly100Chars_Passes()
+    {
+        var form = ValidForm(); form.EmailSubject = new string('a', 100);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ContactUsForm.EmailSubject));
     }
 
     [Fact]
     public async Task EmptyBody_Fails()
     {
         var form = ValidForm(); form.EmailBody = "";
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailBody));
     }
 
@@ -130,7 +149,7 @@ public class ContactUsFormValidatorTests
     public async Task BodyOver2000Chars_Fails()
     {
         var form = ValidForm(); form.EmailBody = new string('a', 2001);
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailBody));
     }
 
@@ -138,7 +157,15 @@ public class ContactUsFormValidatorTests
     public async Task BodyExactly2000Chars_Passes()
     {
         var form = ValidForm(); form.EmailBody = new string('a', 2000);
-        var result = await _validator.ValidateAsync(form);
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
         result.Errors.Should().NotContain(e => e.PropertyName == nameof(ContactUsForm.EmailBody));
+    }
+
+    [Fact]
+    public async Task EmailExceeding254Chars_Fails()
+    {
+        var form = ValidForm(); form.EmailAddress = new string('a', 250) + "@b.com";
+        var result = await _validator.ValidateAsync(form, TestContext.Current.CancellationToken);
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ContactUsForm.EmailAddress));
     }
 }

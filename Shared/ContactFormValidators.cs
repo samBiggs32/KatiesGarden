@@ -20,8 +20,9 @@ namespace KatiesGarden.Web.Client.Models.Validators
                 .Length(1, 100);
 
             RuleFor(x => x.EmailAddress)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .EmailAddress()
+                .Matches(EmailRegex.Pattern).WithMessage("Please enter a valid email address.")
                 .MaximumLength(254);
 
             RuleFor(x => x.EmailSubject)

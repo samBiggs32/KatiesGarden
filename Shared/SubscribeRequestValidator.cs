@@ -7,8 +7,9 @@ namespace KatiesGarden.Web.Client.Models.Validators
         public SubscribeRequestValidator()
         {
             RuleFor(x => x.Email)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("Email address is required.")
-                .EmailAddress().WithMessage("Please enter a valid email address.")
+                .Matches(EmailRegex.Pattern).WithMessage("Please enter a valid email address.")
                 .MaximumLength(254);
 
             RuleFor(x => x.FirstName)

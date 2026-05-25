@@ -1,4 +1,7 @@
+using FluentValidation;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Web.Client.Models.Validators;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +17,9 @@ var host = new HostBuilder()
             services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(dbUrl));
 
         services.AddHttpClient();
+
+        services.AddSingleton<IValidator<ContactUsForm>, ContactUsFormValidator>();
+        services.AddSingleton<IValidator<SubscribeRequest>, SubscribeRequestValidator>();
     })
     .Build();
 
