@@ -53,14 +53,14 @@
                         </div>
                         <div class="row justify-content-center mt-2">
                             <div class="col-lg-9 text-start">
-                                <MudCheckbox @bind-Value="_consent"
+                                <MudCheckBox @bind-Value="_consent"
                                              Dense="true"
                                              Color="Color.Primary">
                                     <p class="mb-0" style="font-size:0.85rem">
                                         I agree to receive occasional email updates from Katie's Garden.
                                         You can unsubscribe at any time. We will never share your email with third parties.
                                     </p>
-                                </MudCheckbox>
+                                </MudCheckBox>
                                 @if (_consentError)
                                 {
                                     <p class="mud-error-text" style="font-size:0.75rem; margin-left:2rem">Please tick the box to subscribe.</p>
