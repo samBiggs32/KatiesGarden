@@ -9,14 +9,24 @@ public class AdminProductService(HttpClient http)
     public Task<List<ProductSummaryDto>?> GetProductsAsync()
         => http.GetFromJsonAsync<List<ProductSummaryDto>>("api/admin/products");
 
-    public Task<ProductDetailDto?> GetProductAsync(Guid id)
-        => http.GetFromJsonAsync<ProductDetailDto>($"api/admin/products/{id}");
+    public async Task<ProductDetailDto?> GetProductAsync(Guid id)
+    {
+        var response = await http.GetAsync($"api/admin/products/{id}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<ProductDetailDto>()
+            : null;
+    }
 
     public Task<List<CollectionSummaryDto>?> GetCollectionsAsync()
         => http.GetFromJsonAsync<List<CollectionSummaryDto>>("api/admin/collections");
 
-    public Task<CollectionDetailDto?> GetCollectionAsync(Guid id)
-        => http.GetFromJsonAsync<CollectionDetailDto>($"api/admin/collections/{id}");
+    public async Task<CollectionDetailDto?> GetCollectionAsync(Guid id)
+    {
+        var response = await http.GetAsync($"api/admin/collections/{id}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<CollectionDetailDto>()
+            : null;
+    }
 
     public async Task<ProductSummaryDto?> CreateProductAsync(CreateProductRequest request)
     {

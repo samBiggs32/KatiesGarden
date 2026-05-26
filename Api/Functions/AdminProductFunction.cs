@@ -166,7 +166,8 @@ public class AdminProductFunction(
             HowToBuyNote = product.HowToBuyNote,
             CollectionId = product.CollectionId,
             CollectionTitle = product.Collection?.Title,
-            CollectionSlug = product.Collection?.Slug
+            CollectionSlug = product.Collection?.Slug,
+            DisplayOrder = product.DisplayOrder
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);

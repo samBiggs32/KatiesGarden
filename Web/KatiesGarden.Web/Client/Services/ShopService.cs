@@ -8,11 +8,21 @@ public class ShopService(HttpClient http)
     public Task<List<CollectionSummaryDto>?> GetCollectionsAsync()
         => http.GetFromJsonAsync<List<CollectionSummaryDto>>("api/shop/collections");
 
-    public Task<CollectionDetailDto?> GetCollectionAsync(string slug)
-        => http.GetFromJsonAsync<CollectionDetailDto>($"api/shop/collections/{slug}");
+    public async Task<CollectionDetailDto?> GetCollectionAsync(string slug)
+    {
+        var response = await http.GetAsync($"api/shop/collections/{slug}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<CollectionDetailDto>()
+            : null;
+    }
 
-    public Task<ProductDetailDto?> GetProductAsync(string slug)
-        => http.GetFromJsonAsync<ProductDetailDto>($"api/shop/products/{slug}");
+    public async Task<ProductDetailDto?> GetProductAsync(string slug)
+    {
+        var response = await http.GetAsync($"api/shop/products/{slug}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<ProductDetailDto>()
+            : null;
+    }
 
     public Task<DeliverySettingsDto?> GetDeliverySettingsAsync()
         => http.GetFromJsonAsync<DeliverySettingsDto>("api/shop/delivery-settings");

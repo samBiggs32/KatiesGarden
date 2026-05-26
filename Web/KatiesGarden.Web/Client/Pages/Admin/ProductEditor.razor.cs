@@ -61,6 +61,7 @@ public partial class ProductEditor
             _stockQuantity = product.StockQuantity;
             _collectionId = product.CollectionId;
             _imageUrls = product.ImageUrls.ToList();
+            _displayOrder = product.DisplayOrder;
         }
 
         _collections = await collectionsTask ?? [];

@@ -15,4 +15,5 @@ public class ProductDetailDto
     public Guid? CollectionId { get; init; }
     public string? CollectionTitle { get; init; }
     public string? CollectionSlug { get; init; }
+    public int DisplayOrder { get; init; }
 }

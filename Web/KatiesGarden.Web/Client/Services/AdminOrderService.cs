@@ -13,8 +13,13 @@ public class AdminOrderService(HttpClient http)
         return http.GetFromJsonAsync<List<OrderSummaryDto>>(url);
     }
 
-    public Task<OrderDetailDto?> GetOrderAsync(Guid id)
-        => http.GetFromJsonAsync<OrderDetailDto>($"api/admin/orders/{id}");
+    public async Task<OrderDetailDto?> GetOrderAsync(Guid id)
+    {
+        var response = await http.GetAsync($"api/admin/orders/{id}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<OrderDetailDto>()
+            : null;
+    }
 
     public Task<HttpResponseMessage> UpdateStatusAsync(Guid id, string status)
         => http.PatchAsJsonAsync($"api/admin/orders/{id}/status", new UpdateOrderStatusRequest(status));

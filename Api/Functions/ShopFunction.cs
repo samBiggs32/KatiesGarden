@@ -95,7 +95,8 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
             HowToBuyNote = product.HowToBuyNote,
             CollectionId = product.CollectionId,
             CollectionTitle = product.Collection?.Title,
-            CollectionSlug = product.Collection?.Slug
+            CollectionSlug = product.Collection?.Slug,
+            DisplayOrder = product.DisplayOrder
         };
 
         var response = req.CreateResponse(HttpStatusCode.OK);
