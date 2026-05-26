@@ -319,6 +319,14 @@ a, .btn-link {
     }
 }
 
+/* Gallery carousel — reserve space before images load (prevents layout shift). */
+.gallery-carousel .carousel-item picture,
+.gallery-carousel .carousel-item img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
+}
+
 /*Small bootstrap*/
 
 
@@ -345,7 +353,7 @@ a, .btn-link {
 .button-primary {
     transition: all .5s ease;
     border: 3px solid white;
-    font-family: 'Montserrat', sans-serif;
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
     text-transform: uppercase;
     text-align: center;
     line-height: 1;

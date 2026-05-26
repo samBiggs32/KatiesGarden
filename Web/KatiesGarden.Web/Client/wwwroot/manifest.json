@@ -1,20 +1,17 @@
 {
-  "name": "KatiesGarden",
-  "short_name": "KatiesGarden",
+  "name": "Katie's Garden",
+  "short_name": "Katie's Garden",
+  "description": "Garden services, bespoke woodwork, and planting schemes in Milverton, Somerset.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#03173d",
+  "background_color": "#F0F5F3",
+  "theme_color": "#24937F",
   "icons": [
     {
       "src": "KatiesGardenLogo.png",
       "type": "image/png",
-      "sizes": "512x512"
-    },
-    {
-      "src": "KatiesGardenLogo.jpg",
-      "type": "image/jpg",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ]
 }
