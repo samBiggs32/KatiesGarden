@@ -1,4 +1,5 @@
 using KatiesGarden.Web.Client;
+using KatiesGarden.Web.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
@@ -16,5 +17,12 @@ var apiBaseUri = string.IsNullOrWhiteSpace(apiBase)
     ? new Uri(builder.HostEnvironment.BaseAddress)
     : new Uri(apiBase.TrimEnd('/') + "/");
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = apiBaseUri });
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<ShopService>();
+builder.Services.AddScoped<CheckoutService>();
+builder.Services.AddScoped<AdminProductService>();
+builder.Services.AddScoped<AdminOrderService>();
 
 await builder.Build().RunAsync();

@@ -1,8 +1,11 @@
+using Azure.Storage.Blobs;
 using FluentValidation;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Email;
+using KatiesGarden.Api.Services;
 using KatiesGarden.Models;
+using KatiesGarden.Models.Shop;
 using KatiesGarden.Models.Validators;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
@@ -21,11 +24,16 @@ var host = new HostBuilder()
 
         services.AddHttpClient();
 
+        // Existing validators
         services.AddSingleton<IValidator<ContactUsForm>, ContactUsFormValidator>();
         services.AddSingleton<IValidator<SubscribeRequest>, SubscribeRequestValidator>();
 
-        // SMTP — required for the contact form. Fail at host startup, not
-        // on the first request, when a key is missing or empty.
+        // Shop validators
+        services.AddSingleton<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
+        services.AddSingleton<IValidator<CreateCollectionRequest>, CreateCollectionRequestValidator>();
+        services.AddSingleton<IValidator<CheckoutRequest>, CheckoutRequestValidator>();
+
+        // SMTP — required, fail at startup if missing
         services.AddOptions<SmtpOptions>()
             .Configure<IConfiguration>((opts, config) =>
             {
@@ -42,8 +50,7 @@ var host = new HostBuilder()
             .Validate(o => !string.IsNullOrWhiteSpace(o.RecipientEmail), "RECIPIENT_EMAIL must be set")
             .ValidateOnStart();
 
-        // Brevo REST — optional. Subscribe endpoint degrades to "DB only"
-        // when these are absent, so no Validate() calls here.
+        // Brevo REST — optional
         services.AddOptions<BrevoOptions>()
             .Configure<IConfiguration>((opts, config) =>
             {
@@ -52,6 +59,16 @@ var host = new HostBuilder()
             });
 
         services.AddSingleton<IEmailSender, MailKitEmailSender>();
+
+        // Azure Blob Storage — optional, skipped gracefully if not configured
+        var storageConn = context.Configuration["AZURE_STORAGE_CONNECTION_STRING"];
+        if (!string.IsNullOrWhiteSpace(storageConn))
+            services.AddSingleton(new BlobServiceClient(storageConn));
+        else
+            services.AddSingleton<BlobServiceClient?>(_ => null);
+
+        // Push notification service — scoped because it uses AppDbContext
+        services.AddScoped<PushNotificationService>();
     })
     .Build();
 
@@ -65,7 +82,7 @@ using (var scope = host.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Database initialisation failed — subscribe endpoint will be unavailable");
+        logger.LogError(ex, "Database initialisation failed — store and subscribe endpoints will be unavailable");
     }
 }
 

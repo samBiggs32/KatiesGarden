@@ -78,6 +78,91 @@ variable "brevo_list_id" {
 }
 
 # ---------------------------------------------------------------------------
+# Store / OAuth / Push
+# ---------------------------------------------------------------------------
+
+variable "github_client_id" {
+  description = "GitHub OAuth App client ID for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "github_client_secret" {
+  description = "GitHub OAuth App client secret for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "google_client_id" {
+  description = "Google OAuth client ID for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "google_client_secret" {
+  description = "Google OAuth client secret for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "microsoft_client_id" {
+  description = "Microsoft AAD app client ID for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "microsoft_client_secret" {
+  description = "Microsoft AAD app client secret for SWA admin login"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "stripe_secret_key" {
+  description = "Stripe secret key (sk_live_... or sk_test_...)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "stripe_webhook_secret" {
+  description = "Stripe webhook signing secret (whsec_...)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "vapid_public_key" {
+  description = "VAPID public key for web push notifications (generate with: npx web-push generate-vapid-keys)"
+  type        = string
+  default     = ""
+}
+
+variable "vapid_private_key" {
+  description = "VAPID private key for web push notifications"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "vapid_subject" {
+  description = "VAPID subject — a mailto: or URL identifying the push sender"
+  type        = string
+  default     = "mailto:team@katiesgarden.uk"
+}
+
+variable "site_url" {
+  description = "Public base URL of the site (no trailing slash)"
+  type        = string
+  default     = "https://www.katiesgarden.uk"
+}
+
+# ---------------------------------------------------------------------------
 # Cloudflare
 # ---------------------------------------------------------------------------
 

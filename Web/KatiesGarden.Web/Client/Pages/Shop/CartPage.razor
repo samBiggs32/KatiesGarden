@@ -1,0 +1,95 @@
+@page "/cart"
+@using KatiesGarden.Models.Shop
+@using KatiesGarden.Web.Client.Models
+
+<PageTitle>Basket — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Your Basket</MudText>
+
+    @if (_items.Count == 0)
+    {
+        <MudAlert Severity="Severity.Normal">Your basket is empty. <MudLink Href="/shop">Browse our shop</MudLink></MudAlert>
+    }
+    else
+    {
+        <MudList T="string" Class="mb-4">
+            @foreach (var item in _items)
+            {
+                <MudListItem>
+                    <div class="d-flex align-items-center gap-3 w-100">
+                        @if (item.ImageUrl is not null)
+                        {
+                            <img src="@item.ImageUrl" alt="@item.ProductName" style="width:60px; height:60px; object-fit:cover; border-radius:4px;" />
+                        }
+                        <div class="flex-grow-1">
+                            <MudText Typo="Typo.body1">@item.ProductName</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Primary">£@item.UnitPrice.ToString("F2") each</MudText>
+                        </div>
+                        <MudNumericField T="int" Value="@item.Quantity" Min="0" Max="99" Style="width:80px;"
+                                         ValueChanged="@(q => UpdateQuantityAsync(item.ProductId, q))" />
+                        <MudText Typo="Typo.body1" Style="min-width:60px; text-align:right;">£@item.LineTotal.ToString("F2")</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                       OnClick="@(() => RemoveAsync(item.ProductId))" />
+                    </div>
+                </MudListItem>
+                <MudDivider />
+            }
+        </MudList>
+
+        <!-- Delivery selection -->
+        <MudCard Elevation="2" Class="mb-4">
+            <MudCardContent>
+                <MudText Typo="Typo.h6" Class="mb-3">Delivery Method</MudText>
+                <MudRadioGroup T="string" @bind-Value="_deliveryType">
+                    <MudRadio T="string" Value="@("Collection")" Color="Color.Primary">
+                        Click & Collect — Free
+                        @if (_deliverySettings is not null)
+                        {
+                            <MudText Typo="Typo.caption" Class="d-block">@_deliverySettings.CollectionAddress</MudText>
+                        }
+                    </MudRadio>
+                    @if (_allCanDeliver)
+                    {
+                        <MudRadio T="string" Value="@("LocalDelivery")" Color="Color.Primary">
+                            Local Delivery — @DeliveryFeeLabel
+                            @if (_deliverySettings is not null)
+                            {
+                                <MudText Typo="Typo.caption" Class="d-block">@_deliverySettings.DeliveryAreaDescription</MudText>
+                            }
+                        </MudRadio>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Warning" Class="mt-2">
+                            One or more items in your basket are collection-only.
+                        </MudText>
+                    }
+                </MudRadioGroup>
+            </MudCardContent>
+        </MudCard>
+
+        <!-- Order summary -->
+        <MudPaper Elevation="0" Class="pa-4 mb-4" Style="background:#f5f5f5;">
+            <div class="d-flex justify-space-between mb-2">
+                <MudText>Subtotal</MudText>
+                <MudText>£@_subtotal.ToString("F2")</MudText>
+            </div>
+            <div class="d-flex justify-space-between mb-2">
+                <MudText>Delivery</MudText>
+                <MudText>£@_deliveryFee.ToString("F2")</MudText>
+            </div>
+            <MudDivider Class="my-2" />
+            <div class="d-flex justify-space-between">
+                <MudText Typo="Typo.h6">Total</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">£@(_subtotal + _deliveryFee).ToString("F2")</MudText>
+            </div>
+        </MudPaper>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                   FullWidth="true" OnClick="ProceedToCheckoutAsync"
+                   Disabled="@_checkingOut">
+            @(_checkingOut ? "Redirecting to payment…" : "Proceed to Checkout")
+        </MudButton>
+    }
+</MudContainer>

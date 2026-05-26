@@ -1,0 +1,85 @@
+@page "/shop/product/{Slug}"
+@using KatiesGarden.Models.Shop
+@using KatiesGarden.Web.Client.Models
+
+<PageTitle>@(_product?.Name ?? "Product") — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    @if (_loading)
+    {
+        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" Class="mb-4" />
+        <MudSkeleton Width="60%" Height="36px" />
+    }
+    else if (_product is null)
+    {
+        <MudAlert Severity="Severity.Warning">Product not found.</MudAlert>
+    }
+    else
+    {
+        @if (_product.ImageUrls.Length > 0)
+        {
+            <MudCarousel Class="mb-6" Style="height:400px;" ShowArrows="true" ShowBullets="@(_product.ImageUrls.Length > 1)" AutoCycle="false" TData="object">
+                @foreach (var url in _product.ImageUrls)
+                {
+                    <MudCarouselItem>
+                        <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                            <img src="@url" alt="@_product.Name" style="max-height:400px; max-width:100%; object-fit:contain;" loading="lazy" />
+                        </div>
+                    </MudCarouselItem>
+                }
+            </MudCarousel>
+        }
+
+        <MudText Typo="Typo.h4" Class="font-weight-bold">@_product.Name</MudText>
+        <MudText Typo="Typo.h5" Color="Color.Primary" Class="mt-2">£@_product.Price.ToString("F2")</MudText>
+
+        <div class="mt-2 mb-4">
+            @if (!_product.IsAvailable)
+            {
+                <MudChip T="string" Color="Color.Error">Sold out</MudChip>
+            }
+            else if (_product.StockQuantity is > 0 and <= 3)
+            {
+                <MudChip T="string" Color="Color.Warning">Only @_product.StockQuantity left</MudChip>
+            }
+            else
+            {
+                <MudChip T="string" Color="Color.Success">In stock</MudChip>
+            }
+            @if (_product.CanLocalDeliver)
+            {
+                <MudChip T="string" Color="Color.Info">Local delivery available</MudChip>
+            }
+            else
+            {
+                <MudChip T="string">Collection only</MudChip>
+            }
+        </div>
+
+        <MudText Typo="Typo.body1" Class="mb-4">@_product.Description</MudText>
+
+        @if (_product.HowToBuyNote is not null)
+        {
+            <MudAlert Severity="Severity.Normal" Class="mb-4">@_product.HowToBuyNote</MudAlert>
+        }
+
+        <div class="d-flex gap-3 flex-wrap">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       Disabled="@(!_product.IsAvailable)"
+                       OnClick="AddToCartAsync">
+                @(_product.IsAvailable ? "Add to Basket" : "Sold Out")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Large"
+                       Href="@($"/contact?subject=Enquiry about {Uri.EscapeDataString(_product.Name)}")">
+                Enquire Instead
+            </MudButton>
+        </div>
+
+        @if (_product.CollectionSlug is not null)
+        {
+            <MudLink Href="@($"/shop/{_product.CollectionSlug}")" Class="mt-6 d-block">
+                ← Back to @_product.CollectionTitle
+            </MudLink>
+        }
+    }
+</MudContainer>

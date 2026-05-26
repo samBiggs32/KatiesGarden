@@ -1,0 +1,77 @@
+@page "/admin/orders"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Orders — Admin</PageTitle>
+
+<div class="d-flex align-items-center mb-6">
+    <MudText Typo="Typo.h4" Class="font-weight-bold flex-grow-1">Orders</MudText>
+</div>
+
+<MudSelect T="string" @bind-Value="_statusFilter" Label="Filter by status" Variant="Variant.Outlined"
+           Class="mb-4" Style="max-width:250px;" Clearable="true"
+           ValueChanged="@(_ => LoadAsync())">
+    <MudSelectItem Value="@("Pending")">Pending</MudSelectItem>
+    <MudSelectItem Value="@("Confirmed")">Confirmed</MudSelectItem>
+    <MudSelectItem Value="@("Processing")">Processing</MudSelectItem>
+    <MudSelectItem Value="@("ReadyForCollection")">Ready for Collection</MudSelectItem>
+    <MudSelectItem Value="@("Dispatched")">Dispatched</MudSelectItem>
+    <MudSelectItem Value="@("Delivered")">Delivered</MudSelectItem>
+    <MudSelectItem Value="@("Cancelled")">Cancelled</MudSelectItem>
+</MudSelect>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+}
+else
+{
+    <MudTable Items="_orders" Dense="false" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Order #</MudTh>
+            <MudTh>Customer</MudTh>
+            <MudTh>Delivery</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Date</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.OrderNumber</MudTd>
+            <MudTd>@context.CustomerFirstName @context.CustomerLastName</MudTd>
+            <MudTd>@context.DeliveryType</MudTd>
+            <MudTd>£@context.Total.ToString("F2")</MudTd>
+            <MudTd><MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
+            <MudTd>@context.CreatedAt.ToString("dd MMM yyyy HH:mm")</MudTd>
+            <MudTd><MudButton Size="Size.Small" Variant="Variant.Outlined" Href="@($"/admin/orders/{context.Id}")">View</MudButton></MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No orders found.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+}
+
+@code {
+    [Inject] AdminOrderService AdminOrderService { get; set; } = null!;
+
+    private List<OrderSummaryDto> _orders = [];
+    private string? _statusFilter;
+    private bool _loading = true;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _orders = await AdminOrderService.GetOrdersAsync(_statusFilter) ?? [];
+        _loading = false;
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Confirmed" or "Processing" => Color.Success,
+        "Pending" => Color.Warning,
+        "Cancelled" or "Refunded" => Color.Error,
+        _ => Color.Default
+    };
+}

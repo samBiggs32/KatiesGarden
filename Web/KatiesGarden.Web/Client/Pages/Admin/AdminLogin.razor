@@ -1,0 +1,29 @@
+@page "/admin/login"
+
+<PageTitle>Admin Login — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="py-12">
+    <div class="text-center mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h5" Class="mt-2 font-weight-bold">Admin Login</MudText>
+        <MudText Typo="Typo.body2" Class="mt-1">Sign in to manage Katie's Garden</MudText>
+    </div>
+
+    <MudStack Spacing="3">
+        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                   StartIcon="@Icons.Custom.Brands.GitHub"
+                   Href="/.auth/login/github?post_login_redirect_uri=/admin">
+            Continue with GitHub
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                   StartIcon="@Icons.Material.Filled.Email"
+                   Href="/.auth/login/google?post_login_redirect_uri=/admin">
+            Continue with Google
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                   StartIcon="@Icons.Material.Filled.Microsoft"
+                   Href="/.auth/login/aad?post_login_redirect_uri=/admin">
+            Continue with Microsoft
+        </MudButton>
+    </MudStack>
+</MudContainer>

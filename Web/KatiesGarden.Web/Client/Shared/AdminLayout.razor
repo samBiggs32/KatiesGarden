@@ -1,0 +1,56 @@
+@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@if (!_checked)
+{
+    <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+        <MudProgressCircular Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1" Color="Color.Primary">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                           OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+            <MudText Typo="Typo.h6" Class="ml-2">Katie's Garden — Admin</MudText>
+            <MudSpacer />
+            <MudButton Color="Color.Inherit" Href="/" StartIcon="@Icons.Material.Filled.Home">View Site</MudButton>
+            <MudButton Color="Color.Inherit" Href="/.auth/logout" StartIcon="@Icons.Material.Filled.Logout">Sign Out</MudButton>
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
+            <MudNavMenu>
+                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Href="/admin/orders" Icon="@Icons.Material.Filled.ShoppingCart">Orders</MudNavLink>
+                <MudNavLink Href="/admin/products" Icon="@Icons.Material.Filled.Inventory">Products</MudNavLink>
+                <MudNavLink Href="/admin/collections" Icon="@Icons.Material.Filled.Collections">Collections</MudNavLink>
+                <MudNavLink Href="/admin/delivery-settings" Icon="@Icons.Material.Filled.LocalShipping">Delivery Settings</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-6">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _checked;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAdmin = await AuthService.IsAdminAsync();
+        if (!isAdmin)
+            Navigation.NavigateTo("/admin/login", forceLoad: false);
+        _checked = true;
+    }
+}
