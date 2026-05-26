@@ -115,27 +115,6 @@ public class AdminProductFunction(
         return req.CreateResponse(HttpStatusCode.NoContent);
     }
 
-    [Function("AdminPatchProductStock")]
-    public async Task<HttpResponseData> PatchStock(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "admin/products/{id:guid}/stock")] HttpRequestData req,
-        Guid id)
-    {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
-
-        var ct = req.FunctionContext.CancellationToken;
-        var product = await db.Products.FindAsync([id], ct);
-        if (product is null) return req.CreateResponse(HttpStatusCode.NotFound);
-
-        var body = await req.ReadFromJsonAsync<StockPatchRequest>();
-        if (body is null) return await Responses.BadRequest(req, "Request body is required.");
-
-        product.StockQuantity = body.StockQuantity;
-        product.IsAvailable = body.IsAvailable ?? (body.StockQuantity is null || body.StockQuantity > 0);
-        await db.SaveChangesAsync(ct);
-
-        return req.CreateResponse(HttpStatusCode.NoContent);
-    }
-
     // ── Collections ─────────────────────────────────────────────────────────
 
     [Function("AdminGetProduct")]
@@ -399,7 +378,6 @@ public class AdminProductFunction(
         p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder);
 }
 
-internal record StockPatchRequest(int? StockQuantity, bool? IsAvailable);
 internal record DeliverySettingsUpdateRequest(
     decimal LocalDeliveryFee,
     decimal? FreeDeliveryThreshold,

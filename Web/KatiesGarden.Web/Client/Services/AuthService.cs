@@ -29,6 +29,4 @@ public class AuthService(HttpClient http)
         var principal = await GetPrincipalAsync();
         return principal?.UserRoles?.Contains("admin", StringComparer.OrdinalIgnoreCase) ?? false;
     }
-
-    public void Invalidate() => _loaded = false;
 }

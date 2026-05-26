@@ -94,22 +94,5 @@ public static class SqlMigrations
             "CreatedAt" timestamptz NOT NULL DEFAULT now()
         );
         CREATE INDEX IF NOT EXISTS ix_push_subscriptions_endpoint ON push_subscriptions ("Endpoint");
-
-        CREATE TABLE IF NOT EXISTS advertising_content (
-            "Id"                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-            "Title"               varchar(200) NOT NULL,
-            "CollectionId"        uuid,
-            "FeaturedProductIds"  uuid[] NOT NULL DEFAULT '{}',
-            "GeneratedImageUrls"  text[] NOT NULL DEFAULT '{}',
-            "SuggestedCaption"    varchar(2200) NOT NULL DEFAULT '',
-            "Hashtags"            varchar(500) NOT NULL DEFAULT '',
-            "Status"              integer NOT NULL DEFAULT 0,
-            "CreatedAt"           timestamptz NOT NULL DEFAULT now(),
-            "PostedAt"            timestamptz,
-            "MetaCampaignId"      text,
-            "MetaAdSetId"         text,
-            "MetaAdId"            text,
-            "MetaStatus"          text
-        );
         """;
 }

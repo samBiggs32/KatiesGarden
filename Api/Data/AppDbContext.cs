@@ -11,7 +11,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OrderLine> OrderLines => Set<OrderLine>();
     public DbSet<DeliverySettings> DeliverySettings => Set<DeliverySettings>();
     public DbSet<StorePushSubscription> PushSubscriptions => Set<StorePushSubscription>();
-    public DbSet<AdvertisingContent> AdvertisingContents => Set<AdvertisingContent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,14 +96,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(p => p.Auth).HasMaxLength(100).IsRequired();
         });
 
-        modelBuilder.Entity<AdvertisingContent>(e =>
-        {
-            e.ToTable("advertising_content");
-            e.Property(a => a.Title).HasMaxLength(200).IsRequired();
-            e.Property(a => a.SuggestedCaption).HasMaxLength(2200);
-            e.Property(a => a.Hashtags).HasMaxLength(500);
-            e.Property(a => a.FeaturedProductIds).HasColumnType("uuid[]");
-            e.Property(a => a.GeneratedImageUrls).HasColumnType("text[]");
-        });
     }
 }

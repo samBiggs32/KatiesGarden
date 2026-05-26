@@ -15,7 +15,4 @@ public static class SwaAuth
 
     public static bool IsAdmin(HttpRequestData req)
         => GetPrincipal(req)?.IsAdmin ?? false;
-
-    public static string? GetUserId(HttpRequestData req)
-        => GetPrincipal(req)?.UserId;
 }
