@@ -1,6 +1,9 @@
 @inherits LayoutComponentBase
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using System.Net.Http.Json
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -21,6 +24,14 @@ else
             <MudText Typo="Typo.h6" Class="ml-2">Katie's Garden — Admin</MudText>
             <MudSpacer />
             <MudButton Color="Color.Inherit" Href="/" StartIcon="@Icons.Material.Filled.Home">View Site</MudButton>
+            @if (_pushSupported)
+            {
+                <MudTooltip Text="@(_pushSubscribed ? "Notifications on — click to disable" : "Enable order notifications")">
+                    <MudIconButton Icon="@(_pushSubscribed ? Icons.Material.Filled.NotificationsActive : Icons.Material.Filled.NotificationsOff)"
+                                   Color="Color.Inherit" OnClick="TogglePushAsync"
+                                   aria-label="@(_pushSubscribed ? "Disable push notifications" : "Enable push notifications")" />
+                </MudTooltip>
+            }
             <MudButton Color="Color.Inherit" Href="/.auth/logout" StartIcon="@Icons.Material.Filled.Logout">Sign Out</MudButton>
         </MudAppBar>
 
@@ -45,12 +56,74 @@ else
 @code {
     private bool _drawerOpen = true;
     private bool _checked;
+    private bool _pushSupported;
+    private bool _pushSubscribed;
+    private string? _vapidPublicKey;
 
     protected override async Task OnInitializedAsync()
     {
         var isAdmin = await AuthService.IsAdminAsync();
         if (!isAdmin)
+        {
             Navigation.NavigateTo("/admin/login", forceLoad: false);
+            _checked = true;
+            return;
+        }
+
+        _pushSupported = await JS.InvokeAsync<bool>("PushManager.isSupported");
+        if (_pushSupported)
+        {
+            _pushSubscribed = await JS.InvokeAsync<bool>("PushManager.isSubscribed");
+
+            try
+            {
+                _vapidPublicKey = await Http.GetStringAsync("api/push/vapid-public-key");
+            }
+            catch
+            {
+                _pushSupported = false;
+            }
+        }
+
         _checked = true;
     }
+
+    private async Task TogglePushAsync()
+    {
+        if (string.IsNullOrEmpty(_vapidPublicKey)) return;
+
+        try
+        {
+            if (_pushSubscribed)
+            {
+                await JS.InvokeVoidAsync("PushManager.unsubscribe");
+                await Http.DeleteAsync("api/push/subscribe");
+                _pushSubscribed = false;
+            }
+            else
+            {
+                var subJson = await JS.InvokeAsync<string>("PushManager.subscribe", _vapidPublicKey);
+                var sub = System.Text.Json.JsonSerializer.Deserialize<PushSubscriptionJson>(subJson,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (sub is not null)
+                {
+                    await Http.PostAsJsonAsync("api/push/subscribe", new
+                    {
+                        sub.Endpoint,
+                        p256dh = sub.Keys?.P256dh ?? string.Empty,
+                        auth = sub.Keys?.Auth ?? string.Empty
+                    });
+                    _pushSubscribed = true;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Push permission denied or not available — silently ignore
+        }
+    }
+
+    private record PushSubscriptionJson(string Endpoint, PushKeys? Keys);
+    private record PushKeys(string P256dh, string Auth);
 }

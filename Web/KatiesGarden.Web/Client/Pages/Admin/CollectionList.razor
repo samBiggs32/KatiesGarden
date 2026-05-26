@@ -1,0 +1,104 @@
+@page "/admin/collections"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Collections — Admin</PageTitle>
+
+<div class="d-flex align-items-center mb-6">
+    <MudText Typo="Typo.h4" Class="font-weight-bold flex-grow-1">Collections</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+               Href="/admin/collections/new">
+        New Collection
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+}
+else
+{
+    <MudTable Items="_collections" Dense="false" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Title</MudTh>
+            <MudTh>Dates</MudTh>
+            <MudTh>Products</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Title</MudTd>
+            <MudTd>
+                @context.StartDate.ToString("dd MMM yyyy")
+                @if (context.EndDate.HasValue)
+                {
+                    <span> → @context.EndDate.Value.ToString("dd MMM yyyy")</span>
+                }
+                else
+                {
+                    <span class="text-muted"> (no end)</span>
+                }
+            </MudTd>
+            <MudTd>@context.ProductCount</MudTd>
+            <MudTd>
+                <MudChip T="string" Color="@(context.IsActive ? Color.Success : Color.Default)" Size="Size.Small">
+                    @(context.IsActive ? "Active" : "Inactive")
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudButton Size="Size.Small" Href="@($"/admin/collections/{context.Id}/edit")">Edit</MudButton>
+                @if (context.IsActive)
+                {
+                    <MudButton Size="Size.Small" Color="Color.Warning"
+                               OnClick="@(() => DeactivateAsync(context.Id, context.Title))">
+                        Deactivate
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>No collections yet. Create one to group your products.</MudText>
+        </NoRecordsContent>
+    </MudTable>
+}
+
+@code {
+    [Inject] AdminProductService AdminProductService { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
+
+    private List<CollectionSummaryDto> _collections = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _collections = await AdminProductService.GetCollectionsAsync() ?? [];
+        _loading = false;
+    }
+
+    private async Task DeactivateAsync(Guid id, string title)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Deactivate Collection",
+            $"Deactivate \"{title}\"? It will be hidden from the shop but its products are kept.",
+            yesText: "Deactivate", cancelText: "Cancel");
+
+        if (result != true) return;
+
+        var response = await AdminProductService.DeleteCollectionAsync(id);
+        if (response.IsSuccessStatusCode)
+        {
+            var c = _collections.FirstOrDefault(c => c.Id == id);
+            if (c is not null)
+                _collections = _collections.Select(x => x.Id == id
+                    ? new CollectionSummaryDto(x.Id, x.Title, x.Slug, x.Description, x.CoverImageUrl,
+                        x.StartDate, x.EndDate, x.ProductCount, x.DisplayOrder, false)
+                    : x).ToList();
+            Snackbar.Add("Collection deactivated", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to deactivate collection", Severity.Error);
+        }
+    }
+}

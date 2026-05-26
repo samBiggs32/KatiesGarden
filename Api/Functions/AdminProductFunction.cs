@@ -1,7 +1,7 @@
 using FluentValidation;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
-using KatiesGarden.Api.Helpers;
+using KatiesGarden.Models.Helpers;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -138,6 +138,81 @@ public class AdminProductFunction(
 
     // ── Collections ─────────────────────────────────────────────────────────
 
+    [Function("AdminGetProduct")]
+    public async Task<HttpResponseData> GetProduct(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/products/{id:guid}")] HttpRequestData req,
+        Guid id)
+    {
+        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+        var ct = req.FunctionContext.CancellationToken;
+        var product = await db.Products
+            .Include(p => p.Collection)
+            .FirstOrDefaultAsync(p => p.Id == id, ct);
+
+        if (product is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        var dto = new ProductDetailDto
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Slug = product.Slug,
+            Description = product.Description,
+            Price = product.Price,
+            StockQuantity = product.StockQuantity,
+            IsAvailable = product.IsAvailable,
+            CanLocalDeliver = product.CanLocalDeliver,
+            ImageUrls = product.ImageUrls,
+            HowToBuyNote = product.HowToBuyNote,
+            CollectionId = product.CollectionId,
+            CollectionTitle = product.Collection?.Title,
+            CollectionSlug = product.Collection?.Slug
+        };
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(dto);
+        return response;
+    }
+
+    [Function("AdminGetCollection")]
+    public async Task<HttpResponseData> GetCollection(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/collections/{id:guid}")] HttpRequestData req,
+        Guid id)
+    {
+        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+        var ct = req.FunctionContext.CancellationToken;
+        var collection = await db.Collections
+            .Include(c => c.Products)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
+
+        if (collection is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        var dto = new CollectionDetailDto
+        {
+            Id = collection.Id,
+            Title = collection.Title,
+            Slug = collection.Slug,
+            Description = collection.Description,
+            CoverImageUrl = collection.CoverImageUrl,
+            IsActive = collection.IsActive,
+            DisplayOrder = collection.DisplayOrder,
+            StartDate = collection.StartDate,
+            EndDate = collection.EndDate,
+            Products = collection.Products
+                .Where(p => p.IsAvailable)
+                .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
+                .Select(p => new ProductSummaryDto(
+                    p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
+                    p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder))
+                .ToList()
+        };
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(dto);
+        return response;
+    }
+
     [Function("AdminGetCollections")]
     public async Task<HttpResponseData> GetAllCollections(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/collections")] HttpRequestData req)
@@ -149,7 +224,7 @@ public class AdminProductFunction(
             .OrderBy(c => c.DisplayOrder).ThenByDescending(c => c.StartDate)
             .Select(c => new CollectionSummaryDto(
                 c.Id, c.Title, c.Slug, c.Description, c.CoverImageUrl,
-                c.StartDate, c.EndDate, c.Products.Count, c.DisplayOrder))
+                c.StartDate, c.EndDate, c.Products.Count, c.DisplayOrder, c.IsActive))
             .ToListAsync(ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
@@ -214,7 +289,8 @@ public class AdminProductFunction(
         var response = req.CreateResponse(HttpStatusCode.Created);
         await response.WriteAsJsonAsync(new CollectionSummaryDto(
             collection.Id, collection.Title, collection.Slug, collection.Description,
-            collection.CoverImageUrl, collection.StartDate, collection.EndDate, 0, collection.DisplayOrder));
+            collection.CoverImageUrl, collection.StartDate, collection.EndDate, 0,
+            collection.DisplayOrder, collection.IsActive));
         return response;
     }
 
@@ -249,7 +325,7 @@ public class AdminProductFunction(
         await response.WriteAsJsonAsync(new CollectionSummaryDto(
             collection.Id, collection.Title, collection.Slug, collection.Description,
             collection.CoverImageUrl, collection.StartDate, collection.EndDate,
-            0, collection.DisplayOrder));
+            0, collection.DisplayOrder, collection.IsActive));
         return response;
     }
 

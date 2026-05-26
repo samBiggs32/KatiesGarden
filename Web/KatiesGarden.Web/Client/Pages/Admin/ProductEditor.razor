@@ -1,0 +1,115 @@
+@page "/admin/products/new"
+@page "/admin/products/{Id:guid}/edit"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>@(_isNew ? "New Product" : "Edit Product") — Admin</PageTitle>
+
+<div class="d-flex align-items-center mb-6">
+    <MudText Typo="Typo.h4" Class="font-weight-bold flex-grow-1">@(_isNew ? "New Product" : "Edit Product")</MudText>
+    <MudButton Variant="Variant.Text" Href="/admin/products" StartIcon="@Icons.Material.Filled.ArrowBack">
+        Back to Products
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+}
+else
+{
+    <MudPaper Elevation="2" Class="pa-6">
+        <MudGrid>
+            <MudItem xs="12" md="8">
+                <MudTextField @bind-Value="_name" Label="Product Name" Required="true"
+                              MaxLength="200" HelperText="Max 200 characters"
+                              Immediate="true" Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="_price" Label="Price (£)" Required="true"
+                                 Format="F2" Min="0.01m" Step="0.01m" Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_description" Label="Description" Lines="5"
+                              MaxLength="2000" HelperText="Max 2000 characters"
+                              Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_howToBuyNote" Label="How to Buy Note (optional)"
+                              MaxLength="500" HelperText="Shown on the product page, e.g. collection instructions" Class="mb-4" />
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudSelect @bind-Value="_collectionId" Label="Collection (optional)" Clearable="true" Class="mb-4">
+                    <MudSelectItem T="Guid?" Value="null">None</MudSelectItem>
+                    @foreach (var c in _collections)
+                    {
+                        <MudSelectItem T="Guid?" Value="c.Id">@c.Title</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="3">
+                <MudNumericField @bind-Value="_displayOrder" Label="Display Order" Min="0" Class="mb-4" />
+            </MudItem>
+
+            <MudItem xs="12" md="3">
+                <div class="d-flex flex-column gap-2 mt-2">
+                    <MudSwitch @bind-Value="_isAvailable" Label="Available for sale" Color="Color.Success" />
+                    <MudSwitch @bind-Value="_canLocalDeliver" Label="Local delivery eligible" Color="Color.Primary" />
+                </div>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudCheckBox @bind-Value="_trackStock" Label="Track stock level" Class="mb-2" />
+                @if (_trackStock)
+                {
+                    <MudNumericField @bind-Value="_stockQuantity" Label="Stock Quantity" Min="0" />
+                }
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Product Images (up to 6)</MudText>
+                <div class="d-flex flex-wrap gap-3 mb-3">
+                    @for (int i = 0; i < _imageUrls.Count; i++)
+                    {
+                        var idx = i;
+                        <div style="position:relative; display:inline-block;">
+                            <img src="@_imageUrls[idx]" alt="Product image @(idx+1)"
+                                 style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #ddd;" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
+                                           Style="position:absolute; top:-8px; right:-8px; background:white;"
+                                           OnClick="@(() => RemoveImage(idx))" aria-label="Remove image @(idx+1)" />
+                        </div>
+                    }
+                </div>
+                @if (_imageUrls.Count < 6)
+                {
+                    <InputFile id="image-upload" OnChange="OnImagesSelected" accept="image/jpeg,image/png,image/webp"
+                               multiple style="display:none;" />
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.AddPhotoAlternate"
+                               OnClick="TriggerFileInput" Disabled="_uploading">
+                        @(_uploading ? "Uploading…" : "Add Images")
+                    </MudButton>
+                }
+                @if (!string.IsNullOrEmpty(_uploadError))
+                {
+                    <MudText Color="Color.Error" Class="mt-1">@_uploadError</MudText>
+                }
+            </MudItem>
+        </MudGrid>
+
+        <div class="d-flex gap-3 mt-6">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync"
+                       Disabled="_saving" StartIcon="@Icons.Material.Filled.Save">
+                @(_saving ? "Saving…" : "Save Product")
+            </MudButton>
+            <MudButton Variant="Variant.Text" Href="/admin/products">Cancel</MudButton>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_saveError))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-4">@_saveError</MudAlert>
+        }
+    </MudPaper>
+}

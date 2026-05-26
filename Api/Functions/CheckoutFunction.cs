@@ -63,7 +63,7 @@ public class CheckoutFunction(
         var total = subtotal + deliveryFee;
 
         // Create pending order record
-        var orderNumber = await OrderNumberHelper.GenerateAsync(db, ct);
+        var orderNumber = OrderNumberHelper.Generate();
         var order = new Order
         {
             OrderNumber = orderNumber,

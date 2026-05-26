@@ -1,3 +1,6 @@
+@inject CartService CartService
+@inject AuthService AuthService
+@implements IAsyncDisposable
 
 <nav class="navbar navbar-expand-sm navbar-light background-colour-primary p-0">
     <div class="d-flex align-items-center w-100">
@@ -51,11 +54,32 @@
                 </li>
                 <li class="nav-item pt-1 list-orientation">
                     <div class="w-100">
+                        <NavLink class="nav-link" href="shop" @onclick="CloseNavMenu">
+                            <span class="oi oi-basket" aria-hidden="true"></span> Shop
+                            @if (_cartCount > 0)
+                            {
+                                <span class="badge badge-pill badge-success ml-1" style="font-size:0.7em; vertical-align:middle;" aria-label="@_cartCount items in cart">@_cartCount</span>
+                            }
+                        </NavLink>
+                    </div>
+                </li>
+                <li class="nav-item pt-1 list-orientation">
+                    <div class="w-100">
                         <NavLink class="nav-link" href="contact" @onclick="CloseNavMenu">
                             <span class="oi oi-chat" aria-hidden="true"></span> Contact
                         </NavLink>
                     </div>
                 </li>
+                @if (_isAdmin)
+                {
+                    <li class="nav-item pt-1 list-orientation">
+                        <div class="w-100">
+                            <NavLink class="nav-link" href="admin" @onclick="CloseNavMenu">
+                                <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin
+                            </NavLink>
+                        </div>
+                    </li>
+                }
             </ul>
         </div>
     </div>
@@ -63,10 +87,31 @@
 
 @code {
     private bool collapseNavMenu = true;
+    private bool _isAdmin;
+    private int _cartCount;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
 
     private void CloseNavMenu() => collapseNavMenu = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAdmin = await AuthService.IsAdminAsync();
+        _cartCount = CartService.ItemCount;
+        CartService.CartChanged += OnCartChanged;
+    }
+
+    private void OnCartChanged()
+    {
+        _cartCount = CartService.ItemCount;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        CartService.CartChanged -= OnCartChanged;
+        return ValueTask.CompletedTask;
+    }
 }

@@ -21,7 +21,7 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
                 c.Id, c.Title, c.Slug, c.Description, c.CoverImageUrl,
                 c.StartDate, c.EndDate,
                 c.Products.Count(p => p.IsAvailable),
-                c.DisplayOrder))
+                c.DisplayOrder, c.IsActive))
             .ToListAsync(req.FunctionContext.CancellationToken);
 
         var response = req.CreateResponse(HttpStatusCode.OK);

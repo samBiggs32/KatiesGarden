@@ -9,4 +9,5 @@ public record CollectionSummaryDto(
     DateTime StartDate,
     DateTime? EndDate,
     int ProductCount,
-    int DisplayOrder);
+    int DisplayOrder,
+    bool IsActive = true);

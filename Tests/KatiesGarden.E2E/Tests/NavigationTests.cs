@@ -55,6 +55,18 @@ public class NavigationTests : PlaywrightTestBase
     }
 
     [Test]
+    public async Task NavLink_Shop_NavigatesAndShowsPage()
+    {
+        await Page.GotoAsync(BaseUrl);
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await Page.ClickAsync("a.nav-link[href='shop']");
+        await Expect(Page).ToHaveURLAsync(new Regex("/shop"));
+        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        // Page should render without a hard error (shop may be empty but page loads)
+        await Expect(Page.Locator("body")).ToBeVisibleAsync();
+    }
+
+    [Test]
     public async Task MobileNav_TogglesOpenAndClosed()
     {
         await Page.SetViewportSizeAsync(375, 812); // iPhone SE

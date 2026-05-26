@@ -4,13 +4,27 @@ using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
 
 namespace KatiesGarden.Api.Functions;
 
-public class PushFunction(AppDbContext db, ILogger<PushFunction> logger)
+public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFunction> logger)
 {
+    [Function("PushGetVapidPublicKey")]
+    public HttpResponseData GetVapidPublicKey(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "push/vapid-public-key")] HttpRequestData req)
+    {
+        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+        var key = config["VAPID_PUBLIC_KEY"] ?? string.Empty;
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        response.Headers.Add("Content-Type", "text/plain");
+        response.WriteString(key);
+        return response;
+    }
+
     [Function("PushSubscribe")]
     public async Task<HttpResponseData> Subscribe(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "push/subscribe")] HttpRequestData req)

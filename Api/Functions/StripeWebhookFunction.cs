@@ -77,15 +77,25 @@ public class StripeWebhookFunction(
         order.StripePaymentIntentId = session.PaymentIntentId;
         order.UpdatedAt = DateTime.UtcNow;
 
-        // Decrement stock
+        // Decrement stock atomically to prevent oversell under concurrent load
         foreach (var line in order.Lines)
         {
-            var product = await db.Products.FindAsync([line.ProductId], ct);
-            if (product?.StockQuantity.HasValue is true)
+            var rowsUpdated = await db.Products
+                .Where(p => p.Id == line.ProductId && p.StockQuantity != null && p.StockQuantity >= line.Quantity)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.StockQuantity, p => p.StockQuantity! - line.Quantity), ct);
+
+            if (rowsUpdated == 0)
             {
-                product.StockQuantity = Math.Max(0, product.StockQuantity!.Value - line.Quantity);
-                if (product.StockQuantity == 0)
-                    product.IsAvailable = false;
+                logger.LogWarning(
+                    "Stock exhausted for product {ProductId} in order {OrderNumber} — payment taken, requires manual review",
+                    line.ProductId, order.OrderNumber);
+            }
+            else
+            {
+                await db.Products
+                    .Where(p => p.Id == line.ProductId && p.StockQuantity == 0)
+                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsAvailable, false), ct);
             }
         }
 

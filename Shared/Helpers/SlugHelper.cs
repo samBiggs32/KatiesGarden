@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace KatiesGarden.Api.Helpers;
+namespace KatiesGarden.Models.Helpers;
 
 public static class SlugHelper
 {

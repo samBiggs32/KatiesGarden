@@ -116,12 +116,108 @@ resource "cloudflare_ruleset" "rate_limit_api" {
     }
 
     ratelimit {
-      characteristics         = ["ip.src"]
-      period                  = 60
-      requests_per_period     = 10
-      mitigation_timeout      = 60
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 10
+      mitigation_timeout  = 60
     }
 
     expression = "(http.request.uri.path eq \"/api/diagnostics\")"
+  }
+
+  # Checkout — 20 req/min: generous enough for normal use, blocks automated abuse
+  rules {
+    action      = "block"
+    description = "Rate limit /api/checkout/* at 20 req/min per IP"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests — please wait a moment and try again."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 20
+      mitigation_timeout  = 60
+    }
+
+    expression = "(http.request.uri.path matches \"^/api/checkout/\")"
+  }
+
+  # Stripe webhook — 10 req/min; short mitigation so Stripe retries aren't permanently blocked
+  rules {
+    action      = "block"
+    description = "Rate limit /api/webhooks/stripe at 10 req/min"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 10
+      mitigation_timeout  = 60
+    }
+
+    expression = "(http.request.uri.path eq \"/api/webhooks/stripe\")"
+  }
+
+  # Admin API — 30 req/min: enough for normal use, blocks scripted enumeration
+  rules {
+    action      = "block"
+    description = "Rate limit /api/admin/* at 30 req/min per IP"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 30
+      mitigation_timeout  = 120
+    }
+
+    expression = "(http.request.uri.path matches \"^/api/admin/\")"
+  }
+
+  # Push notification endpoints — 10 req/min
+  rules {
+    action      = "block"
+    description = "Rate limit /api/push/* at 10 req/min per IP"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 10
+      mitigation_timeout  = 60
+    }
+
+    expression = "(http.request.uri.path matches \"^/api/push/\")"
   }
 }

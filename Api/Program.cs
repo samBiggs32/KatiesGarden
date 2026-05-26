@@ -77,7 +77,18 @@ using (var scope = host.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetService<AppDbContext>();
-        db?.Database.EnsureCreated();
+        if (db is not null)
+        {
+            db.Database.EnsureCreated();
+
+            // Ensure store tables exist on pre-existing databases (EnsureCreated only creates
+            // tables when the DB is brand new; this is idempotent and safe to run every cold start)
+            var conn = db.Database.GetDbConnection();
+            await conn.OpenAsync();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = SqlMigrations.EnsureNewTablesExist;
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
     catch (Exception ex)
     {
