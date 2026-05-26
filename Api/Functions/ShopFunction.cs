@@ -51,6 +51,8 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
             Slug = collection.Slug,
             Description = collection.Description,
             CoverImageUrl = collection.CoverImageUrl,
+            IsActive = collection.IsActive,
+            DisplayOrder = collection.DisplayOrder,
             StartDate = collection.StartDate,
             EndDate = collection.EndDate,
             Products = collection.Products.Select(p => new ProductSummaryDto(

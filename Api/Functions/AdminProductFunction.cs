@@ -200,7 +200,6 @@ public class AdminProductFunction(
             StartDate = collection.StartDate,
             EndDate = collection.EndDate,
             Products = collection.Products
-                .Where(p => p.IsAvailable)
                 .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
                 .Select(p => new ProductSummaryDto(
                     p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
@@ -347,6 +346,22 @@ public class AdminProductFunction(
     }
 
     // ── Delivery Settings ───────────────────────────────────────────────────
+
+    [Function("AdminGetDeliverySettings")]
+    public async Task<HttpResponseData> GetDeliverySettings(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/delivery-settings")] HttpRequestData req)
+    {
+        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+
+        var settings = await db.DeliverySettings.FindAsync(1) ?? new DeliverySettings();
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(new DeliverySettingsDto(
+            settings.LocalDeliveryFee, settings.FreeDeliveryThreshold,
+            settings.DeliveryAreaDescription, settings.CollectionAddress,
+            settings.CollectionInstructions));
+        return response;
+    }
 
     [Function("AdminUpdateDeliverySettings")]
     public async Task<HttpResponseData> UpdateDeliverySettings(

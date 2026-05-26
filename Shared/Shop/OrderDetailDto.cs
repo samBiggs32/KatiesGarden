@@ -1,6 +1,6 @@
 namespace KatiesGarden.Models.Shop;
 
-public class OrderDetailDto
+public record OrderDetailDto
 {
     public Guid Id { get; init; }
     public string OrderNumber { get; init; } = string.Empty;

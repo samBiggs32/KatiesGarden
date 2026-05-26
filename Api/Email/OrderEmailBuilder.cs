@@ -5,10 +5,10 @@ namespace KatiesGarden.Api.Email;
 
 public static class OrderEmailBuilder
 {
-    public static EmailMessage BuildCustomerConfirmation(Order order, string fromAddress, string fromName)
+    public static EmailMessage BuildCustomerConfirmation(Order order, string fromAddress, string fromName, string? collectionAddress = null)
     {
         var deliveryInfo = order.DeliveryType == DeliveryType.Collection
-            ? $"Click & Collect from {order.Lines.FirstOrDefault()?.ProductName ?? "our location"}"
+            ? $"Click & Collect from {(string.IsNullOrWhiteSpace(collectionAddress) ? "our Milverton location" : collectionAddress)}"
             : $"Local delivery to {order.DeliveryAddress}, {order.DeliveryPostcode}";
 
         var itemsList = string.Join("\n", order.Lines.Select(l =>

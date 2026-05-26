@@ -99,6 +99,8 @@
     protected override async Task OnInitializedAsync()
     {
         _isAdmin = await AuthService.IsAdminAsync();
+        // Force the cart to load from localStorage so the badge reflects any persisted items
+        await CartService.GetItemsAsync();
         _cartCount = CartService.ItemCount;
         CartService.CartChanged += OnCartChanged;
     }

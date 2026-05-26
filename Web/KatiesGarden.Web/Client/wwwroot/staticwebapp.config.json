@@ -23,6 +23,7 @@
     }
   },
   "routes": [
+    { "route": "/admin/login", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/admin", "allowedRoles": ["admin"] },
     { "route": "/admin/*", "allowedRoles": ["admin"] }
   ],

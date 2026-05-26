@@ -16,5 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Shared/KatiesGarden.Shared.csproj" />
+    <ProjectReference Include="../../Api/KatiesGarden.Api.csproj" />
   </ItemGroup>
 </Project>

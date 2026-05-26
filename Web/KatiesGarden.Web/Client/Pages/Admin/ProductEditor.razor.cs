@@ -74,7 +74,7 @@ public partial class ProductEditor
     }
 
     private async Task TriggerFileInput()
-        => await JS.InvokeVoidAsync("document.getElementById('image-upload').click");
+        => await JS.InvokeVoidAsync("clickElement", "image-upload");
 
     private async Task OnImagesSelected(InputFileChangeEventArgs e)
     {

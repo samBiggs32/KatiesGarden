@@ -140,7 +140,19 @@ public class CheckoutFunction(
         };
 
         var sessionService = new SessionService();
-        var session = await sessionService.CreateAsync(sessionOptions, cancellationToken: ct);
+        Stripe.Checkout.Session session;
+        try
+        {
+            session = await sessionService.CreateAsync(sessionOptions, cancellationToken: ct);
+        }
+        catch (StripeException ex)
+        {
+            // Remove the orphan Pending order so the dashboard's pending count stays accurate
+            db.Orders.Remove(order);
+            await db.SaveChangesAsync(ct);
+            logger.LogError(ex, "Stripe session creation failed for order {OrderNumber} — order removed", orderNumber);
+            return await Responses.BadRequest(req, "Payment processor is unavailable. Please try again in a moment.");
+        }
 
         order.StripeSessionId = session.Id;
         await db.SaveChangesAsync(ct);

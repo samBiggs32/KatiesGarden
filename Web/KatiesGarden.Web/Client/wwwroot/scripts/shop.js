@@ -8,6 +8,11 @@ window.ClipboardHelper = {
     copy: (text) => navigator.clipboard.writeText(text)
 };
 
+window.clickElement = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.click();
+};
+
 // Convert a URL-safe base64 VAPID key to a Uint8Array for the push API
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -16,17 +21,32 @@ function urlBase64ToUint8Array(base64String) {
     return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
-window.PushManager = {
-    isSupported: () => 'serviceWorker' in navigator && 'PushManager' in window,
+// Capture native browser PushManager support BEFORE we define window.KgPush —
+// using a distinct name avoids shadowing the native `window.PushManager` interface.
+const KG_PUSH_NATIVE_SUPPORTED = 'serviceWorker' in navigator && 'PushManager' in window;
+
+window.KgPush = {
+    isSupported: () => KG_PUSH_NATIVE_SUPPORTED,
 
     isSubscribed: async () => {
-        if (!window.PushManager.isSupported()) return false;
+        if (!KG_PUSH_NATIVE_SUPPORTED) return false;
         try {
             const reg = await navigator.serviceWorker.ready;
             const sub = await reg.pushManager.getSubscription();
             return sub !== null;
         } catch {
             return false;
+        }
+    },
+
+    getEndpoint: async () => {
+        if (!KG_PUSH_NATIVE_SUPPORTED) return null;
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.getSubscription();
+            return sub?.endpoint ?? null;
+        } catch {
+            return null;
         }
     },
 

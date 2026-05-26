@@ -108,7 +108,9 @@ public class StripeWebhookFunction(
         // Customer confirmation email
         try
         {
-            var customerEmail = OrderEmailBuilder.BuildCustomerConfirmation(order, smtp.EffectiveSenderEmail, "Katie's Garden");
+            var settings = await db.DeliverySettings.FindAsync([1], ct);
+            var customerEmail = OrderEmailBuilder.BuildCustomerConfirmation(
+                order, smtp.EffectiveSenderEmail, "Katie's Garden", settings?.CollectionAddress);
             await emailSender.SendAsync(customerEmail, ct);
         }
         catch (Exception ex)

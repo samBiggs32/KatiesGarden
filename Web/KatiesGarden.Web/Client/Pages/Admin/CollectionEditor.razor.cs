@@ -58,7 +58,7 @@ public partial class CollectionEditor
     }
 
     private async Task TriggerCoverUpload()
-        => await JS.InvokeVoidAsync("document.getElementById('cover-upload').click");
+        => await JS.InvokeVoidAsync("clickElement", "cover-upload");
 
     private async Task OnCoverImageSelected(InputFileChangeEventArgs e)
     {

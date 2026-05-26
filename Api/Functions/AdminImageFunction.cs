@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using KatiesGarden.Api.Auth;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -27,27 +28,40 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
             return req.CreateResponse(HttpStatusCode.ServiceUnavailable);
         }
 
-        var contentType = req.Headers.TryGetValues("Content-Type", out var ct) ? ct.First() : string.Empty;
+        var contentType = req.Headers.TryGetValues("Content-Type", out var ctHeaders) ? ctHeaders.First() : string.Empty;
+        // Normalise: strip any charset/boundary parameters
+        var bareContentType = contentType.Split(';', 2)[0].Trim();
 
-        if (!AllowedContentTypes.Any(a => contentType.StartsWith(a, StringComparison.OrdinalIgnoreCase)))
+        if (!AllowedContentTypes.Contains(bareContentType.ToLowerInvariant()))
         {
             var bad = req.CreateResponse(HttpStatusCode.BadRequest);
             await bad.WriteStringAsync("Only JPEG, PNG, WebP, and GIF images are accepted.");
             return bad;
         }
 
-        if (req.Body.Length > MaxFileSizeBytes)
+        // Buffer the upload so we can enforce the size limit before sending to blob storage
+        var ct = req.FunctionContext.CancellationToken;
+        using var buffer = new MemoryStream();
+        var readBuffer = new byte[8192];
+        int read;
+        while ((read = await req.Body.ReadAsync(readBuffer, ct)) > 0)
         {
-            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
-            await bad.WriteStringAsync("Image must be 5 MB or smaller.");
-            return bad;
+            if (buffer.Length + read > MaxFileSizeBytes)
+            {
+                var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+                await bad.WriteStringAsync("Image must be 5 MB or smaller.");
+                return bad;
+            }
+            await buffer.WriteAsync(readBuffer.AsMemory(0, read), ct);
         }
+        buffer.Position = 0;
 
-        var extension = contentType switch
+        var extension = bareContentType switch
         {
-            var s when s.Contains("jpeg") => ".jpg",
-            var s when s.Contains("png") => ".png",
-            var s when s.Contains("webp") => ".webp",
+            "image/jpeg" => ".jpg",
+            "image/png" => ".png",
+            "image/webp" => ".webp",
+            "image/gif" => ".gif",
             _ => ".jpg"
         };
         var blobName = $"{Guid.NewGuid()}{extension}";
@@ -56,12 +70,17 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
         var container = blobClient.GetBlobContainerClient(containerName);
         var blob = container.GetBlobClient(blobName);
 
-        await blob.UploadAsync(req.Body, overwrite: false, req.FunctionContext.CancellationToken);
+        await blob.UploadAsync(
+            buffer,
+            new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = bareContentType } },
+            ct);
 
         logger.LogInformation("Uploaded image {BlobName}", blobName);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
-        await response.WriteAsJsonAsync(new { url = blob.Uri.ToString() });
+        await response.WriteAsJsonAsync(new ImageUploadResponse(blob.Uri.ToString()));
         return response;
     }
+
+    public record ImageUploadResponse(string Url);
 }
