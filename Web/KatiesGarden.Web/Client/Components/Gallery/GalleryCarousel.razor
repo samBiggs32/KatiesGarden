@@ -13,11 +13,16 @@
         @for (int i = 0; i < Images.Count(); i++)
         {
             var image = Images.ElementAt(i);
+            var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
+            var webpSrc = $"{ImagePaths.GalleryBasePath}{WebpFileName(image.FileName)}";
             <div class="carousel-item @(i == 0 ? "active" : "")">
-                <img class="d-block w-100"
-                     loading="@(i == 0 ? "eager" : "lazy")"
-                     src="@($"{ImagePaths.GalleryBasePath}{image.FileName}")"
-                     alt="@image.Alt">
+                <picture>
+                    <source srcset="@webpSrc" type="image/webp" />
+                    <img class="d-block w-100"
+                         loading="@(i == 0 ? "eager" : "lazy")"
+                         src="@jpegSrc"
+                         alt="@image.Alt" />
+                </picture>
                 <div class="carousel-caption d-none d-md-block">
                     <h5>@image.Title</h5>
                     <p>@image.Description</p>
@@ -38,4 +43,9 @@
 @code {
     [Parameter] public string Id { get; set; } = "carousel";
     [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
+
+    // Derives the WebP filename from the JPEG filename.
+    // WebP files are pre-generated at build time alongside the originals.
+    private static string WebpFileName(string fileName) =>
+        System.IO.Path.ChangeExtension(fileName, ".webp");
 }
