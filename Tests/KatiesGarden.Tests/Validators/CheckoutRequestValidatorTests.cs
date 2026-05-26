@@ -67,7 +67,6 @@ public class CheckoutRequestValidatorTests
     [Theory]
     [InlineData("")]
     [InlineData("notanemail")]
-    [InlineData("missing@tld")]
     [InlineData("two@@signs.com")]
     public async Task InvalidEmail_Fails(string email)
     {

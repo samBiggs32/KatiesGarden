@@ -8,9 +8,8 @@
     <MudText Typo="Typo.h4" Class="font-weight-bold flex-grow-1">Orders</MudText>
 </div>
 
-<MudSelect T="string" @bind-Value="_statusFilter" Label="Filter by status" Variant="Variant.Outlined"
-           Class="mb-4" Style="max-width:250px;" Clearable="true"
-           ValueChanged="@(_ => LoadAsync())">
+<MudSelect T="string" @bind-Value="_statusFilter" @bind-Value:after="LoadAsync" Label="Filter by status" Variant="Variant.Outlined"
+           Class="mb-4" Style="max-width:250px;" Clearable="true">
     <MudSelectItem Value="@("Pending")">Pending</MudSelectItem>
     <MudSelectItem Value="@("Confirmed")">Confirmed</MudSelectItem>
     <MudSelectItem Value="@("Processing")">Processing</MudSelectItem>

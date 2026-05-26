@@ -79,7 +79,7 @@ else
                                  style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #ddd;" />
                             <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
                                            Style="position:absolute; top:-8px; right:-8px; background:white;"
-                                           OnClick="@(() => RemoveImage(idx))" aria-label="Remove image @(idx+1)" />
+                                           OnClick="@(() => RemoveImage(idx))" aria-label="@($"Remove image {idx + 1}")" />
                         </div>
                     }
                 </div>

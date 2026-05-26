@@ -46,7 +46,7 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
-        if (stripeEvent.Type != Events.CheckoutSessionCompleted)
+        if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
             return req.CreateResponse(HttpStatusCode.OK);
 
         var session = (Session)stripeEvent.Data.Object;
