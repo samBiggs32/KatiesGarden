@@ -3,7 +3,8 @@
 <div class="m-1 background-colour-primary">
     <div class="image-container">
         <div class="crop">
-            <MudCarousel Class="carousel-size w-100" ShowArrows="@arrows" ShowBullets="@showBullets" AutoCycle="@autocycle" TData="object">
+            <MudCarousel Class="carousel-size w-100" ShowArrows="@arrows" ShowBullets="@showBullets" AutoCycle="@autocycle" TData="object"
+                         aria-label="Garden photo slideshow" role="region">
                 <ChildContent>
                     @for (int i = 0; i < Images.Slides.Count; i++)
                     {
@@ -31,7 +32,7 @@
 </div>
 
 @code {
-    private bool arrows = false;
+    private bool arrows = true;
     private bool showBullets = false;
     private bool autocycle = true;
     private Transition transition = Transition.Fade;

@@ -2,8 +2,42 @@
 
 :root {
     --background-colour: #e0f2f1;
-    --primary-colour: #00796b;
+    --primary-colour: #1f8270;
     --secondary-colour: rgba(47, 79, 79);
+}
+
+/* Skip navigation — visually hidden until focused by keyboard */
+.skip-nav {
+    position: absolute;
+    transform: translateY(-100%);
+    left: 0;
+    top: 0;
+    padding: 0.75rem 1.5rem;
+    background-color: #1f8270;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    z-index: 9999;
+    text-decoration: none;
+    transition: transform 0.1s;
+}
+
+.skip-nav:focus {
+    transform: translateY(0);
+}
+
+/* Keyboard focus rings — visible only for keyboard navigation, not mouse clicks */
+:focus-visible {
+    outline: 3px solid #1f8270;
+    outline-offset: 2px;
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #1f8270;
+    outline-offset: 2px;
+    border-radius: 2px;
 }
 
 html, body {

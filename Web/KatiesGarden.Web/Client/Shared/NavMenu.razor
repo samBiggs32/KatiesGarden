@@ -4,7 +4,8 @@
         <button class="navbar-toggler border-0" type="button"
                 @onclick="ToggleNavMenu"
                 aria-label="Toggle navigation"
-                aria-expanded="@(!collapseNavMenu)">
+                aria-expanded="@(!collapseNavMenu)"
+                aria-controls="main-nav-menu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="d-block d-sm-none flex-grow-1">
@@ -14,7 +15,7 @@
         </div>
     </div>
 
-    <div class="navbar-collapse @NavMenuCssClass ml-auto">
+    <div id="main-nav-menu" class="navbar-collapse @NavMenuCssClass ml-auto">
         <div class="nav navbar-nav ml-auto w-100">
             <div class="w-100 text-center" style="font-size:1.1em">
                 <span class="phone-number-text">Contact Katie on </span>

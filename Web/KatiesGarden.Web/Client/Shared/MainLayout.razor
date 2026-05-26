@@ -2,6 +2,10 @@
 
 @inject IJSRuntime JSRuntime
 
+<!-- First focusable element in the DOM — keyboard users press Tab once
+     to reach this, then Enter to jump past the navigation. -->
+<a class="skip-nav" href="#main-content">Skip to main content</a>
+
 <MudThemeProvider Theme="CustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -11,7 +15,8 @@
 </header>
 
 <div class="container m-0 p-0" style="max-width: 100%">
-    <main role="main" class="pb-3">
+    <!-- tabindex="-1" lets the skip link move focus here programmatically -->
+    <main role="main" id="main-content" tabindex="-1" class="pb-3">
         @Body
     </main>
 </div>
@@ -51,19 +56,23 @@
 <UpdateAvailableDetector />
 
 @code {
-    // Create a minimal theme with only essential properties
+    // WCAG 2.2 AA colour decisions:
+    //   Primary #1f8270  → 4.68:1 on white (was #24937F = 3.78:1, failed AA)
+    //   SecondaryContrastText dark → white-on-pink was 1.86:1 (failed badly)
     MudTheme CustomTheme = new MudTheme()
         {
             PaletteLight = new PaletteLight()
             {
-                Primary = "#24937F",
+                Primary = "#1f8270",
+                PrimaryContrastText = "#FFFFFF",
                 Secondary = "#E7AEC9",
+                SecondaryContrastText = "#2D3E40",  // dark text on light pink
                 Background = "#F0F5F3",
                 Surface = "#FFFFFF",
                 TextPrimary = "#2D3E40",
                 TextSecondary = "#5B7876",
                 AppbarBackground = "#FFFFFF",
-                AppbarText = "#24937F",
+                AppbarText = "#1f8270",
                 DrawerBackground = "#F8FDFB",
                 DrawerText = "#2D3E40",
                 Success = "#5FAD7E",
