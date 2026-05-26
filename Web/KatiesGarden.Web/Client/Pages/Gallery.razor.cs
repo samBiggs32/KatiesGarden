@@ -1,7 +1,6 @@
 ﻿using KatiesGarden.Web.Client.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using static KatiesGarden.Web.Client.Components.GalleryCarousel;
 
 namespace KatiesGarden.Web.Client.Pages
 {

@@ -1,5 +1,6 @@
 ﻿@namespace KatiesGarden.Web.Client.Components
 @using KatiesGarden.Web.Client.Constants
+@using KatiesGarden.Web.Client.Models
 
 <div id="@Id" class="carousel slide gallery-carousel" style="border-radius: 8px; overflow: hidden;">
     <ol class="carousel-indicators">
@@ -13,14 +14,10 @@
         {
             var image = Images.ElementAt(i);
             <div class="carousel-item @(i == 0 ? "active" : "")">
-                @if (i == 0)
-                {
-                    <img class="d-block w-100" loading="eager" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
-                }
-                else
-                {
-                    <img class="d-block w-100" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
-                }
+                <img class="d-block w-100"
+                     loading="@(i == 0 ? "eager" : "lazy")"
+                     src="@($"{ImagePaths.GalleryBasePath}{image.FileName}")"
+                     alt="@image.Alt">
                 <div class="carousel-caption d-none d-md-block">
                     <h5>@image.Title</h5>
                     <p>@image.Description</p>
@@ -40,13 +37,5 @@
 
 @code {
     [Parameter] public string Id { get; set; } = "carousel";
-    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = new List<GalleryImage>();
-
-    public class GalleryImage
-    {
-        public string FileName { get; set; }
-        public string Alt { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-    }
+    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
 }

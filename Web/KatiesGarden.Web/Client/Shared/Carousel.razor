@@ -36,19 +36,9 @@
 </div>
 
 @code {
-    private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
-
-    private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
-
-    private const double sizeMultiple = 1.5;
-    private const double ratio = 1.50149;
-
     private bool arrows = false;
     private bool showBullets = false;
     private bool autocycle = true;
     private Transition transition = Transition.Fade;
     private Color transitionColour = Color.Transparent;
-    private int numberOfImages = 0;
-
-    public Carousel() => numberOfImages = Images.Lookup.Count();
 }
