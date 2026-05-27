@@ -77,7 +77,9 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (also pulls in the .NET 9 runtime needed by the Functions API)
+- [Docker](https://docs.docker.com/get-docker/) — required for the Aspire local stack (Postgres) and for running integration tests
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local) — Aspire launches the Functions host via `func`
 - Git
 - A code editor (recommended: [Visual Studio 2022](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/))
 
@@ -89,12 +91,27 @@ Follow these instructions to get a copy of the project up and running on your lo
    cd KatiesGarden
    ```
 
-2. Run the Blazor frontend
+2. Run the full local stack via Aspire — spins up Postgres, the Functions API, and the Blazor client with a dashboard at the URL printed in the console
+   ```sh
+   dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+   ```
+
+   Or run just the frontend against a remote / pre-existing API
    ```sh
    dotnet run --project Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj
    ```
 
-3. Open your browser and go to `https://localhost:5001`
+### Running the tests
+
+Unit tests (fast, no Docker required):
+```sh
+dotnet test Tests/KatiesGarden.Tests/ --filter "Category!=Integration"
+```
+
+Integration tests (uses Testcontainers; needs Docker running):
+```sh
+dotnet test Tests/KatiesGarden.Tests/ --filter "Category=Integration"
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

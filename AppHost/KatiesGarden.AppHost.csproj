@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.0" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>katiesgarden-apphost-c8c5f0b2</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Functions" Version="13.3.5" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Api/KatiesGarden.Api.csproj" IsAspireProjectResource="true" />
+    <ProjectReference Include="../Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj" IsAspireProjectResource="true" />
+  </ItemGroup>
+</Project>

@@ -24,11 +24,35 @@ jobs:
         run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
 
       - name: Run unit tests
-        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --logger "trx;LogFileName=results.trx"
+        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category!=Integration" --logger "trx;LogFileName=unit-results.trx"
 
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: unit-test-results-${{ github.sha }}
-          path: "**/*.trx"
+          path: "**/unit-results.trx"
+
+  integration_tests:
+    runs-on: ubuntu-latest
+    name: Integration Tests (Postgres via Testcontainers)
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Verify Docker
+        run: docker info
+
+      - name: Run integration tests
+        run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category=Integration" --logger "trx;LogFileName=integration-results.trx"
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: integration-test-results-${{ github.sha }}
+          path: "**/integration-results.trx"
