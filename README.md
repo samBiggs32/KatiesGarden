@@ -113,6 +113,33 @@ Integration tests (uses Testcontainers; needs Docker running):
 dotnet test Tests/KatiesGarden.Tests/ --filter "Category=Integration"
 ```
 
+### Verifying the Aspire local stack
+
+CI builds the AppHost on every push, so reference breakage is caught early. Runtime
+behaviour (containers + `func` + Blazor dev server orchestration) only surfaces on
+a real `dotnet run`. After launching:
+
+```sh
+dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+```
+
+Check, in order:
+
+1. **Console prints a dashboard URL** like `https://localhost:17158` — open it
+2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`,
+   `api`, `web` — all in the **Running** state (Postgres takes ~10s the first time
+   while the image pulls)
+3. **`postgres` is healthy** — click into it; the logs tab should show
+   `database system is ready to accept connections`
+4. **`api` connects to the database** — click `api` → logs; you should NOT see
+   `DATABASE_URL must be set` or Npgsql connection errors
+5. **`web` opens** — click the endpoint URL on the `web` row; the Blazor app should
+   load with shop/cart/admin links working against your local API
+
+If `api` fails to start with `func: command not found`, install Azure Functions
+Core Tools v4. If the dashboard never appears, check that Docker Desktop is
+running (`docker info`).
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 🩺 Operations

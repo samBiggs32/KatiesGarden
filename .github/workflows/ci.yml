@@ -23,6 +23,9 @@ jobs:
       - name: Build API
         run: dotnet build Api/KatiesGarden.Api.csproj --configuration Release
 
+      - name: Build Aspire AppHost
+        run: dotnet build AppHost/KatiesGarden.AppHost.csproj --configuration Release
+
       - name: Run unit tests
         run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category!=Integration" --logger "trx;LogFileName=unit-results.trx"
 
@@ -35,7 +38,7 @@ jobs:
 
   integration_tests:
     runs-on: ubuntu-latest
-    name: Integration Tests (Postgres via Testcontainers)
+    name: Integration Tests (Postgres + Aspire smoke)
     steps:
       - uses: actions/checkout@v5
 
@@ -46,6 +49,9 @@ jobs:
 
       - name: Verify Docker
         run: docker info
+
+      - name: Install Azure Functions Core Tools
+        run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
       - name: Run integration tests
         run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category=Integration" --logger "trx;LogFileName=integration-results.trx"
