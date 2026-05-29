@@ -7,6 +7,11 @@
 local.settings.json
 appsettings.Development.json
 
+# Exception: the Blazor WASM dev config holds only the local API URL (no secrets —
+# WASM config is served to the browser) and must be committed so `aspire run` works
+# out of the box. Browser-served config must NEVER contain credentials.
+!Web/KatiesGarden.Web/Client/wwwroot/appsettings.Development.json
+
 # Azure Static Web Apps CLI working folder (emulator runtime state)
 .swa/
 

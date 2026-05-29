@@ -120,17 +120,34 @@ cp Api/local.settings.json.example Api/local.settings.json
 dotnet run --project AppHost/KatiesGarden.AppHost.csproj
 ```
 
-Aspire starts Postgres, the Functions API, and the Blazor dev server in one command. A dashboard URL is printed in the console (e.g. `https://localhost:17158`) — open it to see all services.
+Aspire starts Postgres, the Functions API (pinned to **port 7071**), and the Blazor dev server in one command. A dashboard URL is printed in the console (e.g. `https://localhost:17158`) — open it to see all services.
+
+> **Open the `web` resource's HTTP endpoint (`http://localhost:5000`), not the HTTPS one.**
+> The Blazor app is a standalone WebAssembly SPA: it runs in the browser and cannot read
+> Aspire's service-discovery variables, so in Development it is wired directly to the
+> Functions host at `http://localhost:7071` (via `wwwroot/appsettings.Development.json`).
+> A page served over **https** calling an **http** API is blocked by the browser as mixed
+> content — so use the HTTP web endpoint locally. In production this is a non-issue: SWA
+> serves the app and `/api/*` from the same HTTPS origin, and `ApiBaseUrl` is left empty.
+
+> For the **full single-origin experience** (no CORS, no mixed-content caveat, and working
+> `/.auth/*` admin login), run behind the SWA emulator instead — see
+> [Testing admin login locally](#testing-admin-login-locally). That is the closest local
+> mirror of production; plain Aspire is best for backend/dashboard and DB work.
 
 ### Running just the frontend
 
-If you only want to work on the Blazor UI against a deployed or local API:
+If you only want to work on the Blazor UI against a deployed or local API, run the WASM
+dev server directly:
 
 ```sh
-dotnet run --project Web/KatiesGarden.Web/Server/KatiesGarden.Web.Server.csproj
+dotnet run --project Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj
 ```
 
-The server project serves the Blazor WASM client. You can point it at a live API by setting `ApiBaseUrl` in `appsettings.Development.json`.
+Point it at any API by setting `ApiBaseUrl` in
+`Web/KatiesGarden.Web/Client/wwwroot/appsettings.Development.json` (e.g. `http://localhost:7071`
+for a local `func start`, or a deployed URL). Leaving it empty makes the app call `/api/*`
+on its own origin — which is what production (SWA) uses.
 
 ### Running the tests
 
@@ -171,9 +188,13 @@ After `dotnet run --project AppHost/...`:
 2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — all in the **Running** state (Postgres takes ~10 s the first time while the image pulls)
 3. **`postgres` is healthy** — click into it; the logs tab should show `database system is ready to accept connections`
 4. **`api` connects to the DB** — click `api` → logs; you should NOT see `DATABASE_URL must be set` or Npgsql connection errors
-5. **`web` opens** — click the endpoint URL on the `web` row; the Blazor app should load with shop/cart/admin links working against your local API
+5. **`web` opens** — click the **HTTP** endpoint (`http://localhost:5000`) on the `web` row; the Blazor app should load with shop/cart/admin links working against your local API on `:7071`
 
-If `api` fails with `func: command not found`, install Azure Functions Core Tools v4. If the dashboard never appears, check that Docker Desktop is running (`docker info`).
+**Troubleshooting**
+
+- **`api` fails with `dotnet ---port does not exist` / `Could not execute because the specified command or file was not found`** — Azure Functions Core Tools v4 (`func`) is not on your PATH. Aspire launches the Functions host via `func host start`; without it the launch command is malformed. Install it (`npm install -g azure-functions-core-tools@4`) and **restart your IDE** so it picks up the updated PATH. The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the port to 7071.
+- **Shop/cart show errors or "unexpected character `<`"** — the browser is calling the wrong origin. Make sure you opened the **HTTP** `web` endpoint (not HTTPS), so the WASM app can reach `http://localhost:7071` without mixed-content blocking.
+- **Dashboard never appears** — check Docker Desktop is running (`docker info`).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -247,6 +268,10 @@ STRIPE_SECRET_KEY=sk_test_...      # or sk_live_... in production
 STRIPE_WEBHOOK_SECRET=whsec_...
 SITE_URL=http://localhost:4280     # used for Stripe Checkout success/cancel redirect URLs
 ```
+
+> `SITE_URL` must match the origin you browse from so Stripe can redirect back: use
+> `http://localhost:4280` under the SWA emulator, `http://localhost:5000` under plain Aspire,
+> and `https://www.katiesgarden.uk` in production.
 
 > When you go live, swap the test keys for live keys and update the webhook endpoint URL.
 

@@ -26,5 +26,10 @@
     "VAPID_PUBLIC_KEY": "",
     "VAPID_PRIVATE_KEY": "",
     "VAPID_SUBJECT": "mailto:team@katiesgarden.uk"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
   }
 }
