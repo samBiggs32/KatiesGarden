@@ -9,7 +9,7 @@ public class AdminOrderService(HttpClient http)
     {
         var url = string.IsNullOrWhiteSpace(status)
             ? "api/admin/orders"
-            : $"api/admin/orders?status={status}";
+            : $"api/admin/orders?status={Uri.EscapeDataString(status)}";
         return http.GetFromJsonAsync<List<OrderSummaryDto>>(url);
     }
 

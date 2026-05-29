@@ -45,7 +45,7 @@ else
                     <MudSelectItem T="Guid?" Value="null">None</MudSelectItem>
                     @foreach (var c in _collections)
                     {
-                        <MudSelectItem T="Guid?" Value="c.Id">@c.Title</MudSelectItem>
+                        <MudSelectItem @key="c.Id" T="Guid?" Value="c.Id">@c.Title</MudSelectItem>
                     }
                 </MudSelect>
             </MudItem>

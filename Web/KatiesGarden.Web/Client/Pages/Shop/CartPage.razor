@@ -17,7 +17,7 @@
         <MudList T="string" Class="mb-4">
             @foreach (var item in _items)
             {
-                <MudListItem>
+                <MudListItem @key="item.ProductId">
                     <div class="d-flex align-items-center gap-3 w-100">
                         @if (item.ImageUrl is not null)
                         {

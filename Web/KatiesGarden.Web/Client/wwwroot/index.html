@@ -62,12 +62,11 @@
 
 <body class="background-colour-primary">
     <div id="app">
-        <!-- Shown while the Blazor WASM runtime downloads (~2-4s on first visit).
-             Styled to match the MudTheme primary colour so there's no colour flash. -->
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:1rem; background-color:#F0F5F3;">
-            <img src="KatiesGardenLogo.png" alt="Katie's Garden" style="width:80px; height:80px; border-radius:50%;" />
-            <p style="font-family:Arial,sans-serif; font-size:1.25rem; color:#24937F; margin:0; font-weight:500;">Katie's Garden</p>
-            <p style="font-family:Arial,sans-serif; font-size:0.9rem; color:#5B7876; margin:0;">
+        <!-- Shown while the Blazor WASM runtime downloads (~2-4s on first visit). -->
+        <div class="app-loading">
+            <img src="KatiesGardenLogo.png" alt="Katie's Garden" class="app-loading__logo" />
+            <p class="app-loading__title">Katie's Garden</p>
+            <p class="app-loading__subtitle">
                 <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                 Loading&hellip;
             </p>

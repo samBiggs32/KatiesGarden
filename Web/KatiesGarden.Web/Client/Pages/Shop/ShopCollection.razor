@@ -35,7 +35,7 @@
             <MudGrid>
                 @foreach (var product in _collection.Products)
                 {
-                    <MudItem xs="12" sm="6" md="4">
+                    <MudItem @key="product.Id" xs="12" sm="6" md="4">
                         <MudCard Elevation="2" Class="h-100">
                             @if (product.CoverImageUrl is not null)
                             {

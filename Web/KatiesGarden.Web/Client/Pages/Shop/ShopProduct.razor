@@ -21,7 +21,7 @@
             <MudCarousel Class="mb-6" Style="height:400px;" ShowArrows="true" ShowBullets="@(_product.ImageUrls.Length > 1)" AutoCycle="false" TData="object">
                 @foreach (var url in _product.ImageUrls)
                 {
-                    <MudCarouselItem>
+                    <MudCarouselItem @key="url">
                         <div style="display:flex; justify-content:center; align-items:center; height:100%;">
                             <img src="@url" alt="@_product.Name" style="max-height:400px; max-width:100%; object-fit:contain;" loading="lazy" />
                         </div>
