@@ -81,7 +81,6 @@ html, body {
    w-100 children as rows instead of placing them side-by-side. */
 .navbar-expand-sm .navbar-collapse {
     width: 100%;
-    flex-wrap: wrap;
 }
 
 hr {
@@ -92,15 +91,16 @@ hr {
     height: 1px;
 }
 
-.company-history-list ul.history-left-list {
+.garden-jobs-list ul.history-left-list {
     float: left;
 }
 
-.company-history-list ul li {
+.garden-jobs-list ul li {
     color: var(--primary-colour);
     font-size: 17px;
     font-style: normal;
     line-height: 2.5;
+    list-style: none;
 }
 
 .contact {

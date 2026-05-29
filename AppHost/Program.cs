@@ -25,6 +25,7 @@ var api = builder.AddAzureFunctionsProject<Projects.KatiesGarden_Api>("api")
     .WithEnvironment("STRIPE_SECRET_KEY", builder.Configuration["STRIPE_SECRET_KEY"] ?? "sk_test_placeholder")
     .WithEnvironment("STRIPE_WEBHOOK_SECRET", builder.Configuration["STRIPE_WEBHOOK_SECRET"] ?? "whsec_test_placeholder")
     .WithEnvironment("SITE_URL", builder.Configuration["SITE_URL"] ?? "http://localhost:5158")
+    .WithHttpHealthCheck("health")
     .WaitFor(db);
 
 // Blazor WebAssembly dev server. Aspire injects the API endpoint as a service
