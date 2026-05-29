@@ -77,6 +77,13 @@ html, body {
     position: relative;
 }
 
+/* 3-tier navbar (phone → logo → links): make navbar-collapse stack its
+   w-100 children as rows instead of placing them side-by-side. */
+.navbar-expand-sm .navbar-collapse {
+    width: 100%;
+    flex-wrap: wrap;
+}
+
 hr {
     border: 0;
     clear: both;
