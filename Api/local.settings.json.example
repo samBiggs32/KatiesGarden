@@ -3,14 +3,28 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+
     "SMTP_HOST": "smtp-relay.brevo.com",
     "SMTP_PORT": "587",
     "SMTP_USERNAME": "your-brevo-login-email@example.com",
     "SMTP_PASSWORD": "your-brevo-smtp-key",
     "SENDER_EMAIL": "noreply@katiesgarden.uk",
     "RECIPIENT_EMAIL": "team@katiesgarden.uk",
+
     "DATABASE_URL": "postgresql://user:password@host.neon.tech/katiesgarden?sslmode=require",
+
     "BREVO_API_KEY": "your-brevo-rest-api-key",
-    "BREVO_LIST_ID": "1"
+    "BREVO_LIST_ID": "1",
+
+    "STRIPE_SECRET_KEY": "sk_test_...",
+    "STRIPE_WEBHOOK_SECRET": "whsec_...",
+    "SITE_URL": "http://localhost:4280",
+
+    "AZURE_STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "AZURE_STORAGE_CONTAINER": "product-images",
+
+    "VAPID_PUBLIC_KEY": "",
+    "VAPID_PRIVATE_KEY": "",
+    "VAPID_SUBJECT": "mailto:team@katiesgarden.uk"
   }
 }

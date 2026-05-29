@@ -26,127 +26,317 @@
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+  - [Quick start (Aspire)](#quick-start-aspire)
+  - [Running just the frontend](#running-just-the-frontend)
+  - [Running the tests](#running-the-tests)
+  - [Verifying the local stack](#verifying-the-local-stack)
+- [Configuration reference](#configuration-reference)
+  - [Database (Neon PostgreSQL)](#database-neon-postgresql)
+  - [Email sending (Brevo)](#email-sending-brevo)
+  - [Online shop (Stripe)](#online-shop-stripe)
+  - [Product image storage (Azure Blob)](#product-image-storage-azure-blob)
+  - [Push notifications (VAPID)](#push-notifications-vapid)
+  - [Admin login (OAuth)](#admin-login-oauth)
 - [Operations](#-operations)
   - [Live readiness check](#live-readiness-check)
   - [Logs](#logs)
-- [Infrastructure](#infrastructure)
+- [Infrastructure](#-infrastructure)
   - [Provisioning with Terraform](#provisioning-with-terraform)
-  - [GitHub Actions Secret](#github-actions-secret)
+  - [GitHub Actions Secrets](#github-actions-secrets)
   - [Cloudflare](#cloudflare)
 - [Development Roadmap](#development-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
 
+---
+
 ## 🌱 About The Project
 
-Katie's Garden is a family-run garden center and landscaping service based in Milverton, Taunton, UK. This web application showcases our products, services, and finished garden projects while providing an online shopping experience for customers.
-
-Our site features a responsive design that works beautifully on both desktop and mobile devices, allowing customers to browse our plant selection, view our garden design gallery, and place orders online.
+Katie's Garden is a family-run garden centre and landscaping service based in Milverton, Taunton, UK. This web application showcases projects, services, and products while providing an online shopping experience for customers.
 
 ### Built With
 
-* [Blazor WebAssembly (.NET 10)](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) - Frontend
-* [Azure Functions v4 (.NET 9)](https://learn.microsoft.com/en-us/azure/azure-functions/) - Backend API
-* [MudBlazor](https://mudblazor.com) - UI component library
-* [MailKit](https://github.com/jstedfast/MailKit) - SMTP email sending
-* [Azure Static Web Apps](https://azure.microsoft.com/en-us/services/app-service/static/) - Hosting (Free tier)
-* [Cloudflare](https://www.cloudflare.com) - CDN, DDoS protection, and rate limiting (free tier)
-* [Terraform](https://www.terraform.io) - Infrastructure as code
+| Layer | Technology |
+|---|---|
+| Frontend | [Blazor WebAssembly (.NET 10)](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) + [MudBlazor](https://mudblazor.com) |
+| API | [Azure Functions v4 isolated worker (.NET 9)](https://learn.microsoft.com/en-us/azure/azure-functions/) |
+| Database | [Neon serverless PostgreSQL](https://neon.tech) via EF Core |
+| Payments | [Stripe Checkout](https://stripe.com/docs/payments/checkout) |
+| Email | [MailKit](https://github.com/jstedfast/MailKit) + [Brevo SMTP](https://www.brevo.com) |
+| Image storage | [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs) |
+| Hosting | [Azure Static Web Apps (Standard)](https://azure.microsoft.com/en-us/services/app-service/static/) |
+| CDN / WAF | [Cloudflare](https://www.cloudflare.com) (free tier) |
+| Local orchestration | [.NET Aspire 9](https://learn.microsoft.com/en-us/dotnet/aspire/) |
+| Infrastructure | [Terraform ≥ 1.7](https://www.terraform.io) |
+| Unit tests | [xUnit.v3](https://xunit.net) + [FluentAssertions](https://fluentassertions.com) |
+| E2E tests | [Playwright NUnit](https://playwright.dev/dotnet/) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
 
 ## ✨ Features
 
-- **Home Page** - Featuring seasonal highlights and business introduction
-- **Gallery** - Showcase of completed garden projects and available plants
-- **Contact Page** - Business information and inquiry form
-- **Shop** (Coming Soon) - Online ordering for:
-  - Indoor Plants
-  - Perennials
-  - Vegetables
-  - Herbs
-  - Woodwork Products (Bug Houses, Boot Stands, etc.)
+- **Home page** — seasonal highlights, business introduction, responsive carousel
+- **Gallery** — woodwork, bugs & hugs, and maintenance project showcases
+- **Contact page** — enquiry form with server-side validation and email delivery
+- **Newsletter sign-up** — subscriber list synced to Brevo contact list
+- **Online shop** — browse collections and products, add to basket, proceed to Stripe Checkout
+- **Admin panel** (`/admin`) — order management, product and collection CRUD, delivery settings, push notification toggle
+- **Push notifications** — Katie receives a browser push when a new order is placed
+- **Progressive Web App** — service worker, offline shell, installable on mobile
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 🚀 Getting Started
+---
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (also pulls in the .NET 9 runtime needed by the Functions API)
-- [Docker](https://docs.docker.com/get-docker/) — required for the Aspire local stack (Postgres) and for running integration tests
-- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local) — Aspire launches the Functions host via `func`
-- Git
-- A code editor (recommended: [Visual Studio 2022](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/))
+| Tool | Why |
+|---|---|
+| [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) | Builds the Blazor client and runs tests (.NET 9 runtime for the Functions API is included) |
+| [Docker Desktop](https://docs.docker.com/get-docker/) | Aspire spins up a local Postgres container; also required for integration tests |
+| [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local) | Aspire launches the Functions host via the `func` CLI |
+| [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite) (optional) | Local Azure Blob Storage emulator for product image uploads. Install with `npm install -g azurite` |
+| Git | Source control |
+| VS Code or Visual Studio 2022 | Recommended editors |
 
-### Installation
+### Quick start (Aspire)
 
-1. Clone the repository
-   ```sh
-   git clone https://github.com/samBiggs32/KatiesGarden.git
-   cd KatiesGarden
-   ```
+Clone the repo, copy the example settings, then run the full stack:
 
-2. Run the full local stack via Aspire — spins up Postgres, the Functions API, and the Blazor client with a dashboard at the URL printed in the console
-   ```sh
-   dotnet run --project AppHost/KatiesGarden.AppHost.csproj
-   ```
+```sh
+git clone https://github.com/samBiggs32/KatiesGarden.git
+cd KatiesGarden
 
-   Or run just the frontend against a remote / pre-existing API
-   ```sh
-   dotnet run --project Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj
-   ```
+# Copy and fill in the settings file (see Configuration reference below)
+cp Api/local.settings.json.example Api/local.settings.json
+# Edit Api/local.settings.json with your credentials
+
+dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+```
+
+Aspire starts Postgres, the Functions API, and the Blazor dev server in one command. A dashboard URL is printed in the console (e.g. `https://localhost:17158`) — open it to see all services.
+
+### Running just the frontend
+
+If you only want to work on the Blazor UI against a deployed or local API:
+
+```sh
+dotnet run --project Web/KatiesGarden.Web/Server/KatiesGarden.Web.Server.csproj
+```
+
+The server project serves the Blazor WASM client. You can point it at a live API by setting `ApiBaseUrl` in `appsettings.Development.json`.
 
 ### Running the tests
 
-Unit tests (fast, no Docker required):
+**Unit tests** (fast, no Docker required):
+
 ```sh
 dotnet test Tests/KatiesGarden.Tests/ --filter "Category!=Integration"
 ```
 
-Integration tests (uses Testcontainers; needs Docker running):
+**Integration tests** (Aspire + Testcontainers; requires Docker):
+
 ```sh
 dotnet test Tests/KatiesGarden.Tests/ --filter "Category=Integration"
 ```
 
-### Verifying the Aspire local stack
-
-CI builds the AppHost on every push, so reference breakage is caught early. Runtime
-behaviour (containers + `func` + Blazor dev server orchestration) only surfaces on
-a real `dotnet run`. After launching:
+**E2E tests** (Playwright; targets a running site):
 
 ```sh
-dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+# Install Playwright browsers the first time
+pwsh Tests/KatiesGarden.E2E/bin/Debug/net10.0/playwright.ps1 install chromium
+
+# Run against production
+PLAYWRIGHT_BASE_URL=https://www.katiesgarden.uk \
+  dotnet test Tests/KatiesGarden.E2E/ -- NUnit.NumberOfTestWorkers=1
+
+# Or against a local Aspire stack
+PLAYWRIGHT_BASE_URL=http://localhost:4280 \
+  dotnet test Tests/KatiesGarden.E2E/ -- NUnit.NumberOfTestWorkers=1
 ```
 
-Check, in order:
+> E2E tests must run single-threaded per worker (`NUnit.NumberOfTestWorkers=1`) because Playwright shares browser state within a worker.
+
+### Verifying the local stack
+
+After `dotnet run --project AppHost/...`:
 
 1. **Console prints a dashboard URL** like `https://localhost:17158` — open it
-2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`,
-   `api`, `web` — all in the **Running** state (Postgres takes ~10s the first time
-   while the image pulls)
-3. **`postgres` is healthy** — click into it; the logs tab should show
-   `database system is ready to accept connections`
-4. **`api` connects to the database** — click `api` → logs; you should NOT see
-   `DATABASE_URL must be set` or Npgsql connection errors
-5. **`web` opens** — click the endpoint URL on the `web` row; the Blazor app should
-   load with shop/cart/admin links working against your local API
+2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — all in the **Running** state (Postgres takes ~10 s the first time while the image pulls)
+3. **`postgres` is healthy** — click into it; the logs tab should show `database system is ready to accept connections`
+4. **`api` connects to the DB** — click `api` → logs; you should NOT see `DATABASE_URL must be set` or Npgsql connection errors
+5. **`web` opens** — click the endpoint URL on the `web` row; the Blazor app should load with shop/cart/admin links working against your local API
 
-If `api` fails to start with `func: command not found`, install Azure Functions
-Core Tools v4. If the dashboard never appears, check that Docker Desktop is
-running (`docker info`).
+If `api` fails with `func: command not found`, install Azure Functions Core Tools v4. If the dashboard never appears, check that Docker Desktop is running (`docker info`).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
+## ⚙️ Configuration reference
+
+All configuration is read from environment variables. Locally these live in `Api/local.settings.json` (gitignored). In production they are set as **SWA application settings** by Terraform. Copy `Api/local.settings.json.example` to `Api/local.settings.json` and fill in the values below.
+
+### Database (Neon PostgreSQL)
+
+Newsletter subscribers, shop products, collections, and orders are stored in a free-tier [Neon](https://neon.tech) serverless PostgreSQL database.
+
+1. Sign up at [neon.tech](https://neon.tech) — no credit card required
+2. Create a project, then copy the **connection string** from the dashboard
+
+```
+DATABASE_URL=postgresql://user:pass@host.neon.tech/katiesgarden?sslmode=require
+```
+
+All tables are created automatically on first cold start via `EnsureCreated()` and an idempotent `CREATE TABLE IF NOT EXISTS` migration that runs on every startup — safe on both new and existing databases. The tables created are: `collections`, `products`, `orders`, `order_lines`, `delivery_settings`, `push_subscriptions`, `advertising_content`, and `subscribers`.
+
+> If `DATABASE_URL` is not set, the API degrades gracefully — contact form emails still send, but nothing is persisted.
+
+### Email sending (Brevo)
+
+The contact form sends email via SMTP. The newsletter sign-up syncs subscribers to a Brevo contact list via the REST API.
+
+**Recommended: Brevo (free tier, 300 emails/day)**
+
+1. Sign up at [brevo.com](https://www.brevo.com) — no credit card required
+2. Go to **Senders & IPs → Domains**, add `katiesgarden.uk`, and complete DNS verification
+3. Go to **SMTP & API → SMTP** and generate an **SMTP key** (for contact form emails)
+4. Go to **SMTP & API → API Keys** and generate a separate **REST API key** (for newsletter syncing)
+5. Go to **Contacts → Lists**, create a list (e.g. "Website Newsletter"), and note its numeric ID
+
+```
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USERNAME=your-brevo-login-email@example.com  # your Brevo account email
+SMTP_PASSWORD=xsmtpsib-...                        # the generated SMTP key, not your login password
+SENDER_EMAIL=noreply@katiesgarden.uk
+RECIPIENT_EMAIL=team@katiesgarden.uk
+BREVO_API_KEY=your-brevo-rest-api-key
+BREVO_LIST_ID=1                                   # numeric list ID from Brevo → Contacts → Lists
+```
+
+**Alternative: any SMTP provider**
+If `team@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), use their SMTP credentials instead. Check your host's "outbound SMTP" settings page.
+
+### Online shop (Stripe)
+
+The shop uses **Stripe Checkout** — the API creates a Checkout Session and returns a redirect URL; no card data ever touches the server.
+
+1. Sign up at [stripe.com](https://stripe.com) and go to the [Dashboard](https://dashboard.stripe.com)
+2. Use **test mode** (toggle in the top-left) while developing — test card `4242 4242 4242 4242`, any future date, any CVC
+3. Copy your **Secret key** from **Developers → API keys**
+4. Set up a webhook:
+   - Go to **Developers → Webhooks → Add endpoint**
+   - URL: `https://www.katiesgarden.uk/api/webhooks/stripe` (or your ngrok URL locally)
+   - Events to listen for: `checkout.session.completed`
+   - Copy the **Signing secret** (`whsec_...`) after saving
+5. For local development, use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward events:
+   ```sh
+   stripe listen --forward-to http://localhost:7071/api/webhooks/stripe
+   # The CLI prints a signing secret — use that as STRIPE_WEBHOOK_SECRET locally
+   ```
+
+```
+STRIPE_SECRET_KEY=sk_test_...      # or sk_live_... in production
+STRIPE_WEBHOOK_SECRET=whsec_...
+SITE_URL=http://localhost:4280     # used for Stripe Checkout success/cancel redirect URLs
+```
+
+> When you go live, swap the test keys for live keys and update the webhook endpoint URL.
+
+### Product image storage (Azure Blob)
+
+Product images are uploaded via the admin panel and stored in Azure Blob Storage (public read, authenticated write).
+
+**Local development** — Azurite emulates Blob Storage with no Azure account needed:
+
+```sh
+# Start Azurite (if not already running)
+azurite --location /tmp/azurite --debug /tmp/azurite.log &
+```
+
+```
+AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true
+AZURE_STORAGE_CONTAINER=product-images
+```
+
+**Production** — create a Storage Account in Azure (or let Terraform create it), then copy the connection string:
+
+1. In the [Azure Portal](https://portal.azure.com), find your Storage Account
+2. Go to **Security + networking → Access keys** and copy **Connection string** for key1
+3. The container (`product-images` by default) is created automatically on first upload
+
+```
+AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...
+AZURE_STORAGE_CONTAINER=product-images
+```
+
+> If `AZURE_STORAGE_CONNECTION_STRING` is not set, the image upload endpoint returns 503. Products can still be created without images.
+
+### Push notifications (VAPID)
+
+Katie receives a browser push notification when a new order is placed. VAPID (Voluntary Application Server Identification) keys authenticate the push server.
+
+Generate a key pair once (Node.js required):
+
+```sh
+npx web-push generate-vapid-keys
+```
+
+This prints a public/private key pair. Copy them to your settings:
+
+```
+VAPID_PUBLIC_KEY=BN...          # the public key (safe to expose — used by the browser)
+VAPID_PRIVATE_KEY=...           # the private key (keep secret)
+VAPID_SUBJECT=mailto:team@katiesgarden.uk
+```
+
+The same public key is served by `GET /api/push/vapid-public-key` and used by the browser to subscribe. The same private key signs the push payload sent to the browser's push service.
+
+> If `VAPID_PUBLIC_KEY` is not set, the bell icon is hidden in the admin panel and no pushes are sent.
+
+### Admin login (OAuth)
+
+The `/admin` route is protected by Azure Static Web Apps' built-in authentication. Katie signs in with GitHub, Google, or Microsoft — whichever she prefers — and SWA checks her email against the `allowedRoles` list in `staticwebapp.config.json`.
+
+**One-time setup per OAuth provider:**
+
+**GitHub:**
+1. Go to [github.com/settings/applications/new](https://github.com/settings/applications/new)
+2. Homepage URL: `https://www.katiesgarden.uk`
+3. Callback URL: `https://www.katiesgarden.uk/.auth/login/github/callback`
+4. Copy the **Client ID** and generate a **Client Secret**
+
+**Google:**
+1. Go to [console.cloud.google.com → Credentials → Create OAuth client ID](https://console.cloud.google.com)
+2. Application type: Web application
+3. Authorised redirect URI: `https://www.katiesgarden.uk/.auth/login/google/callback`
+4. Copy the **Client ID** and **Client Secret**
+
+**Microsoft:**
+1. Go to [portal.azure.com → App registrations → New registration](https://portal.azure.com)
+2. Redirect URI (Web): `https://www.katiesgarden.uk/.auth/login/aad/callback`
+3. Under **Certificates & secrets → New client secret**, generate a secret
+4. Copy the **Application (client) ID** and the secret value
+
+Pass these to Terraform via `terraform.tfvars` (see [Provisioning with Terraform](#provisioning-with-terraform)). Terraform sets them as SWA identity provider settings automatically.
+
+To grant Katie admin access, add her email to `allowedRoles` in `Web/KatiesGarden.Web/Client/wwwroot/staticwebapp.config.json` under the `/admin` route rule.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
 
 ## 🩺 Operations
 
 ### Live readiness check
 
-Public endpoint at `https://katiesgarden.uk/api/diagnostics`. Returns JSON with the status of each external dependency the API touches at runtime:
+Public endpoint at `https://katiesgarden.uk/api/diagnostics`. Returns JSON with the status of each external dependency:
 
 ```sh
 curl https://katiesgarden.uk/api/diagnostics
@@ -165,31 +355,30 @@ curl https://katiesgarden.uk/api/diagnostics
 }
 ```
 
-- HTTP **200** when everything green; HTTP **503** when any check is `"fail"`
-- Individual values: `"ok"` (reachable), `"fail"` (unreachable), `"not_configured"` (env var not set — endpoint degrades gracefully), `"skipped"` (intentionally not run on each call)
-- `smtp` is deliberately skipped on every call — a full STARTTLS + AUTH LOGIN round-trip is 1–3s, too slow for per-minute uptime polling. The daily `verify-secrets` GitHub Action covers SMTP end-to-end
-- Rate limited at the Cloudflare edge to 10 requests per minute per IP, so uptime monitors are fine but the Brevo API quota is protected from abuse
+- HTTP **200** when everything is green; HTTP **503** when any check is `"fail"`
+- `smtp` is deliberately skipped on each call — a full STARTTLS + AUTH LOGIN round-trip is 1–3 s, too slow for per-minute polling. The daily `verify-secrets` workflow covers SMTP end-to-end
+- Rate limited at the Cloudflare edge to 10 requests per minute per IP
 
-Point an uptime monitor (UptimeRobot, BetterStack, etc.) at this URL and alert on non-200 responses for a low-effort production health signal.
+Point an uptime monitor (UptimeRobot, BetterStack, etc.) at this URL and alert on non-200 responses.
 
 ### Logs
 
-Logs are emitted via `ILogger` throughout the API. In production they're collected by **Azure Application Insights** when the SWA-linked Functions runtime has `APPLICATIONINSIGHTS_CONNECTION_STRING` set. To enable:
+Logs are emitted via `ILogger` throughout the API. In production they are collected by **Azure Application Insights** when `APPLICATIONINSIGHTS_CONNECTION_STRING` is set. To enable:
 
-1. In the [Azure Portal](https://portal.azure.com), find your Static Web App's linked Functions app (or the SWA-managed Functions environment)
-2. Go to **Settings → Configuration** and add `APPLICATIONINSIGHTS_CONNECTION_STRING` pointing at an Application Insights resource (free 5 GB/month tier is plenty)
+1. In the [Azure Portal](https://portal.azure.com), find your Static Web App's linked Functions environment
+2. Go to **Settings → Configuration** and add `APPLICATIONINSIGHTS_CONNECTION_STRING`
 3. View logs at **Application Insights → Logs** with KQL, or **Live Metrics** for real-time tailing
 
 Log levels in use:
 
 | Level | When |
 |---|---|
-| `Information` | Successful operations, validation failures, "already-subscribed" idempotent hits |
-| `Warning` | Malformed request bodies, Brevo non-2xx responses, missing DB context, diagnostics check failures |
-| `Error` | SMTP send failures, DB persistence failures, host startup DB init failures |
-| `Debug` | Skipped Brevo sync (expected in dev; quiet in production) |
+| `Information` | Successful operations, validation failures, idempotent hits |
+| `Warning` | Malformed request bodies, Brevo non-2xx responses, missing DB context |
+| `Error` | SMTP send failures, DB persistence failures, startup DB init failures |
+| `Debug` | Skipped Brevo sync (quiet in production) |
 
-Logs are structured: every entry uses templated parameters (`{Email}`, `{StatusCode}` etc.) so they're queryable in Application Insights via KQL. Example queries:
+Example KQL queries:
 
 ```kql
 // Recent contact form failures
@@ -197,28 +386,35 @@ traces | where customDimensions["CategoryName"] startswith "ContactFormFunction"
        | where severityLevel >= 3
        | order by timestamp desc
 
-// Validation failure patterns
-traces | where message contains "validation failed"
-       | summarize count() by tostring(customDimensions["Errors"])
-       | order by count_ desc
+// New orders in the last 24 h
+traces | where message contains "Order created"
+       | where timestamp > ago(24h)
+       | order by timestamp desc
 ```
 
-If Application Insights isn't connected, logs still go to the Functions runtime stdout — visible via `az functionapp logs tail` or the SWA portal's **Logs** tab.
+If Application Insights isn't connected, logs go to the Functions runtime stdout — visible via `az functionapp logs tail` or the SWA portal's **Logs** tab.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
 
 ## 🏗 Infrastructure
 
-Azure resources are managed with Terraform. The config lives in the `infra/` directory and provisions a single **Azure Static Web App (Free tier)**, which hosts both the Blazor frontend and the Azure Functions API at no cost. Subscriber data is stored in a **Neon serverless PostgreSQL** database (free tier).
+Azure resources are managed with Terraform in the `infra/` directory. The config provisions:
+- **Azure Static Web App (Standard tier)** — hosts the Blazor frontend and Functions API
+- **Azure Storage Account** — stores product images uploaded via the admin panel
+- **Cloudflare DNS + WAF** — CDN, rate limiting, HTTPS enforcement
 
 ### Provisioning with Terraform
 
 **Prerequisites:** [Terraform ≥ 1.7](https://developer.hashicorp.com/terraform/install) and the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli).
 
-Create `infra/terraform.tfvars` (gitignored — never commit this file):
+Create `infra/terraform.tfvars` (gitignored — **never commit this file**):
 
 ```hcl
 subscription_id   = "your-azure-subscription-id"
 
-# SMTP (Brevo) — see "Email sending" below
+# Email
 smtp_host         = "smtp-relay.brevo.com"
 smtp_port         = "587"
 smtp_username     = "your-brevo-login-email@example.com"
@@ -226,14 +422,32 @@ smtp_password     = "your-brevo-smtp-key"
 smtp_sender_email = "noreply@katiesgarden.uk"
 recipient_email   = "team@katiesgarden.uk"
 
-# Neon PostgreSQL — see "Database" below
-database_url      = "postgresql://user:password@host.neon.tech/katiesgarden?sslmode=require"
-
-# Brevo newsletter list — see "Email sending" below
+# Newsletter
 brevo_api_key     = "your-brevo-rest-api-key"
 brevo_list_id     = "1"
 
-# Cloudflare — see "Cloudflare" below
+# Database
+database_url      = "postgresql://user:password@host.neon.tech/katiesgarden?sslmode=require"
+
+# Shop (Stripe)
+stripe_secret_key      = "sk_live_..."
+stripe_webhook_secret  = "whsec_..."
+site_url               = "https://www.katiesgarden.uk"
+
+# Push notifications
+vapid_public_key   = "BN..."
+vapid_private_key  = "..."
+vapid_subject      = "mailto:team@katiesgarden.uk"
+
+# Admin OAuth — add whichever providers you want to support
+github_client_id      = ""
+github_client_secret  = ""
+google_client_id      = ""
+google_client_secret  = ""
+microsoft_client_id   = ""
+microsoft_client_secret = ""
+
+# Cloudflare
 cloudflare_api_token = "your-cloudflare-api-token"
 cloudflare_zone_id   = "your-zone-id"
 ```
@@ -263,144 +477,104 @@ terraform import azurerm_static_web_app.main \
 
 ### GitHub Actions Secrets
 
-The deploy pipeline is gated by a `verify-secrets` job that checks every external dependency is reachable before letting a deploy proceed. Set the following under **GitHub → Settings → Secrets and variables → Actions**:
+The deploy pipeline runs a `verify-secrets` job before every deploy. Set the following under **GitHub → Settings → Secrets and variables → Actions**:
 
-| Secret | Used for | How verified |
-|---|---|---|
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deploy | Presence + length check (full check at deploy) |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare DNS/WAF management | `GET /user/tokens/verify` returns `status: active` |
-| `BREVO_API_KEY` | Newsletter contact-list management | `GET /v3/account` returns 200 |
-| `SMTP_HOST` `SMTP_PORT` `SMTP_USERNAME` `SMTP_PASSWORD` | Contact form email sending | Live SMTP STARTTLS handshake + AUTH LOGIN |
-| `DATABASE_URL` | Subscriber persistence (Neon Postgres) | `psql ... -c "SELECT 1"` (optional — warns rather than fails if unset) |
+| Secret | Used for |
+|---|---|
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deploy token |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare DNS/WAF management |
+| `DATABASE_URL` | Neon Postgres connection string |
+| `BREVO_API_KEY` | Newsletter list management |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_USERNAME` `SMTP_PASSWORD` | Contact form email sending |
+| `STRIPE_SECRET_KEY` | Stripe API (verify-secrets checks it's non-empty) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signature verification |
+| `VAPID_PUBLIC_KEY` `VAPID_PRIVATE_KEY` `VAPID_SUBJECT` | Web push notifications |
+| `AZURE_STORAGE_CONNECTION_STRING` | Product image storage |
 
-Retrieve the SWA token from Terraform:
+Retrieve the SWA deploy token from Terraform:
 
 ```sh
-cd infra
-terraform output -raw deployment_token
+cd infra && terraform output -raw deployment_token
 ```
 
-These secrets are duplicated between Azure (set by Terraform as SWA app settings — that's how the deployed Functions read them at runtime) and GitHub (read by the verify-secrets workflow during CI). Keep them in sync. A scheduled run of the verify workflow (daily at 06:00 UTC) catches drift — for example, a rotated SMTP password that you only updated in Azure.
+> These secrets are also set as SWA application settings by Terraform — that's how the deployed Functions read them at runtime. Keep them in sync. A scheduled run of the verify workflow (daily at 06:00 UTC) catches drift (e.g. a rotated SMTP password you only updated in one place).
 
 ### Database (Neon PostgreSQL)
 
-Newsletter subscribers are stored in a free-tier [Neon](https://neon.tech) serverless PostgreSQL database. Neon scales to zero when idle — ideal for a low-traffic site.
-
 1. Sign up at [neon.tech](https://neon.tech) — no credit card required
-2. Create a project, then copy the **connection string** from the dashboard (looks like `postgresql://user:pass@host.neon.tech/dbname?sslmode=require`)
-3. Paste it into `database_url` in `terraform.tfvars`
+2. Create a project, then copy the **connection string** from the dashboard
+3. Paste into `database_url` in `terraform.tfvars` and `DATABASE_URL` in `local.settings.json`
 
-The `subscribers` table is created automatically on first deploy via `EnsureCreated()`. No manual migrations needed to get started.
-
-> If `DATABASE_URL` is not set, the subscribe endpoint degrades gracefully — it still adds contacts to Brevo, it just won't store them locally.
-
-### Email sending
-
-The contact form posts to an Azure Function which sends email via SMTP. You need a provider and credentials — nothing is sent without them.
-
-**Recommended: Brevo (free tier, 300 emails/day)**
-
-1. Sign up at [brevo.com](https://www.brevo.com) — no credit card required
-2. Go to **Senders & IPs → Domains** and add `katiesgarden.uk`. Follow the DNS verification steps (a few TXT/CNAME records). This lets you send from any `@katiesgarden.uk` address.
-3. Go to **SMTP & API → SMTP** and generate an **SMTP key** (for sending contact form emails).
-4. Go to **SMTP & API → API Keys** and generate a separate **API key** (for adding newsletter subscribers to a contact list). Copy this to `brevo_api_key`.
-5. Go to **Contacts → Lists**, create a list (e.g. "Website Newsletter"), and copy its numeric ID to `brevo_list_id`.
-6. Your `terraform.tfvars` SMTP entries should be:
-
-```hcl
-smtp_host         = "smtp-relay.brevo.com"
-smtp_port         = "587"
-smtp_username     = "your-brevo-login-email@example.com"  # your Brevo account email
-smtp_password     = "xsmtpsib-..."                        # the generated SMTP key, not your login password
-smtp_sender_email = "noreply@katiesgarden.uk"
-recipient_email   = "team@katiesgarden.uk"
-```
-
-**Alternative: your existing email host**
-If `team@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), you can use their outbound SMTP credentials instead. Check your host's SMTP settings page.
-
-**Alternative: SendGrid (free tier, 100 emails/day)**
-Use `smtp.sendgrid.net`, port `587`, username `apikey`, and a SendGrid API key with Mail Send permission as the password.
-
-**Local development**
-Copy `Api/local.settings.json.example` to `Api/local.settings.json` (gitignored) and fill in your credentials to test the contact form locally with the Azure Functions emulator.
+All tables are created or updated automatically on cold start — no manual migrations needed.
 
 ### Cloudflare
 
-Cloudflare sits in front of the Azure Static Web App and provides:
-
-- **CDN** — static assets cached at Cloudflare's edge, reducing latency globally
-- **DDoS protection** — automatic, always-on at the free tier
-- **Rate limiting** — blocks IPs that submit more than 5 requests per minute to `/api/contact` or `/api/subscribe`, preventing spam and abuse
-- **SSL termination** — Cloudflare manages the public HTTPS certificate; traffic to Azure SWA goes over HTTPS (full mode)
-- **HTTP → HTTPS redirect** — enforced at the Cloudflare edge
+Cloudflare provides CDN, DDoS protection, rate limiting, and HTTPS enforcement in front of the Azure SWA.
 
 #### Setup
 
-1. Sign up at [cloudflare.com](https://www.cloudflare.com) — the free tier covers everything here
-2. Add your domain (`katiesgarden.uk`) and follow the prompts to update your domain registrar's nameservers to Cloudflare's
-3. Once active, find your **Zone ID** in the dashboard under the domain's **Overview** tab (right-hand panel) — copy it to `cloudflare_zone_id` in `terraform.tfvars`
-4. Go to **My Profile → API Tokens → Create Token** and create a custom token with these permissions on the `katiesgarden.uk` zone:
+1. Sign up at [cloudflare.com](https://www.cloudflare.com) — free tier covers everything here
+2. Add `katiesgarden.uk` and point your domain registrar's nameservers to Cloudflare's
+3. Copy the **Zone ID** from the domain's **Overview** tab in the dashboard → `cloudflare_zone_id`
+4. Go to **My Profile → API Tokens → Create Token** with these zone permissions:
    - **Zone → DNS → Edit**
    - **Zone → Zone Settings → Edit**
    - **Zone → Zone WAF → Edit**
-5. Copy the token to `cloudflare_api_token` in `terraform.tfvars`
+5. Copy the token → `cloudflare_api_token`
 
-After running `terraform apply`, Terraform will:
-- Create CNAME records pointing `katiesgarden.uk` and `www.katiesgarden.uk` to your Azure SWA hostname
-- Apply zone security settings (TLS 1.2+, HTTP→HTTPS redirect, full SSL, medium security level)
-- Configure rate limiting on the API endpoints
+After `terraform apply`, Terraform creates DNS records, applies security settings, and configures rate limits on all API routes.
 
 #### Custom domain on Azure SWA
 
-Connecting your custom domain in Azure SWA is a **one-time manual step** (not managed by Terraform for the free tier):
+This is a **one-time manual step** (not managed by Terraform for the free tier):
 
-1. In the [Azure Portal](https://portal.azure.com), open your Static Web App
-2. Go to **Custom domains → Add**
-3. Enter `katiesgarden.uk` — Azure will give you a TXT record to verify ownership
-4. Add that TXT record in Cloudflare's DNS dashboard, then click **Validate** in Azure
-5. Repeat for `www.katiesgarden.uk` using a CNAME validation record
+1. In the [Azure Portal](https://portal.azure.com), open your Static Web App → **Custom domains → Add**
+2. Enter `katiesgarden.uk` — Azure gives you a TXT record for ownership verification
+3. Add the TXT record in Cloudflare's DNS dashboard, then click **Validate** in Azure
+4. Repeat for `www.katiesgarden.uk` using a CNAME validation record
 
-Azure SWA generates its own TLS certificate for the custom domain. Because the DNS CNAMEs point to Azure via Cloudflare's proxy, set SSL mode to **Full** (already done by Terraform) — not "Flexible".
+Set Cloudflare SSL mode to **Full** (Terraform does this) — not "Flexible".
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
 
 ## 📈 Development Roadmap
 
-- [x] Implement responsive home page
-- [x] Create gallery with project showcase
-- [x] Develop contact page with form
-- [x] Set up CI/CD pipeline 
-- [x] Configure DNS and deploy to Azure Static Web Apps
-- [ ] Implement shop/ordering functionality
-  - [ ] Product catalog with categories
-  - [ ] Shopping cart functionality
-  - [ ] Checkout process
-  - [ ] Order management
-- [ ] Add user accounts and authentication
+- [x] Responsive home page
+- [x] Gallery with project showcase (woodwork, bugs & hugs, maintenance)
+- [x] Contact page with server-side validated form
+- [x] Newsletter sign-up synced to Brevo
+- [x] CI/CD pipeline with PR previews and E2E tests
+- [x] DNS, Cloudflare CDN, and Azure Static Web Apps deployment
+- [x] Online shop — product catalogue, collections, shopping basket
+- [x] Stripe Checkout integration (Click & Collect + local delivery)
+- [x] Admin panel — orders, products, collections, delivery settings
+- [x] Push notifications to Katie on new orders
+- [x] Progressive Web App (service worker, offline shell, installable)
+- [ ] Seasonal specials and promotions
 - [ ] Expand gallery with new projects
-- [ ] Implement seasonal specials and promotions
 
-See the [open issues](https://github.com/samBiggs32/KatiesGarden/issues) for a list of proposed features and known issues.
+See the [open issues](https://github.com/samBiggs32/KatiesGarden/issues) for proposed features and known issues.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
+
 ## 🤝 Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a pull request
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Standards
+### Development standards
 
 - Follow the existing code style and patterns
-- Write unit tests for new features
-- Update documentation as needed
-- Ensure all tests pass before submitting a pull request
+- Write unit tests for new features; integration tests for new API endpoints
+- Ensure `dotnet test Tests/KatiesGarden.Tests/ --filter "Category!=Integration"` passes before opening a PR
+- Update this README when adding new configuration variables or setup steps
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
