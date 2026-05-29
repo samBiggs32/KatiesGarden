@@ -127,6 +127,10 @@ using (var scope = host.Services.CreateScope())
         log.LogInformation("SMTP: {Host} / {User}", smtpHost, smtpUser);
 
     // ── Database ────────────────────────────────────────────────────────────
+    // Schema init is bounded by a hard timeout: an unreachable/slow database must
+    // never hang the host so long that the Functions launcher gives up and kills
+    // the process. On timeout/failure we log and continue — the host still starts
+    // and /api/diagnostics will report the database as down.
     var db = scope.ServiceProvider.GetService<AppDbContext>();
     if (db is null)
     {
@@ -136,13 +140,14 @@ using (var scope = host.Services.CreateScope())
     {
         try
         {
-            await db.Database.EnsureCreatedAsync();
-            await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist);
+            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
+            await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
             log.LogInformation("Database schema ready");
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "Database initialisation failed — DB-backed endpoints will return 500");
+            log.LogError(ex, "Database initialisation failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
         }
     }
 

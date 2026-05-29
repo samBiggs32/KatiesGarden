@@ -113,14 +113,26 @@ Clone the repo, copy the example settings, then run the full stack:
 git clone https://github.com/samBiggs32/KatiesGarden.git
 cd KatiesGarden
 
-# Copy and fill in the settings file (see Configuration reference below)
+# Aspire needs only the worker runtime locally — the AppHost injects everything else
 cp Api/local.settings.json.example Api/local.settings.json
-# Edit Api/local.settings.json with your credentials
 
 dotnet run --project AppHost/KatiesGarden.AppHost.csproj
 ```
 
 Aspire starts Postgres, the Functions API (pinned to **port 7071**), and the Blazor dev server in one command. A dashboard URL is printed in the console (e.g. `https://localhost:17158`) — open it to see all services.
+
+> **Keep `local.settings.json` minimal when running via Aspire.** Per Microsoft's
+> [Azure Functions + Aspire guidance](https://learn.microsoft.com/azure/azure-functions/dotnet-aspire-integration),
+> the only value it should contain is `FUNCTIONS_WORKER_RUNTIME` — the AppHost injects
+> `DATABASE_URL`, `SMTP_*`, `STRIPE_*`, and `SITE_URL` as environment variables. In
+> particular, **do not set `AzureWebJobsStorage`**: `AddAzureFunctionsProject` provisions
+> that connection for you, and hard-coding `UseDevelopmentStorage=true` points the host at a
+> local Azurite that usually isn't running — which makes the Functions host **fail to start
+> with exit code `0x80008081` before any of your code logs**. Other integrations (Brevo,
+> Blob, VAPID) are left unset locally and report `not_configured` — not a failure.
+>
+> For a standalone `func start` (without Aspire), add the settings you need from the
+> [Configuration reference](#-configuration-reference) to `local.settings.json` yourself.
 
 > **Open the `web` resource's HTTP endpoint (`http://localhost:5000`), not the HTTPS one.**
 > The Blazor app is a standalone WebAssembly SPA: it runs in the browser and cannot read
@@ -220,6 +232,8 @@ After `dotnet run --project AppHost/...`:
   winget install Microsoft.Azure.FunctionsCoreTools   # if missing
   ```
   The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the standalone port to 7071. See [microsoft/aspire #7010](https://github.com/microsoft/aspire/issues/7010).
+- **`api` launches (you see `func`) but the project exits immediately with code `0x80008081` / `-2147450751`, and the `/api/diagnostics` health check throws `TaskCanceledException`** — the Functions host crashed during startup, so nothing is listening and the probe times out. The usual cause is `AzureWebJobsStorage` being set to `UseDevelopmentStorage=true` in `local.settings.json` while Azurite isn't running. **Remove `AzureWebJobsStorage` from `local.settings.json`** — Aspire's `AddAzureFunctionsProject` provisions it for you. Keep the file minimal (only `FUNCTIONS_WORKER_RUNTIME`); the AppHost injects the rest. If you see no `Katie's Garden API starting up` log at all, the crash is here — before our code runs.
+- **`api` starts but never goes Healthy (stays yellow), so `web` never launches** — `/api/diagnostics` is returning 503. A *configured-but-unreachable* integration reports `fail` (→ 503), whereas an *unset* one reports `not_configured` (fine). The common culprit is `AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true` with no Azurite running — leave it empty locally so Blob Storage reports `not_configured`. Hit `http://localhost:7071/api/diagnostics` to see which check is failing.
 - **Shop/cart show errors or "unexpected character `<`"** — the browser is calling the wrong origin. Make sure you opened the **HTTP** `web` endpoint (not HTTPS), so the WASM app can reach `http://localhost:7071` without mixed-content blocking.
 - **Dashboard never appears** — check Docker Desktop is running (`docker info`).
 
