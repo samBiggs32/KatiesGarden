@@ -110,7 +110,7 @@ jobs:
           echo "PASS: /contact"
 
   e2e_tests:
-    needs: smoke_test
+    needs: [smoke_test, build_and_deploy_preview]
     runs-on: ubuntu-latest
     name: E2E Tests (Chromium)
     env:
@@ -140,7 +140,7 @@ jobs:
           path: "**/*.trx"
 
   lighthouse:
-    needs: smoke_test
+    needs: [smoke_test, build_and_deploy_preview]
     runs-on: ubuntu-latest
     name: Lighthouse CI
     env:

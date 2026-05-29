@@ -145,3 +145,33 @@ jobs:
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/contact")
           [ "$STATUS" = "200" ] || (echo "ERROR: /contact returned $STATUS" && exit 1)
           echo "PASS: /contact"
+
+  e2e_tests_production:
+    needs: [smoke_test_production, build_and_deploy_production]
+    runs-on: ubuntu-latest
+    name: E2E Tests (Production)
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ needs.build_and_deploy_production.outputs.site_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build E2E tests
+        run: dotnet build Tests/KatiesGarden.E2E/KatiesGarden.E2E.csproj --configuration Release
+
+      - name: Install Playwright browsers
+        run: pwsh Tests/KatiesGarden.E2E/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
+
+      - name: Run E2E tests
+        run: dotnet test Tests/KatiesGarden.E2E/KatiesGarden.E2E.csproj --configuration Release --no-build --logger "trx;LogFileName=e2e-production-results.trx"
+
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-production-results
+          path: "**/*.trx"
