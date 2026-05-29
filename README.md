@@ -185,9 +185,22 @@ PLAYWRIGHT_BASE_URL=http://localhost:4280 \
 After `dotnet run --project AppHost/...`:
 
 1. **Console prints a dashboard URL** like `https://localhost:17158` — open it
-2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — all in the **Running** state (Postgres takes ~10 s the first time while the image pulls)
-3. **`postgres` is healthy** — click into it; the logs tab should show `database system is ready to accept connections`
-4. **`api` connects to the DB** — click `api` → logs; you should NOT see `DATABASE_URL must be set` or Npgsql connection errors
+2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — each goes **Running** then **Healthy** (Postgres takes ~10 s the first time while the image pulls)
+3. **Health state reflects live integrations** — each resource has a health probe:
+   - `postgres` — Aspire's built-in Postgres readiness check
+   - `api` — probes **`/api/diagnostics`**, which is only "ready" when the database is reachable and every *configured* integration (Stripe, Blob Storage, Brevo) responds to a **read-only** call. Locally these are placeholders, so they report `not_configured` (not a failure) and `api` still goes Healthy. With real credentials the probe genuinely verifies each integration is live.
+   - `web` — probes `/` (the dev server is serving)
+4. **Inspect the integration checks directly**:
+   ```sh
+   curl http://localhost:7071/api/diagnostics | jq
+   # {"status":"ready","checks":{"api":"ok","database":"ok","brevo_api":"not_configured",
+   #  "stripe":"not_configured","blob_storage":"not_configured","smtp":"skipped"}, ...}
+
+   # Add ?checkSmtp=true to also verify SMTP credentials are live. This connects +
+   # authenticates + disconnects — it NEVER sends a message, so no send quota is used.
+   curl "http://localhost:7071/api/diagnostics?checkSmtp=true" | jq
+   ```
+   Every check is read-only and free: `database` runs `SELECT 1`, `brevo_api` reads the account, `stripe` retrieves the balance (no charge), `blob_storage` reads account properties (no writes), and `smtp` only logs in. Nothing here bills against any account or spends email quota.
 5. **`web` opens** — click the **HTTP** endpoint (`http://localhost:5000`) on the `web` row; the Blazor app should load with shop/cart/admin links working against your local API on `:7071`
 
 **Troubleshooting**
@@ -416,14 +429,19 @@ curl https://katiesgarden.uk/api/diagnostics
     "api": "ok",
     "database": "ok",
     "brevo_api": "ok",
+    "stripe": "ok",
+    "blob_storage": "ok",
     "smtp": "skipped"
   },
   "timestamp": "2026-05-25T18:00:00Z"
 }
 ```
 
-- HTTP **200** when everything is green; HTTP **503** when any check is `"fail"`
-- `smtp` is deliberately skipped on each call — a full STARTTLS + AUTH LOGIN round-trip is 1–3 s, too slow for per-minute polling. The daily `verify-secrets` workflow covers SMTP end-to-end
+This same endpoint is the Aspire `api` health probe, so `dotnet run --project AppHost/...` surfaces the identical integration status on the dashboard.
+
+- HTTP **200** when everything is green; HTTP **503** when any check is `"fail"`. Each check is `"ok"`, `"fail"`, or `"not_configured"` (an absent/placeholder integration — not a failure)
+- **Every check is read-only and quota-safe**: `database` runs `SELECT 1`; `brevo_api` reads the account; `stripe` retrieves the balance (no charge or Checkout Session created); `blob_storage` reads account properties (no container/blob writes). None of these spend any quota or money
+- `smtp` is skipped by default — a full STARTTLS + AUTH round-trip is 1–3 s, too slow for per-minute polling. Append **`?checkSmtp=true`** to verify SMTP credentials are live: it connects + authenticates + disconnects and **never sends a message**, so it costs no send quota. The daily `verify-secrets` workflow also covers SMTP
 - Rate limited at the Cloudflare edge to 10 requests per minute per IP
 
 Point an uptime monitor (UptimeRobot, BetterStack, etc.) at this URL and alert on non-200 responses.
