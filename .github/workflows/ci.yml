@@ -39,6 +39,7 @@ jobs:
   integration_tests:
     runs-on: ubuntu-latest
     name: Integration Tests (Postgres + Aspire smoke)
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
