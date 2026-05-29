@@ -1,8 +1,37 @@
 {
+  "auth": {
+    "identityProviders": {
+      "github": {
+        "registration": {
+          "clientIdSettingName": "GITHUB_CLIENT_ID",
+          "clientSecretSettingName": "GITHUB_CLIENT_SECRET"
+        }
+      },
+      "google": {
+        "registration": {
+          "clientIdSettingName": "GOOGLE_CLIENT_ID",
+          "clientSecretSettingName": "GOOGLE_CLIENT_SECRET"
+        }
+      },
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/common/v2.0",
+          "clientIdSettingName": "MICROSOFT_CLIENT_ID",
+          "clientSecretSettingName": "MICROSOFT_CLIENT_SECRET"
+        }
+      }
+    }
+  },
+  "routes": [
+    { "route": "/admin/login", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/admin", "allowedRoles": ["admin"] },
+    { "route": "/admin/*", "allowedRoles": ["admin"] }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": [
       "/api/*",
+      "/.auth/*",
       "/Images/*",
       "/css/*",
       "/scripts/*",
@@ -36,7 +65,7 @@
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'"
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com js.stripe.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob: katiesgardenstore.blob.core.windows.net *.stripe.com; connect-src 'self' katiesgardenstore.blob.core.windows.net api.stripe.com; worker-src 'self' blob:; frame-src js.stripe.com; frame-ancestors 'none'"
   },
   "mimeTypes": {
     ".json": "application/json",

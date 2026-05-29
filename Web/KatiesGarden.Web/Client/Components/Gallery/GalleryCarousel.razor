@@ -1,5 +1,6 @@
 ﻿@namespace KatiesGarden.Web.Client.Components
 @using KatiesGarden.Web.Client.Constants
+@using KatiesGarden.Web.Client.Models
 
 <div id="@Id" class="carousel slide gallery-carousel" style="border-radius: 8px; overflow: hidden;">
     <ol class="carousel-indicators">
@@ -12,15 +13,16 @@
         @for (int i = 0; i < Images.Count(); i++)
         {
             var image = Images.ElementAt(i);
+            var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
+            var webpSrc = $"{ImagePaths.GalleryBasePath}{WebpFileName(image.FileName)}";
             <div class="carousel-item @(i == 0 ? "active" : "")">
-                @if (i == 0)
-                {
-                    <img class="d-block w-100" loading="eager" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
-                }
-                else
-                {
-                    <img class="d-block w-100" src="@($"{ImagePaths.GalleryBasePath}/{image.FileName}")" alt="@image.Alt">
-                }
+                <picture>
+                    <source srcset="@webpSrc" type="image/webp" />
+                    <img class="d-block w-100"
+                         loading="@(i == 0 ? "eager" : "lazy")"
+                         src="@jpegSrc"
+                         alt="@image.Alt" />
+                </picture>
                 <div class="carousel-caption d-none d-md-block">
                     <h5>@image.Title</h5>
                     <p>@image.Description</p>
@@ -40,13 +42,10 @@
 
 @code {
     [Parameter] public string Id { get; set; } = "carousel";
-    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = new List<GalleryImage>();
+    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
 
-    public class GalleryImage
-    {
-        public string FileName { get; set; }
-        public string Alt { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-    }
+    // Derives the WebP filename from the JPEG filename.
+    // WebP files are pre-generated at build time alongside the originals.
+    private static string WebpFileName(string fileName) =>
+        System.IO.Path.ChangeExtension(fileName, ".webp");
 }

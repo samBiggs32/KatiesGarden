@@ -1,0 +1,168 @@
+@page "/admin/orders/{Id:guid}"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Order @(_order?.OrderNumber ?? "…") — Admin</PageTitle>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+}
+else if (_order is null)
+{
+    <MudAlert Severity="Severity.Error">Order not found.</MudAlert>
+}
+else
+{
+    <div class="d-flex align-items-center mb-4">
+        <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="/admin/orders" Variant="Variant.Text">Back</MudButton>
+        <MudText Typo="Typo.h5" Class="ml-2 font-weight-bold">Order @_order.OrderNumber</MudText>
+        <MudChip T="string" Color="@StatusColor(_order.Status)" Class="ml-3">@_order.Status</MudChip>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="mb-4">
+                <MudCardHeader><MudText Typo="Typo.h6">Customer</MudText></MudCardHeader>
+                <MudCardContent>
+                    <MudText>@_order.CustomerFirstName @_order.CustomerLastName</MudText>
+                    <MudText><a href="mailto:@_order.CustomerEmail">@_order.CustomerEmail</a></MudText>
+                    <MudText><a href="tel:@_order.CustomerPhone">@_order.CustomerPhone</a></MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="mb-4">
+                <MudCardHeader><MudText Typo="Typo.h6">Delivery</MudText></MudCardHeader>
+                <MudCardContent>
+                    <MudText><strong>@_order.DeliveryType</strong></MudText>
+                    @if (_order.DeliveryAddress is not null)
+                    {
+                        <MudText>@_order.DeliveryAddress, @_order.DeliveryPostcode</MudText>
+                    }
+                    @if (_order.CustomerNotes is not null)
+                    {
+                        <MudText Class="mt-2"><em>Notes: @_order.CustomerNotes</em></MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <MudCard Elevation="2" Class="mb-4">
+        <MudCardHeader><MudText Typo="Typo.h6">Items</MudText></MudCardHeader>
+        <MudCardContent>
+            <MudTable Items="_order.Lines" Dense="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Product</MudTh>
+                    <MudTh>Unit Price</MudTh>
+                    <MudTh>Qty</MudTh>
+                    <MudTh>Total</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.ProductName</MudTd>
+                    <MudTd>£@context.UnitPrice.ToString("F2")</MudTd>
+                    <MudTd>@context.Quantity</MudTd>
+                    <MudTd>£@context.LineTotal.ToString("F2")</MudTd>
+                </RowTemplate>
+            </MudTable>
+            <div class="mt-3 text-end">
+                <MudText>Subtotal: £@_order.Subtotal.ToString("F2")</MudText>
+                <MudText>Delivery: £@_order.DeliveryFee.ToString("F2")</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">Total: £@_order.Total.ToString("F2")</MudText>
+            </div>
+        </MudCardContent>
+    </MudCard>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="mb-4">
+                <MudCardHeader><MudText Typo="Typo.h6">Update Status</MudText></MudCardHeader>
+                <MudCardContent>
+                    <MudSelect T="string" @bind-Value="_newStatus" Variant="Variant.Outlined" Label="New Status" Class="mb-3">
+                        <MudSelectItem Value="@("Confirmed")">Confirmed</MudSelectItem>
+                        <MudSelectItem Value="@("Processing")">Processing</MudSelectItem>
+                        <MudSelectItem Value="@("ReadyForCollection")">Ready for Collection</MudSelectItem>
+                        <MudSelectItem Value="@("Dispatched")">Dispatched</MudSelectItem>
+                        <MudSelectItem Value="@("Delivered")">Delivered</MudSelectItem>
+                        <MudSelectItem Value="@("Cancelled")">Cancelled</MudSelectItem>
+                        <MudSelectItem Value="@("Refunded")">Refunded</MudSelectItem>
+                    </MudSelect>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateStatusAsync"
+                               Disabled="@_updatingStatus">
+                        @(_updatingStatus ? "Saving…" : "Update Status")
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="mb-4">
+                <MudCardHeader><MudText Typo="Typo.h6">Internal Notes</MudText></MudCardHeader>
+                <MudCardContent>
+                    <MudTextField @bind-Value="_adminNotes" Lines="3" Variant="Variant.Outlined"
+                                  Label="Notes (not sent to customer)" Class="mb-3" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="SaveNotesAsync"
+                               Disabled="@_savingNotes">
+                        @(_savingNotes ? "Saving…" : "Save Notes")
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Inject] AdminOrderService AdminOrderService { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+
+    [Parameter] public Guid Id { get; set; }
+
+    private OrderDetailDto? _order;
+    private bool _loading = true;
+    private string _newStatus = string.Empty;
+    private string? _adminNotes;
+    private bool _updatingStatus, _savingNotes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _order = await AdminOrderService.GetOrderAsync(Id);
+        if (_order is not null)
+        {
+            _newStatus = _order.Status;
+            _adminNotes = _order.AdminNotes;
+        }
+        _loading = false;
+    }
+
+    private async Task UpdateStatusAsync()
+    {
+        _updatingStatus = true;
+        var response = await AdminOrderService.UpdateStatusAsync(Id, _newStatus);
+        if (response.IsSuccessStatusCode)
+        {
+            _order = _order! with { Status = _newStatus };
+            Snackbar.Add("Status updated — customer notified by email", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to update status", Severity.Error);
+        }
+        _updatingStatus = false;
+    }
+
+    private async Task SaveNotesAsync()
+    {
+        _savingNotes = true;
+        await AdminOrderService.UpdateNotesAsync(Id, _adminNotes);
+        Snackbar.Add("Notes saved", Severity.Success);
+        _savingNotes = false;
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" => Color.Success,
+        "Pending" => Color.Warning,
+        "Cancelled" or "Refunded" => Color.Error,
+        _ => Color.Default
+    };
+}

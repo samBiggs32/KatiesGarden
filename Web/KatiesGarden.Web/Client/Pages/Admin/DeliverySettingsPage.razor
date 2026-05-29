@@ -1,0 +1,93 @@
+@page "/admin/delivery-settings"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Delivery Settings — Admin</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Delivery Settings</MudText>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+}
+else if (_settings is not null)
+{
+    <MudCard Elevation="2" Style="max-width:600px;">
+        <MudCardContent>
+            <MudNumericField T="decimal" @bind-Value="_fee" Label="Local Delivery Fee (£)" Variant="Variant.Outlined"
+                             Format="F2" Min="0" Class="mb-4" />
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <MudSwitch @bind-Value="_hasFreeThreshold" Label="Free delivery over a threshold" Color="Color.Primary" />
+            </div>
+
+            @if (_hasFreeThreshold)
+            {
+                <MudNumericField T="decimal" @bind-Value="_freeThreshold" Label="Free delivery threshold (£)"
+                                 Variant="Variant.Outlined" Format="F2" Min="0" Class="mb-4" />
+            }
+
+            <MudTextField @bind-Value="_areaDescription" Label="Delivery Area Description"
+                          Variant="Variant.Outlined" Class="mb-4"
+                          HelperText="Shown to customers, e.g. 'Within 10 miles of Milverton'" />
+
+            <MudTextField @bind-Value="_collectionAddress" Label="Collection Address"
+                          Variant="Variant.Outlined" Class="mb-4" />
+
+            <MudTextField @bind-Value="_collectionInstructions" Label="Collection Instructions"
+                          Variant="Variant.Outlined" Lines="3" Class="mb-4"
+                          HelperText="Optional instructions shown to customers who choose click &amp; collect" />
+        </MudCardContent>
+        <MudCardActions Class="pb-4 px-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="@_saving">
+                @(_saving ? "Saving…" : "Save Settings")
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
+@code {
+    [Inject] AdminProductService AdminProductService { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+
+    private DeliverySettingsDto? _settings;
+    private decimal _fee;
+    private bool _hasFreeThreshold;
+    private decimal _freeThreshold;
+    private string _areaDescription = string.Empty;
+    private string _collectionAddress = string.Empty;
+    private string _collectionInstructions = string.Empty;
+    private bool _loading = true;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _settings = await AdminProductService.GetDeliverySettingsAsync();
+        if (_settings is not null)
+        {
+            _fee = _settings.LocalDeliveryFee;
+            _hasFreeThreshold = _settings.FreeDeliveryThreshold.HasValue;
+            _freeThreshold = _settings.FreeDeliveryThreshold ?? 0m;
+            _areaDescription = _settings.DeliveryAreaDescription;
+            _collectionAddress = _settings.CollectionAddress;
+            _collectionInstructions = _settings.CollectionInstructions;
+        }
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var updated = new DeliverySettingsDto(
+            _fee,
+            _hasFreeThreshold ? _freeThreshold : null,
+            _areaDescription,
+            _collectionAddress,
+            _collectionInstructions);
+
+        var result = await AdminProductService.UpdateDeliverySettingsAsync(updated);
+        Snackbar.Add(result is not null ? "Settings saved" : "Failed to save settings",
+            result is not null ? Severity.Success : Severity.Error);
+        _saving = false;
+    }
+}

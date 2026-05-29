@@ -23,7 +23,7 @@ public class HomePageTests : PlaywrightTestBase
     {
         await Page.GotoAsync(BaseUrl);
         await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        await Expect(Page.Locator("text=Katie's Garden")).First.ToBeVisibleAsync();
+        await Expect(Page.Locator("text=Katie's Garden").First).ToBeVisibleAsync();
     }
 
     [Test]

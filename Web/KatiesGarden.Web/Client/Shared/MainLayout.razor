@@ -1,8 +1,13 @@
 ﻿@inherits LayoutComponentBase
+@using KatiesGarden.Web.Client.Theme
 
 @inject IJSRuntime JSRuntime
 
-<MudThemeProvider Theme="CustomTheme" />
+<!-- First focusable element in the DOM — keyboard users press Tab once
+     to reach this, then Enter to jump past the navigation. -->
+<a class="skip-nav" href="#main-content">Skip to main content</a>
+
+<MudThemeProvider Theme="KatiesGardenTheme.Instance" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -11,7 +16,8 @@
 </header>
 
 <div class="container m-0 p-0" style="max-width: 100%">
-    <main role="main" class="pb-3">
+    <!-- tabindex="-1" lets the skip link move focus here programmatically -->
+    <main role="main" id="main-content" tabindex="-1" class="pb-3">
         @Body
     </main>
 </div>
@@ -51,25 +57,5 @@
 <UpdateAvailableDetector />
 
 @code {
-    // Create a minimal theme with only essential properties
-    MudTheme CustomTheme = new MudTheme()
-        {
-            PaletteLight = new PaletteLight()
-            {
-                Primary = "#24937F",
-                Secondary = "#E7AEC9",
-                Background = "#F0F5F3",
-                Surface = "#FFFFFF",
-                TextPrimary = "#2D3E40",
-                TextSecondary = "#5B7876",
-                AppbarBackground = "#FFFFFF",
-                AppbarText = "#24937F",
-                DrawerBackground = "#F8FDFB",
-                DrawerText = "#2D3E40",
-                Success = "#5FAD7E",
-                Error = "#D03838"
-            }
-        };
-
     string version = "v1.0.5";
 }

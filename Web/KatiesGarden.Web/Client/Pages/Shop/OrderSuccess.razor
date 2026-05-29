@@ -1,0 +1,15 @@
+@page "/order/success"
+
+<PageTitle>Order Confirmed — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8 text-center">
+    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size:5rem;" Class="mb-4" />
+    <MudText Typo="Typo.h4" Class="mb-4 font-weight-bold">Thank you for your order!</MudText>
+    <MudText Typo="Typo.body1" Class="mb-6">
+        We've received your order and you'll get a confirmation email shortly.
+        Katie will be in touch to arrange collection or delivery.
+    </MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/shop">
+        Continue Shopping
+    </MudButton>
+</MudContainer>

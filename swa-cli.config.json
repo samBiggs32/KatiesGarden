@@ -1,0 +1,12 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "katiesgarden": {
+      "appDevserverUrl": "http://localhost:5000",
+      "apiDevserverUrl": "http://localhost:7071",
+      "swaConfigLocation": "Web/KatiesGarden.Web/Client/wwwroot",
+      "run": "dotnet run --project Web/KatiesGarden.Web/Client/KatiesGarden.Web.Client.csproj",
+      "port": 4280
+    }
+  }
+}

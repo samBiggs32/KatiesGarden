@@ -1,0 +1,59 @@
+@page "/shop"
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Shop — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
+    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold text-center">Our Shop</MudText>
+
+    @if (_loading)
+    {
+        <MudGrid>
+            @for (int i = 0; i < 3; i++)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard>
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                        <MudCardContent>
+                            <MudSkeleton Width="60%" />
+                            <MudSkeleton Width="40%" />
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else if (_collections?.Count > 0)
+    {
+        <MudGrid>
+            @foreach (var collection in _collections)
+            {
+                <MudItem @key="collection.Id" xs="12" sm="6" md="4">
+                    <MudCard Elevation="3" Class="h-100">
+                        @if (collection.CoverImageUrl is not null)
+                        {
+                            <MudCardMedia Image="@collection.CoverImageUrl" Height="200" />
+                        }
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">@collection.Title</MudText>
+                            <MudText Typo="Typo.body2" Class="mt-1">@collection.Description</MudText>
+                            <MudChip T="string" Size="Size.Small" Class="mt-2">
+                                @collection.ProductCount item@(collection.ProductCount == 1 ? "" : "s")
+                            </MudChip>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                       Href="@($"/shop/{collection.Slug}")">
+                                Browse Collection
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudAlert Severity="Severity.Info">No collections are available right now. Check back soon!</MudAlert>
+    }
+</MudContainer>

@@ -1,4 +1,5 @@
 ﻿@namespace KatiesGarden.Web.Client.Components
+@using KatiesGarden.Web.Client.Models
 
 <div class="mb-4">
     <GalleryCarousel Id="@CarouselId"
@@ -28,7 +29,7 @@
 
 @code {
     [Parameter] public string CarouselId { get; set; }
-    [Parameter] public IEnumerable<GalleryCarousel.GalleryImage> Images { get; set; }
+    [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
     [Parameter] public string Title { get; set; }
     [Parameter] public List<string> Description { get; set; }
     [Parameter] public string ButtonText { get; set; }

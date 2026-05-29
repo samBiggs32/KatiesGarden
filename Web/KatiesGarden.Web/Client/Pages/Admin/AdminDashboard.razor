@@ -1,0 +1,113 @@
+@page "/admin"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+
+<PageTitle>Dashboard — Admin</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Dashboard</MudText>
+
+@if (_loading)
+{
+    <MudGrid>
+        @for (int i = 0; i < 4; i++)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px" />
+            </MudItem>
+        }
+    </MudGrid>
+}
+else
+{
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="2" Class="pa-4 text-center">
+                <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Color="Color.Warning" Size="Size.Large" />
+                <MudText Typo="Typo.h4">@_pendingCount</MudText>
+                <MudText Typo="Typo.body2">Pending Orders</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="2" Class="pa-4 text-center">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                <MudText Typo="Typo.h4">@_confirmedCount</MudText>
+                <MudText Typo="Typo.body2">Confirmed Orders</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="2" Class="pa-4 text-center">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h4">@_productCount</MudText>
+                <MudText Typo="Typo.body2">Active Products</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="2" Class="pa-4 text-center">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Size="Size.Large" />
+                <MudText Typo="Typo.h4">@_lowStockCount</MudText>
+                <MudText Typo="Typo.body2">Low / No Stock</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.h6" Class="mb-3">Recent Orders</MudText>
+    @if (_recentOrders.Count > 0)
+    {
+        <MudTable Items="_recentOrders" Dense="true" Hover="true">
+            <HeaderContent>
+                <MudTh>Order</MudTh>
+                <MudTh>Customer</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Date</MudTh>
+                <MudTh></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.OrderNumber</MudTd>
+                <MudTd>@context.CustomerFirstName @context.CustomerLastName</MudTd>
+                <MudTd>£@context.Total.ToString("F2")</MudTd>
+                <MudTd><MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
+                <MudTd>@context.CreatedAt.ToString("dd MMM yyyy")</MudTd>
+                <MudTd><MudButton Size="Size.Small" Href="@($"/admin/orders/{context.Id}")">View</MudButton></MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+    else
+    {
+        <MudText Typo="Typo.body2" Color="Color.Secondary">No orders yet.</MudText>
+    }
+}
+
+@code {
+    [Inject] AdminOrderService AdminOrderService { get; set; } = null!;
+    [Inject] AdminProductService AdminProductService { get; set; } = null!;
+
+    private bool _loading = true;
+    private int _pendingCount, _confirmedCount, _productCount, _lowStockCount;
+    private List<OrderSummaryDto> _recentOrders = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ordersTask = AdminOrderService.GetOrdersAsync();
+        var productsTask = AdminProductService.GetProductsAsync();
+        await Task.WhenAll(ordersTask, productsTask);
+
+        var orders = await ordersTask ?? [];
+        var products = await productsTask ?? [];
+
+        _pendingCount = orders.Count(o => o.Status == "Pending");
+        _confirmedCount = orders.Count(o => o.Status == "Confirmed" || o.Status == "Processing");
+        _productCount = products.Count(p => p.IsAvailable);
+        _lowStockCount = products.Count(p => !p.IsAvailable || (p.StockQuantity.HasValue && p.StockQuantity <= 2));
+        _recentOrders = orders.Take(5).ToList();
+        _loading = false;
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Confirmed" or "Processing" => Color.Success,
+        "Pending" => Color.Warning,
+        "Cancelled" or "Refunded" => Color.Error,
+        _ => Color.Default
+    };
+}

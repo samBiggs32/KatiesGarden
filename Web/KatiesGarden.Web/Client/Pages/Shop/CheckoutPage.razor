@@ -1,0 +1,57 @@
+@page "/checkout"
+@using KatiesGarden.Models.Shop
+@using KatiesGarden.Web.Client.Models
+
+<PageTitle>Checkout — Katie's Garden</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Your Details</MudText>
+
+    <MudForm @ref="_form" Model="_request">
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_request.FirstName" Label="First Name" Variant="Variant.Outlined"
+                              Required="true" Class="mb-3" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_request.LastName" Label="Last Name" Variant="Variant.Outlined"
+                              Required="true" Class="mb-3" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_request.Email" Label="Email Address" Variant="Variant.Outlined"
+                              InputType="InputType.Email" Required="true" Class="mb-3" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_request.Phone" Label="Phone Number" Variant="Variant.Outlined"
+                              Required="true" Class="mb-3" />
+            </MudItem>
+
+            @if (_deliveryType == "LocalDelivery")
+            {
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_request.DeliveryAddress" Label="Delivery Address" Variant="Variant.Outlined"
+                                  Required="true" Lines="2" Class="mb-3" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_request.DeliveryPostcode" Label="Postcode" Variant="Variant.Outlined"
+                                  Required="true" Class="mb-3" />
+                </MudItem>
+            }
+
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_request.Notes" Label="Order Notes (optional)" Variant="Variant.Outlined"
+                              Lines="3" Class="mb-3" />
+            </MudItem>
+        </MudGrid>
+
+        @if (_error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4">@_error</MudAlert>
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                   Size="Size.Large" OnClick="SubmitAsync" Disabled="@_submitting">
+            @(_submitting ? "Preparing payment…" : "Continue to Payment")
+        </MudButton>
+    </MudForm>
+</MudContainer>

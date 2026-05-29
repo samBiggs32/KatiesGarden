@@ -1,34 +1,30 @@
-﻿<div class="m-1 background-colour-primary">
+@using KatiesGarden.Web.Client.Models
+
+<div class="m-1 background-colour-primary">
     <div class="image-container">
         <div class="crop">
-            <MudCarousel Class="carousel-size w-100" ShowArrows="@arrows" ShowBullets="@showBullets" AutoCycle="@autocycle" TData="object">
+            <MudCarousel Class="carousel-size w-100" ShowArrows="@arrows" ShowBullets="@showBullets" AutoCycle="@autocycle" TData="object"
+                         aria-label="Garden photo slideshow" role="region">
                 <ChildContent>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block" loading="eager" style="max-height: 100%; max-width: 100%; object-fit: contain;"
-                                 src="@Images.Lookup.ElementAt(0).Key" srcset=@Images.Lookup.ElementAt(0).Value alt="Katies Garden">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(1).Key" srcset=@Images.Lookup.ElementAt(1).Value alt="Katies Garden">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(2).Key" srcset=@Images.Lookup.ElementAt(2).Value alt="Katies Garden">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(3).Key" srcset=@Images.Lookup.ElementAt(3).Value alt="Katies Garden">
-                        </div>
-                    </MudCarouselItem>
-                    <MudCarouselItem Transition="transition" Color="@transitionColour">
-                        <div class="d-flex">
-                            <img class="d-block w-100" src="@Images.Lookup.ElementAt(4).Key" srcset=@Images.Lookup.ElementAt(4).Value alt="Katies Garden">
-                        </div>
-                    </MudCarouselItem>
+                    @for (int i = 0; i < Images.Slides.Count; i++)
+                    {
+                        var slide = Images.Slides[i];
+                        var isFirst = i == 0;
+                        <MudCarouselItem Transition="transition" Color="@transitionColour">
+                            <div class="d-flex">
+                                <picture class="d-block w-100">
+                                    <source type="image/webp" srcset="@slide.WebpSrc" />
+                                    <img class="d-block w-100"
+                                         loading="@(isFirst ? "eager" : "lazy")"
+                                         style="max-height: 100%; max-width: 100%; object-fit: cover;"
+                                         src="@slide.Src"
+                                         srcset="@slide.SrcSet"
+                                         sizes="100vw"
+                                         alt="@slide.Alt" />
+                                </picture>
+                            </div>
+                        </MudCarouselItem>
+                    }
                 </ChildContent>
             </MudCarousel>
         </div>
@@ -36,19 +32,9 @@
 </div>
 
 @code {
-    private int imageWidthNumber = Convert.ToInt32(518 * sizeMultiple);
-
-    private int imageHeight = Convert.ToInt32((518 / sizeMultiple) * ratio);
-
-    private const double sizeMultiple = 1.5;
-    private const double ratio = 1.50149;
-
-    private bool arrows = false;
+    private bool arrows = true;
     private bool showBullets = false;
     private bool autocycle = true;
     private Transition transition = Transition.Fade;
     private Color transitionColour = Color.Transparent;
-    private int numberOfImages = 0;
-
-    public Carousel() => numberOfImages = Images.Lookup.Count();
 }

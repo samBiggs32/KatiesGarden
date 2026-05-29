@@ -1,0 +1,98 @@
+@page "/admin/collections/new"
+@page "/admin/collections/{Id:guid}/edit"
+@layout AdminLayout
+@using KatiesGarden.Models.Shop
+@using Microsoft.AspNetCore.Components.Forms
+
+<PageTitle>@(_isNew ? "New Collection" : "Edit Collection") — Admin</PageTitle>
+
+<div class="d-flex align-items-center mb-6">
+    <MudText Typo="Typo.h4" Class="font-weight-bold flex-grow-1">@(_isNew ? "New Collection" : "Edit Collection")</MudText>
+    <MudButton Variant="Variant.Text" Href="/admin/collections" StartIcon="@Icons.Material.Filled.ArrowBack">
+        Back to Collections
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+}
+else
+{
+    <MudPaper Elevation="2" Class="pa-6">
+        <MudGrid>
+            <MudItem xs="12" md="8">
+                <MudTextField @bind-Value="_title" Label="Collection Title" Required="true"
+                              MaxLength="200" HelperText="e.g. Spring Sale 2025"
+                              Immediate="true" Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudNumericField @bind-Value="_displayOrder" Label="Display Order" Min="0" Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_description" Label="Description" Lines="4"
+                              MaxLength="2000" HelperText="Max 2000 characters" Class="mb-4" />
+            </MudItem>
+
+            <MudItem xs="12" md="5">
+                <MudDatePicker @bind-Date="_startDate" Label="Start Date" Class="mb-4" />
+            </MudItem>
+            <MudItem xs="12" md="2" Class="d-flex align-items-center">
+                <MudCheckBox @bind-Value="_hasEndDate" Label="Has end date" />
+            </MudItem>
+            <MudItem xs="12" md="5">
+                @if (_hasEndDate)
+                {
+                    <MudDatePicker @bind-Date="_endDate" Label="End Date" Class="mb-4" />
+                }
+            </MudItem>
+
+            @if (!_isNew)
+            {
+                <MudItem xs="12" md="4">
+                    <MudSwitch @bind-Value="_isActive" Label="Active (visible in shop)" Color="Color.Success" />
+                </MudItem>
+            }
+
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Cover Image (optional)</MudText>
+                @if (!string.IsNullOrEmpty(_coverImageUrl))
+                {
+                    <div style="position:relative; display:inline-block; margin-bottom:12px;">
+                        <img src="@_coverImageUrl" alt="Cover image"
+                             style="width:200px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #ddd;" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error"
+                                       Style="position:absolute; top:-8px; right:-8px; background:white;"
+                                       OnClick="@(() => _coverImageUrl = null)" aria-label="Remove cover image" />
+                    </div>
+                }
+                else
+                {
+                    <InputFile id="cover-upload" OnChange="OnCoverImageSelected" accept="image/jpeg,image/png,image/webp"
+                               style="display:none;" />
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.AddPhotoAlternate"
+                               OnClick="TriggerCoverUpload" Disabled="_uploading">
+                        @(_uploading ? "Uploading…" : "Upload Cover Image")
+                    </MudButton>
+                }
+                @if (!string.IsNullOrEmpty(_uploadError))
+                {
+                    <MudText Color="Color.Error" Class="mt-1">@_uploadError</MudText>
+                }
+            </MudItem>
+        </MudGrid>
+
+        <div class="d-flex gap-3 mt-6">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync"
+                       Disabled="_saving" StartIcon="@Icons.Material.Filled.Save">
+                @(_saving ? "Saving…" : "Save Collection")
+            </MudButton>
+            <MudButton Variant="Variant.Text" Href="/admin/collections">Cancel</MudButton>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_saveError))
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-4">@_saveError</MudAlert>
+        }
+    </MudPaper>
+}

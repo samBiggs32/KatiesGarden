@@ -1,0 +1,145 @@
+@inherits LayoutComponentBase
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject HttpClient Http
+@inject IJSRuntime JS
+@using System.Net.Http
+@using System.Net.Http.Json
+@using KatiesGarden.Models.Shop
+@using KatiesGarden.Web.Client.Theme
+
+<MudThemeProvider Theme="KatiesGardenTheme.Instance" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@if (!_checked)
+{
+    <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+        <MudProgressCircular Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1" Color="Color.Primary">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                           OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+            <MudText Typo="Typo.h6" Class="ml-2">Katie's Garden — Admin</MudText>
+            <MudSpacer />
+            <MudButton Color="Color.Inherit" Href="/" StartIcon="@Icons.Material.Filled.Home">View Site</MudButton>
+            @if (_pushSupported)
+            {
+                <MudTooltip Text="@(_pushSubscribed ? "Notifications on — click to disable" : "Enable order notifications")">
+                    <MudIconButton Icon="@(_pushSubscribed ? Icons.Material.Filled.NotificationsActive : Icons.Material.Filled.NotificationsOff)"
+                                   Color="Color.Inherit" OnClick="TogglePushAsync"
+                                   aria-label="@(_pushSubscribed ? "Disable push notifications" : "Enable push notifications")" />
+                </MudTooltip>
+            }
+            <MudButton Color="Color.Inherit" Href="/.auth/logout" StartIcon="@Icons.Material.Filled.Logout">Sign Out</MudButton>
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Variant="DrawerVariant.Responsive" ClipMode="DrawerClipMode.Always">
+            <MudNavMenu>
+                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Href="/admin/orders" Icon="@Icons.Material.Filled.ShoppingCart">Orders</MudNavLink>
+                <MudNavLink Href="/admin/products" Icon="@Icons.Material.Filled.Inventory">Products</MudNavLink>
+                <MudNavLink Href="/admin/collections" Icon="@Icons.Material.Filled.Collections">Collections</MudNavLink>
+                <MudNavLink Href="/admin/delivery-settings" Icon="@Icons.Material.Filled.LocalShipping">Delivery Settings</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-6">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _checked;
+    private bool _pushSupported;
+    private bool _pushSubscribed;
+    private string? _vapidPublicKey;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAdmin = await AuthService.IsAdminAsync();
+        if (!isAdmin)
+        {
+            Navigation.NavigateTo("/admin/login", forceLoad: false);
+            _checked = true;
+            return;
+        }
+
+        _pushSupported = await JS.InvokeAsync<bool>("KgPush.isSupported");
+        if (_pushSupported)
+        {
+            try
+            {
+                _vapidPublicKey = await Http.GetStringAsync("api/push/vapid-public-key");
+            }
+            catch
+            {
+                _vapidPublicKey = null;
+            }
+
+            // Hide the bell entirely if the VAPID key isn't configured server-side
+            if (string.IsNullOrWhiteSpace(_vapidPublicKey))
+                _pushSupported = false;
+            else
+                _pushSubscribed = await JS.InvokeAsync<bool>("KgPush.isSubscribed");
+        }
+
+        _checked = true;
+    }
+
+    private async Task TogglePushAsync()
+    {
+        if (string.IsNullOrEmpty(_vapidPublicKey)) return;
+
+        try
+        {
+            if (_pushSubscribed)
+            {
+                // Capture endpoint before unsubscribing so we can tell the server which row to remove
+                var endpoint = await JS.InvokeAsync<string?>("KgPush.getEndpoint");
+                await JS.InvokeVoidAsync("KgPush.unsubscribe");
+
+                if (!string.IsNullOrEmpty(endpoint))
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Delete, "api/push/subscribe")
+                    {
+                        Content = JsonContent.Create(new PushSubscribeRequest(endpoint, string.Empty, string.Empty))
+                    };
+                    await Http.SendAsync(request);
+                }
+
+                _pushSubscribed = false;
+            }
+            else
+            {
+                var subJson = await JS.InvokeAsync<string>("KgPush.subscribe", _vapidPublicKey);
+                var sub = System.Text.Json.JsonSerializer.Deserialize<PushSubscriptionJson>(subJson,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (sub is not null)
+                {
+                    await Http.PostAsJsonAsync("api/push/subscribe", new PushSubscribeRequest(
+                        sub.Endpoint,
+                        sub.Keys?.P256dh ?? string.Empty,
+                        sub.Keys?.Auth ?? string.Empty));
+                    _pushSubscribed = true;
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Push permission denied or not available — silently ignore
+        }
+    }
+
+    private record PushSubscriptionJson(string Endpoint, PushKeys? Keys);
+    private record PushKeys(string P256dh, string Auth);
+}

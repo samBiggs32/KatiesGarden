@@ -5,6 +5,8 @@ self.importScripts('./service-worker-assets.js');
 self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
+self.addEventListener('push', event => event.waitUntil(onPush(event)));
+self.addEventListener('notificationclick', event => event.waitUntil(onNotificationClick(event)));
 
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
@@ -33,6 +35,32 @@ async function onActivate(event) {
             .filter(key => key.startsWith(cacheNamePrefix) && key !== cacheName)
             .map(key => caches.delete(key))
     ]);
+}
+
+async function onPush(event) {
+    let payload = { title: "Katie's Garden", body: 'New activity' };
+    try {
+        if (event.data) payload = { ...payload, ...event.data.json() };
+    } catch { /* keep default payload */ }
+
+    await self.registration.showNotification(payload.title, {
+        body: payload.body,
+        icon: '/Images/katies-icon-192.png',
+        badge: '/Images/katies-icon-192.png',
+        tag: 'kg-order',
+        renotify: true,
+        data: { url: '/admin/orders' }
+    });
+}
+
+async function onNotificationClick(event) {
+    event.notification.close();
+    const target = event.notification.data?.url ?? '/admin';
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of clients) {
+        if (client.url.includes(target) && 'focus' in client) return client.focus();
+    }
+    if (self.clients.openWindow) await self.clients.openWindow(target);
 }
 
 async function onFetch(event) {

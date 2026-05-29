@@ -6,7 +6,9 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" Version="13.3.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.0.0" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -16,5 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../Shared/KatiesGarden.Shared.csproj" />
+    <ProjectReference Include="../../Api/KatiesGarden.Api.csproj" />
+    <ProjectReference Include="../../AppHost/KatiesGarden.AppHost.csproj" />
   </ItemGroup>
 </Project>

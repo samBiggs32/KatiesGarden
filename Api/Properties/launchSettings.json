@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "KatiesGarden.Api": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7071",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
