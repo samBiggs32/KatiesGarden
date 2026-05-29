@@ -22,7 +22,7 @@ public class AdminImageApiTests(AspireApiFixture fixture)
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-        var response = await fixture.HttpClient.PostAsync("/api/admin/images", content);
+        var response = await fixture.HttpClient.PostAsync("/api/manage/images", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -34,7 +34,7 @@ public class AdminImageApiTests(AspireApiFixture fixture)
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-        var response = await admin.PostAsync("/api/admin/images", content);
+        var response = await admin.PostAsync("/api/manage/images", content);
 
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
     }
@@ -46,7 +46,7 @@ public class AdminImageApiTests(AspireApiFixture fixture)
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
 
-        var response = await admin.PostAsync("/api/admin/images", content);
+        var response = await admin.PostAsync("/api/manage/images", content);
 
         // Content-type check runs BEFORE the storage null-check, so this returns 400
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

@@ -17,7 +17,7 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
 
     [Function("UploadImage")]
     public async Task<HttpResponseData> Upload(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/images")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/images")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req))
             return req.CreateResponse(HttpStatusCode.Unauthorized);
