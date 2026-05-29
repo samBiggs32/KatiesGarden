@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build & Unit Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -41,7 +41,7 @@ jobs:
     name: Integration Tests (Postgres + Aspire smoke)
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5

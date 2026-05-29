@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -46,7 +46,7 @@ jobs:
     outputs:
       preview_url: ${{ steps.deploy.outputs.static_web_app_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -119,7 +119,7 @@ jobs:
     env:
       PLAYWRIGHT_BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -149,7 +149,7 @@ jobs:
     env:
       BASE_URL: ${{ needs.build_and_deploy_preview.outputs.preview_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run Lighthouse CI
         run: |

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Unit Tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -40,7 +40,7 @@ jobs:
     name: Integration Tests
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -70,7 +70,7 @@ jobs:
     outputs:
       site_url: ${{ steps.deploy.outputs.static_web_app_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true
           lfs: false
@@ -154,7 +154,7 @@ jobs:
     env:
       PLAYWRIGHT_BASE_URL: ${{ needs.build_and_deploy_production.outputs.site_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
