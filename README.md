@@ -37,6 +37,7 @@
   - [Product image storage (Azure Blob)](#product-image-storage-azure-blob)
   - [Push notifications (VAPID)](#push-notifications-vapid)
   - [Admin login (OAuth)](#admin-login-oauth)
+    - [Testing admin login locally](#testing-admin-login-locally)
 - [Operations](#-operations)
   - [Live readiness check](#live-readiness-check)
   - [Logs](#logs)
@@ -326,7 +327,48 @@ The `/admin` route is protected by Azure Static Web Apps' built-in authenticatio
 
 Pass these to Terraform via `terraform.tfvars` (see [Provisioning with Terraform](#provisioning-with-terraform)). Terraform sets them as SWA identity provider settings automatically.
 
-To grant Katie admin access, add her email to `allowedRoles` in `Web/KatiesGarden.Web/Client/wwwroot/staticwebapp.config.json` under the `/admin` route rule.
+To grant Katie the `admin` role in production, invite her in the **Azure Portal → your Static Web App → Role management → Invite** — choose her provider and email, assign the role `admin`, and send her the invite link. Once she accepts and signs in, `/admin` unlocks and the **Admin** link appears in the nav. (The `allowedRoles: ["admin"]` entry in `staticwebapp.config.json` only declares *which* role is required — it doesn't assign it.)
+
+> There's deliberately **no public "Sign in" link** on the site — admins reach the panel by navigating to `/admin` (which redirects to `/admin/login`). The nav's Admin link only appears once you're already signed in as an admin.
+
+#### Testing admin login locally
+
+The `/.auth/*` endpoints, `/.auth/me`, and roles are provided by the Azure Static Web Apps runtime — they **don't exist** under a plain Aspire / `dotnet run`, so admin login can't be exercised that way. The **SWA CLI** emulates them locally and lets you fake a login with any roles, including `admin`.
+
+**Install once:**
+
+```sh
+npm install -g @azure/static-web-apps-cli
+# (Azure Functions Core Tools v4 must also be installed — see Prerequisites)
+```
+
+**Run it** (from the repo root):
+
+```powershell
+# Windows — one command starts the API, the Blazor dev server, and the emulator:
+pwsh scripts/start-local-auth.ps1
+```
+
+Or manually, in two terminals (any OS):
+
+```sh
+# Terminal 1 — the Functions API on :7071
+cd Api && func start
+
+# Terminal 2 — the SWA emulator on :4280 (also launches the Blazor dev server)
+swa start
+```
+
+Both read `swa-cli.config.json`, which wires the Blazor dev server (`:5000`), the API (`:7071`), and your real `staticwebapp.config.json` together behind `http://localhost:4280`.
+
+**Sign in as admin:**
+
+1. Open **http://localhost:4280** and go to **`/admin/login`**.
+2. Click any provider button — the SWA CLI shows a local fake-login form instead of the real OAuth screen.
+3. In the **Roles** field, add `admin` (alongside the default `anonymous,authenticated`), pick any username, and submit.
+4. You're redirected to `/admin` as an administrator: the route guard passes, the API sees the `x-ms-client-principal` header with the admin role, and the **Admin** link appears in the nav.
+
+> The admin pages call `/api/admin/*`, which needs the database. The emulator only handles auth — for working data, point `DATABASE_URL` in `Api/local.settings.json` at a local Postgres (e.g. `docker run -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres`) or a Neon dev branch. Without it, sign-in still works but data calls will error.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

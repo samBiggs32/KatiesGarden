@@ -7,6 +7,9 @@
 local.settings.json
 appsettings.Development.json
 
+# Azure Static Web Apps CLI working folder (emulator runtime state)
+.swa/
+
 # User-specific files
 *.rsuser
 *.suo
