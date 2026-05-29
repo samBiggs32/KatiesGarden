@@ -205,7 +205,21 @@ After `dotnet run --project AppHost/...`:
 
 **Troubleshooting**
 
-- **`api` fails with `dotnet ---port does not exist` / `Could not execute because the specified command or file was not found`** — Azure Functions Core Tools v4 (`func`) is not on your PATH. Aspire launches the Functions host via `func host start`; without it the launch command is malformed. Install it (`npm install -g azure-functions-core-tools@4`) and **restart your IDE** so it picks up the updated PATH. The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the port to 7071.
+- **`api` fails with `dotnet ---port does not exist` / `Could not execute because the specified command or file was not found`** (Postgres starts fine, only `api` dies) — Aspire's `AddAzureFunctionsProject` launches the Functions host via `func host start`. When it **can't find `func`**, the command degrades to a malformed `dotnet --port {n}` (the port is an Aspire-assigned dynamic one, e.g. `61483`, not 7071). The cause is almost always **PATH inheritance**, not a missing install:
+
+  > **`func` working in your terminal does NOT mean Visual Studio sees it.** `devenv.exe` caches the system PATH from when it started. If `func` was installed/added to PATH *after* VS was already open, VS — and the Aspire AppHost it spawns — is blind to it.
+
+  **Fastest fix (no reboot):** run the AppHost from a terminal where `func --version` works — it inherits that terminal's PATH:
+  ```sh
+  dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+  ```
+  **Permanent fix for VS F5:** install the tools, then **fully exit** Visual Studio (not just "Restart") and reopen — a reboot is surest:
+  ```powershell
+  func --version            # 4.x.xxxx if installed
+  where.exe func            # resolved path, or "Could not find"
+  winget install Microsoft.Azure.FunctionsCoreTools   # if missing
+  ```
+  The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the standalone port to 7071. See [microsoft/aspire #7010](https://github.com/microsoft/aspire/issues/7010).
 - **Shop/cart show errors or "unexpected character `<`"** — the browser is calling the wrong origin. Make sure you opened the **HTTP** `web` endpoint (not HTTPS), so the WASM app can reach `http://localhost:7071` without mixed-content blocking.
 - **Dashboard never appears** — check Docker Desktop is running (`docker info`).
 
