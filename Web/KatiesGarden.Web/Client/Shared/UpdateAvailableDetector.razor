@@ -1,4 +1,5 @@
-﻿@inject IJSRuntime _jsRuntime
+﻿@implements IAsyncDisposable
+@inject IJSRuntime _jsRuntime
 
 @if (_newVersionAvailable)
 {
@@ -10,17 +11,14 @@
 @code {
 
     private bool _newVersionAvailable = false;
+    private DotNetObjectReference<UpdateAvailableDetector>? _dotNetRef;
 
     protected override async Task OnInitializedAsync()
     {
-        await RegisterForUpdateAvailableNotification();
-    }
-
-    private async Task RegisterForUpdateAvailableNotification()
-    {
+        _dotNetRef = DotNetObjectReference.Create(this);
         await _jsRuntime.InvokeAsync<object>(
             identifier: "registerForUpdateAvailableNotification",
-            DotNetObjectReference.Create(this),
+            _dotNetRef,
             nameof(OnUpdateAvailable));
     }
 
@@ -28,10 +26,14 @@
     public Task OnUpdateAvailable()
     {
         _newVersionAvailable = true;
-
         StateHasChanged();
-
         return Task.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _dotNetRef?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
 }

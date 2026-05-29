@@ -1,11 +1,10 @@
+using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Services;
-using KatiesGarden.Api.Configuration;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Stripe;
@@ -17,9 +16,9 @@ namespace KatiesGarden.Api.Functions;
 public class StripeWebhookFunction(
     AppDbContext db,
     IEmailSender emailSender,
-    PushNotificationService pushService,
+    IPushNotificationService pushService,
     IOptions<SmtpOptions> smtpOptions,
-    IConfiguration config,
+    IOptions<StripeOptions> stripeOptions,
     ILogger<StripeWebhookFunction> logger)
 {
     [Function("StripeWebhook")]
@@ -27,8 +26,7 @@ public class StripeWebhookFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhooks/stripe")] HttpRequestData req)
     {
         var ct = req.FunctionContext.CancellationToken;
-        var webhookSecret = config["STRIPE_WEBHOOK_SECRET"];
-        StripeConfiguration.ApiKey = config["STRIPE_SECRET_KEY"];
+        var webhookSecret = stripeOptions.Value.WebhookSecret;
 
         string json;
         using (var reader = new StreamReader(req.Body))
@@ -44,6 +42,11 @@ public class StripeWebhookFunction(
         {
             logger.LogWarning(ex, "Invalid Stripe webhook signature");
             return req.CreateResponse(HttpStatusCode.BadRequest);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error constructing Stripe event");
+            return req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
         if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
@@ -103,7 +106,7 @@ public class StripeWebhookFunction(
         logger.LogInformation("Order {OrderNumber} confirmed (Stripe session {SessionId})", order.OrderNumber, session.Id);
 
         var smtp = smtpOptions.Value;
-        var siteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
+        var siteUrl = stripeOptions.Value.SiteUrl;
 
         // Customer confirmation email
         try

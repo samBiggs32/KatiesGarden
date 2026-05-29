@@ -92,8 +92,8 @@ else
         var productsTask = AdminProductService.GetProductsAsync();
         await Task.WhenAll(ordersTask, productsTask);
 
-        var orders = ordersTask.Result ?? [];
-        var products = productsTask.Result ?? [];
+        var orders = await ordersTask ?? [];
+        var products = await productsTask ?? [];
 
         _pendingCount = orders.Count(o => o.Status == "Pending");
         _confirmedCount = orders.Count(o => o.Status == "Confirmed" || o.Status == "Processing");

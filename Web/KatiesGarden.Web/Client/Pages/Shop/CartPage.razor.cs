@@ -6,7 +6,7 @@ using MudBlazor;
 
 namespace KatiesGarden.Web.Client.Pages.Shop;
 
-public partial class CartPage : ComponentBase
+public partial class CartPage : ComponentBase, IDisposable
 {
     [Inject] CartService CartService { get; set; } = null!;
     [Inject] ShopService ShopService { get; set; } = null!;
@@ -41,10 +41,16 @@ public partial class CartPage : ComponentBase
         CartService.CartChanged += OnCartChanged;
     }
 
-    private async void OnCartChanged()
+    // Synchronous event handler — dispatches async work back to the component's
+    // render context via InvokeAsync so StateHasChanged is always called on the
+    // UI thread, and any exceptions surface in the component's error boundary.
+    private void OnCartChanged()
     {
-        _items = (await CartService.GetItemsAsync()).ToList();
-        await InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(async () =>
+        {
+            _items = (await CartService.GetItemsAsync()).ToList();
+            StateHasChanged();
+        });
     }
 
     private async Task UpdateQuantityAsync(Guid productId, int quantity)

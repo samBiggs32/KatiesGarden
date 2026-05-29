@@ -9,7 +9,7 @@ namespace KatiesGarden.Api.Services;
 public class PushNotificationService(
     AppDbContext db,
     IConfiguration config,
-    ILogger<PushNotificationService> logger)
+    ILogger<PushNotificationService> logger) : IPushNotificationService
 {
     public async Task SendAsync(string title, string body, CancellationToken ct = default)
     {

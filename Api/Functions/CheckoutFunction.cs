@@ -1,13 +1,14 @@
 using FluentValidation;
 using KatiesGarden.Api.Auth;
+using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Helpers;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 using System.Net;
@@ -17,7 +18,8 @@ namespace KatiesGarden.Api.Functions;
 public class CheckoutFunction(
     AppDbContext db,
     IValidator<CheckoutRequest> validator,
-    IConfiguration config,
+    IOptions<StripeOptions> stripeOptions,
+    SessionService sessionService,
     ILogger<CheckoutFunction> logger)
 {
     [Function("CreateCheckoutSession")]
@@ -92,9 +94,8 @@ public class CheckoutFunction(
         db.Orders.Add(order);
         await db.SaveChangesAsync(ct);
 
-        // Create Stripe Checkout Session
-        StripeConfiguration.ApiKey = config["STRIPE_SECRET_KEY"];
-        var siteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
+        var stripe = stripeOptions.Value;
+        var siteUrl = stripe.SiteUrl;
 
         var lineItems = request.Items.Select(i => new SessionLineItemOptions
         {
@@ -128,7 +129,7 @@ public class CheckoutFunction(
             });
         }
 
-        var sessionOptions = new SessionCreateOptions
+        var sessionCreateOptions = new SessionCreateOptions
         {
             PaymentMethodTypes = ["card"],
             LineItems = lineItems,
@@ -139,11 +140,10 @@ public class CheckoutFunction(
             Metadata = new Dictionary<string, string> { ["orderId"] = order.Id.ToString() }
         };
 
-        var sessionService = new SessionService();
         Stripe.Checkout.Session session;
         try
         {
-            session = await sessionService.CreateAsync(sessionOptions, cancellationToken: ct);
+            session = await sessionService.CreateAsync(sessionCreateOptions, cancellationToken: ct);
         }
         catch (StripeException ex)
         {

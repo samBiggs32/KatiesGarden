@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Stripe;
+using Stripe.Checkout;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
@@ -58,7 +60,19 @@ var host = new HostBuilder()
                 opts.ListId = int.TryParse(config["BREVO_LIST_ID"], out var id) ? id : null;
             });
 
+        // Stripe — optional keys; missing keys cause graceful failures at call time, not startup
+        services.AddOptions<StripeOptions>()
+            .Configure<IConfiguration>((opts, config) =>
+            {
+                opts.SecretKey = config["STRIPE_SECRET_KEY"] ?? "";
+                opts.WebhookSecret = config["STRIPE_WEBHOOK_SECRET"] ?? "";
+                opts.SiteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
+            });
+
         services.AddSingleton<IEmailSender, MailKitEmailSender>();
+
+        // Stripe services — singletons because they carry no per-request state
+        services.AddSingleton<SessionService>();
 
         // Azure Blob Storage — optional, skipped gracefully if not configured
         var storageConn = context.Configuration["AZURE_STORAGE_CONNECTION_STRING"];
@@ -68,9 +82,14 @@ var host = new HostBuilder()
             services.AddSingleton<BlobServiceClient?>(_ => null);
 
         // Push notification service — scoped because it uses AppDbContext
-        services.AddScoped<PushNotificationService>();
+        services.AddScoped<IPushNotificationService, PushNotificationService>();
     })
     .Build();
+
+// Set Stripe API key once at startup — avoids mutating a global static on every request
+var stripeKey = host.Services.GetRequiredService<IConfiguration>()["STRIPE_SECRET_KEY"];
+if (!string.IsNullOrWhiteSpace(stripeKey))
+    StripeConfiguration.ApiKey = stripeKey;
 
 using (var scope = host.Services.CreateScope())
 {
