@@ -278,13 +278,13 @@ SMTP_PORT=587
 SMTP_USERNAME=your-brevo-login-email@example.com  # your Brevo account email
 SMTP_PASSWORD=xsmtpsib-...                        # the generated SMTP key, not your login password
 SENDER_EMAIL=noreply@katiesgarden.uk
-RECIPIENT_EMAIL=team@katiesgarden.uk
+RECIPIENT_EMAIL=sales@katiesgarden.uk
 BREVO_API_KEY=your-brevo-rest-api-key
 BREVO_LIST_ID=1                                   # numeric list ID from Brevo → Contacts → Lists
 ```
 
 **Alternative: any SMTP provider**
-If `team@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), use their SMTP credentials instead. Check your host's "outbound SMTP" settings page.
+If `sales@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), use their SMTP credentials instead. Check your host's "outbound SMTP" settings page.
 
 ### Online shop (Stripe)
 
@@ -360,7 +360,7 @@ This prints a public/private key pair. Copy them to your settings:
 ```
 VAPID_PUBLIC_KEY=BN...          # the public key (safe to expose — used by the browser)
 VAPID_PRIVATE_KEY=...           # the private key (keep secret)
-VAPID_SUBJECT=mailto:team@katiesgarden.uk
+VAPID_SUBJECT=mailto:sales@katiesgarden.uk
 ```
 
 The same public key is served by `GET /api/push/vapid-public-key` and used by the browser to subscribe. The same private key signs the push payload sent to the browser's push service.
@@ -533,7 +533,7 @@ smtp_port         = "587"
 smtp_username     = "your-brevo-login-email@example.com"
 smtp_password     = "your-brevo-smtp-key"
 smtp_sender_email = "noreply@katiesgarden.uk"
-recipient_email   = "team@katiesgarden.uk"
+recipient_email   = "sales@katiesgarden.uk"
 
 # Newsletter
 brevo_api_key     = "your-brevo-rest-api-key"
@@ -550,7 +550,7 @@ site_url               = "https://www.katiesgarden.uk"
 # Push notifications
 vapid_public_key   = "BN..."
 vapid_private_key  = "..."
-vapid_subject      = "mailto:team@katiesgarden.uk"
+vapid_subject      = "mailto:sales@katiesgarden.uk"
 
 # Admin OAuth — add whichever providers you want to support
 github_client_id      = ""
