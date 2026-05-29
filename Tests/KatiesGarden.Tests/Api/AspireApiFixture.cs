@@ -4,6 +4,8 @@ using Aspire.Hosting.Testing;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -23,6 +25,7 @@ public sealed class AspireApiFixture : IAsyncLifetime
 {
     private DistributedApplication? _app;
     private string? _connectionString;
+    private readonly ConcurrentQueue<string> _apiLogs = new();
 
     public HttpClient HttpClient { get; private set; } = null!;
 
@@ -32,6 +35,11 @@ public sealed class AspireApiFixture : IAsyncLifetime
             .CreateAsync<Projects.KatiesGarden_AppHost>();
         _app = await builder.BuildAsync();
         await _app.StartAsync();
+
+        // Stream the api resource's stdout/stderr into a buffer so test failures
+        // can surface the Functions host's own logs (routing, DI, SQL errors)
+        // instead of leaving us guessing from an opaque 404/500.
+        StartCapturingApiLogs(_app);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
         await _app.ResourceNotifications.WaitForResourceHealthyAsync("postgres", cts.Token);
@@ -46,6 +54,32 @@ public sealed class AspireApiFixture : IAsyncLifetime
         // Wait for the API to actually be responsive — /api/health is the
         // cheapest "ready to take traffic" signal.
         await WaitForHealth(cts.Token);
+    }
+
+    /// <summary>Captured stdout/stderr from the Functions host (most recent ~500 lines).</summary>
+    public string GetApiLogs()
+        => string.Join(Environment.NewLine, _apiLogs);
+
+    private void StartCapturingApiLogs(DistributedApplication app)
+    {
+        var loggerService = app.Services.GetService<ResourceLoggerService>();
+        if (loggerService is null) return;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var batch in loggerService.WatchAsync("api"))
+                {
+                    foreach (var line in batch)
+                    {
+                        _apiLogs.Enqueue(line.Content);
+                        while (_apiLogs.Count > 500) _apiLogs.TryDequeue(out _);
+                    }
+                }
+            }
+            catch { /* watch ends when the app stops */ }
+        });
     }
 
     public AppDbContext CreateDbContext()
@@ -94,7 +128,9 @@ public sealed class AspireApiFixture : IAsyncLifetime
             catch { /* keep retrying */ }
             await Task.Delay(1000, ct);
         }
-        throw new TimeoutException("API did not become healthy within 30 seconds");
+        throw new TimeoutException(
+            "API did not become healthy within 30 seconds. Functions host logs:" +
+            Environment.NewLine + GetApiLogs());
     }
 
     public async ValueTask DisposeAsync()
