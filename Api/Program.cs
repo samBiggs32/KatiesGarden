@@ -29,10 +29,19 @@ var host = new HostBuilder()
     {
         var config = context.Configuration;
 
-        // Database — optional; endpoints that need it return 503 when not configured
+        // Database — AppDbContext is ALWAYS registered so every function that
+        // depends on it can be constructed by the DI container. Most functions
+        // inject AppDbContext non-nullably; if it were only registered when
+        // DATABASE_URL is set, running the API standalone (no Aspire, no DB) would
+        // fail the whole host with "Some services are not able to be constructed".
+        // EF Core defers connecting until the first query, so a placeholder
+        // connection string is harmless at startup — DB-backed endpoints simply
+        // return 503/500 at call time when the database is unreachable.
         var dbUrl = config["DATABASE_URL"];
-        if (!string.IsNullOrWhiteSpace(dbUrl))
-            services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(dbUrl));
+        services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(
+            string.IsNullOrWhiteSpace(dbUrl)
+                ? "Host=localhost;Database=katiesgarden_unconfigured"
+                : dbUrl));
 
         services.AddHttpClient();
 
@@ -131,15 +140,17 @@ using (var scope = host.Services.CreateScope())
     // never hang the host so long that the Functions launcher gives up and kills
     // the process. On timeout/failure we log and continue — the host still starts
     // and /api/diagnostics will report the database as down.
-    var db = scope.ServiceProvider.GetService<AppDbContext>();
-    if (db is null)
+    var dbUrl = config["DATABASE_URL"];
+    if (string.IsNullOrWhiteSpace(dbUrl))
     {
-        log.LogWarning("DATABASE_URL not set — all database-backed endpoints unavailable");
+        log.LogWarning("DATABASE_URL not set — database-backed endpoints will return 503/500. " +
+            "Run the API via Aspire (dotnet run --project AppHost) to provision Postgres automatically.");
     }
     else
     {
         try
         {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
             await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
