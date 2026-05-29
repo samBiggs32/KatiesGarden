@@ -33,6 +33,8 @@ var api = builder.AddAzureFunctionsProject<Projects.KatiesGarden_Api>("api")
     // stack still goes green locally without any real accounts. All checks are
     // read-only — no email is sent and no quota is spent.
     .WithHttpHealthCheck("/api/diagnostics");
+    .WithHttpHealthCheck("health")
+    .WaitFor(db);
 
 // Blazor WebAssembly dev server. Aspire injects the API endpoint as a service
 // discovery variable; the client uses HttpClient.BaseAddress in dev anyway,

@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using FluentValidation;
+using Google.Protobuf.WellKnownTypes;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Email;
@@ -7,10 +8,12 @@ using KatiesGarden.Api.Services;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Shop;
 using KatiesGarden.Models.Validators;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Stripe;
@@ -71,6 +74,21 @@ var host = new HostBuilder()
             opts.WebhookSecret = config["STRIPE_WEBHOOK_SECRET"] ?? "";
             opts.SiteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
         });
+        // Stripe — optional keys; missing keys cause graceful failures at call time, not startup
+        services.AddOptions<StripeOptions>()
+            .Configure<IConfiguration>((opts, config) =>
+            {
+                opts.SecretKey = config["STRIPE_SECRET_KEY"] ?? "";
+                opts.WebhookSecret = config["STRIPE_WEBHOOK_SECRET"] ?? "";
+                opts.SiteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
+            });
+
+        services.AddHealthChecks()
+        .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
+
+        services.AddSingleton<IEmailSender, MailKitEmailSender>();
+
+        // Stripe services — singletons because they carry no per-request state
         services.AddSingleton<SessionService>();
 
         // Azure Blob Storage — only registered when a connection string is present so
