@@ -113,14 +113,26 @@ Clone the repo, copy the example settings, then run the full stack:
 git clone https://github.com/samBiggs32/KatiesGarden.git
 cd KatiesGarden
 
-# Copy and fill in the settings file (see Configuration reference below)
+# Aspire needs only the worker runtime locally — the AppHost injects everything else
 cp Api/local.settings.json.example Api/local.settings.json
-# Edit Api/local.settings.json with your credentials
 
 dotnet run --project AppHost/KatiesGarden.AppHost.csproj
 ```
 
 Aspire starts Postgres, the Functions API (pinned to **port 7071**), and the Blazor dev server in one command. A dashboard URL is printed in the console (e.g. `https://localhost:17158`) — open it to see all services.
+
+> **Keep `local.settings.json` minimal when running via Aspire.** Per Microsoft's
+> [Azure Functions + Aspire guidance](https://learn.microsoft.com/azure/azure-functions/dotnet-aspire-integration),
+> the only value it should contain is `FUNCTIONS_WORKER_RUNTIME` — the AppHost injects
+> `DATABASE_URL`, `SMTP_*`, `STRIPE_*`, and `SITE_URL` as environment variables. In
+> particular, **do not set `AzureWebJobsStorage`**: `AddAzureFunctionsProject` provisions
+> that connection for you, and hard-coding `UseDevelopmentStorage=true` points the host at a
+> local Azurite that usually isn't running — which makes the Functions host **fail to start
+> with exit code `0x80008081` before any of your code logs**. Other integrations (Brevo,
+> Blob, VAPID) are left unset locally and report `not_configured` — not a failure.
+>
+> For a standalone `func start` (without Aspire), add the settings you need from the
+> [Configuration reference](#-configuration-reference) to `local.settings.json` yourself.
 
 > **Open the `web` resource's HTTP endpoint (`http://localhost:5000`), not the HTTPS one.**
 > The Blazor app is a standalone WebAssembly SPA: it runs in the browser and cannot read
@@ -185,14 +197,43 @@ PLAYWRIGHT_BASE_URL=http://localhost:4280 \
 After `dotnet run --project AppHost/...`:
 
 1. **Console prints a dashboard URL** like `https://localhost:17158` — open it
-2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — all in the **Running** state (Postgres takes ~10 s the first time while the image pulls)
-3. **`postgres` is healthy** — click into it; the logs tab should show `database system is ready to accept connections`
-4. **`api` connects to the DB** — click `api` → logs; you should NOT see `DATABASE_URL must be set` or Npgsql connection errors
+2. **Dashboard "Resources" tab shows 4 resources** — `postgres`, `katiesgardendb`, `api`, `web` — each goes **Running** then **Healthy** (Postgres takes ~10 s the first time while the image pulls)
+3. **Health state reflects live integrations** — each resource has a health probe:
+   - `postgres` — Aspire's built-in Postgres readiness check
+   - `api` — probes **`/api/diagnostics`**, which is only "ready" when the database is reachable and every *configured* integration (Stripe, Blob Storage, Brevo) responds to a **read-only** call. Locally these are placeholders, so they report `not_configured` (not a failure) and `api` still goes Healthy. With real credentials the probe genuinely verifies each integration is live.
+   - `web` — probes `/` (the dev server is serving)
+4. **Inspect the integration checks directly**:
+   ```sh
+   curl http://localhost:7071/api/diagnostics | jq
+   # {"status":"ready","checks":{"api":"ok","database":"ok","brevo_api":"not_configured",
+   #  "stripe":"not_configured","blob_storage":"not_configured","smtp":"skipped"}, ...}
+
+   # Add ?checkSmtp=true to also verify SMTP credentials are live. This connects +
+   # authenticates + disconnects — it NEVER sends a message, so no send quota is used.
+   curl "http://localhost:7071/api/diagnostics?checkSmtp=true" | jq
+   ```
+   Every check is read-only and free: `database` runs `SELECT 1`, `brevo_api` reads the account, `stripe` retrieves the balance (no charge), `blob_storage` reads account properties (no writes), and `smtp` only logs in. Nothing here bills against any account or spends email quota.
 5. **`web` opens** — click the **HTTP** endpoint (`http://localhost:5000`) on the `web` row; the Blazor app should load with shop/cart/admin links working against your local API on `:7071`
 
 **Troubleshooting**
 
-- **`api` fails with `dotnet ---port does not exist` / `Could not execute because the specified command or file was not found`** — Azure Functions Core Tools v4 (`func`) is not on your PATH. Aspire launches the Functions host via `func host start`; without it the launch command is malformed. Install it (`npm install -g azure-functions-core-tools@4`) and **restart your IDE** so it picks up the updated PATH. The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the port to 7071.
+- **`api` fails with `dotnet ---port does not exist` / `Could not execute because the specified command or file was not found`** (Postgres starts fine, only `api` dies) — Aspire's `AddAzureFunctionsProject` launches the Functions host via `func host start`. When it **can't find `func`**, the command degrades to a malformed `dotnet --port {n}` (the port is an Aspire-assigned dynamic one, e.g. `61483`, not 7071). The cause is almost always **PATH inheritance**, not a missing install:
+
+  > **`func` working in your terminal does NOT mean Visual Studio sees it.** `devenv.exe` caches the system PATH from when it started. If `func` was installed/added to PATH *after* VS was already open, VS — and the Aspire AppHost it spawns — is blind to it.
+
+  **Fastest fix (no reboot):** run the AppHost from a terminal where `func --version` works — it inherits that terminal's PATH:
+  ```sh
+  dotnet run --project AppHost/KatiesGarden.AppHost.csproj
+  ```
+  **Permanent fix for VS F5:** install the tools, then **fully exit** Visual Studio (not just "Restart") and reopen — a reboot is surest:
+  ```powershell
+  func --version            # 4.x.xxxx if installed
+  where.exe func            # resolved path, or "Could not find"
+  winget install Microsoft.Azure.FunctionsCoreTools   # if missing
+  ```
+  The Functions launch profile lives in `Api/Properties/launchSettings.json` and pins the standalone port to 7071. See [microsoft/aspire #7010](https://github.com/microsoft/aspire/issues/7010).
+- **`api` launches (you see `func`) but the project exits immediately with code `0x80008081` / `-2147450751`, and the `/api/diagnostics` health check throws `TaskCanceledException`** — the Functions host crashed during startup, so nothing is listening and the probe times out. The usual cause is `AzureWebJobsStorage` being set to `UseDevelopmentStorage=true` in `local.settings.json` while Azurite isn't running. **Remove `AzureWebJobsStorage` from `local.settings.json`** — Aspire's `AddAzureFunctionsProject` provisions it for you. Keep the file minimal (only `FUNCTIONS_WORKER_RUNTIME`); the AppHost injects the rest. If you see no `Katie's Garden API starting up` log at all, the crash is here — before our code runs.
+- **`api` starts but never goes Healthy (stays yellow), so `web` never launches** — `/api/diagnostics` is returning 503. A *configured-but-unreachable* integration reports `fail` (→ 503), whereas an *unset* one reports `not_configured` (fine). The common culprit is `AZURE_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true` with no Azurite running — leave it empty locally so Blob Storage reports `not_configured`. Hit `http://localhost:7071/api/diagnostics` to see which check is failing.
 - **Shop/cart show errors or "unexpected character `<`"** — the browser is calling the wrong origin. Make sure you opened the **HTTP** `web` endpoint (not HTTPS), so the WASM app can reach `http://localhost:7071` without mixed-content blocking.
 - **Dashboard never appears** — check Docker Desktop is running (`docker info`).
 
@@ -237,13 +278,13 @@ SMTP_PORT=587
 SMTP_USERNAME=your-brevo-login-email@example.com  # your Brevo account email
 SMTP_PASSWORD=xsmtpsib-...                        # the generated SMTP key, not your login password
 SENDER_EMAIL=noreply@katiesgarden.uk
-RECIPIENT_EMAIL=team@katiesgarden.uk
+RECIPIENT_EMAIL=sales@katiesgarden.uk
 BREVO_API_KEY=your-brevo-rest-api-key
 BREVO_LIST_ID=1                                   # numeric list ID from Brevo → Contacts → Lists
 ```
 
 **Alternative: any SMTP provider**
-If `team@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), use their SMTP credentials instead. Check your host's "outbound SMTP" settings page.
+If `sales@katiesgarden.uk` is hosted via Google Workspace, Microsoft 365, or a domain host (e.g. Krystal), use their SMTP credentials instead. Check your host's "outbound SMTP" settings page.
 
 ### Online shop (Stripe)
 
@@ -319,7 +360,7 @@ This prints a public/private key pair. Copy them to your settings:
 ```
 VAPID_PUBLIC_KEY=BN...          # the public key (safe to expose — used by the browser)
 VAPID_PRIVATE_KEY=...           # the private key (keep secret)
-VAPID_SUBJECT=mailto:team@katiesgarden.uk
+VAPID_SUBJECT=mailto:sales@katiesgarden.uk
 ```
 
 The same public key is served by `GET /api/push/vapid-public-key` and used by the browser to subscribe. The same private key signs the push payload sent to the browser's push service.
@@ -416,14 +457,19 @@ curl https://katiesgarden.uk/api/diagnostics
     "api": "ok",
     "database": "ok",
     "brevo_api": "ok",
+    "stripe": "ok",
+    "blob_storage": "ok",
     "smtp": "skipped"
   },
   "timestamp": "2026-05-25T18:00:00Z"
 }
 ```
 
-- HTTP **200** when everything is green; HTTP **503** when any check is `"fail"`
-- `smtp` is deliberately skipped on each call — a full STARTTLS + AUTH LOGIN round-trip is 1–3 s, too slow for per-minute polling. The daily `verify-secrets` workflow covers SMTP end-to-end
+This same endpoint is the Aspire `api` health probe, so `dotnet run --project AppHost/...` surfaces the identical integration status on the dashboard.
+
+- HTTP **200** when everything is green; HTTP **503** when any check is `"fail"`. Each check is `"ok"`, `"fail"`, or `"not_configured"` (an absent/placeholder integration — not a failure)
+- **Every check is read-only and quota-safe**: `database` runs `SELECT 1`; `brevo_api` reads the account; `stripe` retrieves the balance (no charge or Checkout Session created); `blob_storage` reads account properties (no container/blob writes). None of these spend any quota or money
+- `smtp` is skipped by default — a full STARTTLS + AUTH round-trip is 1–3 s, too slow for per-minute polling. Append **`?checkSmtp=true`** to verify SMTP credentials are live: it connects + authenticates + disconnects and **never sends a message**, so it costs no send quota. The daily `verify-secrets` workflow also covers SMTP
 - Rate limited at the Cloudflare edge to 10 requests per minute per IP
 
 Point an uptime monitor (UptimeRobot, BetterStack, etc.) at this URL and alert on non-200 responses.
@@ -487,7 +533,7 @@ smtp_port         = "587"
 smtp_username     = "your-brevo-login-email@example.com"
 smtp_password     = "your-brevo-smtp-key"
 smtp_sender_email = "noreply@katiesgarden.uk"
-recipient_email   = "team@katiesgarden.uk"
+recipient_email   = "sales@katiesgarden.uk"
 
 # Newsletter
 brevo_api_key     = "your-brevo-rest-api-key"
@@ -504,7 +550,7 @@ site_url               = "https://www.katiesgarden.uk"
 # Push notifications
 vapid_public_key   = "BN..."
 vapid_private_key  = "..."
-vapid_subject      = "mailto:team@katiesgarden.uk"
+vapid_subject      = "mailto:sales@katiesgarden.uk"
 
 # Admin OAuth — add whichever providers you want to support
 github_client_id      = ""

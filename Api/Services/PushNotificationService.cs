@@ -27,7 +27,7 @@ public class PushNotificationService(
         if (subscriptions.Count == 0) return;
 
         var client = new WebPushClient();
-        var vapidDetails = new VapidDetails(vapidSubject ?? "mailto:team@katiesgarden.uk", vapidPublicKey, vapidPrivateKey);
+        var vapidDetails = new VapidDetails(vapidSubject ?? "mailto:sales@katiesgarden.uk", vapidPublicKey, vapidPrivateKey);
         var payload = System.Text.Json.JsonSerializer.Serialize(new { title, body });
 
         var staleEndpoints = new List<string>();

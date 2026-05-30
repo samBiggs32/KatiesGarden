@@ -25,12 +25,23 @@ var api = builder.AddAzureFunctionsProject<Projects.KatiesGarden_Api>("api")
     .WithEnvironment("STRIPE_SECRET_KEY", builder.Configuration["STRIPE_SECRET_KEY"] ?? "sk_test_placeholder")
     .WithEnvironment("STRIPE_WEBHOOK_SECRET", builder.Configuration["STRIPE_WEBHOOK_SECRET"] ?? "whsec_test_placeholder")
     .WithEnvironment("SITE_URL", builder.Configuration["SITE_URL"] ?? "http://localhost:5158")
-    .WaitFor(db);
+    .WaitFor(db)
+    // Integration-aware readiness probe: the dashboard marks `api` healthy only
+    // once /api/diagnostics returns 200 ("ready") — i.e. the database is reachable
+    // and every *configured* integration (Stripe, Blob, Brevo) is live. The
+    // placeholders injected above report "not_configured" (not a failure), so the
+    // stack still goes green locally without any real accounts. All checks are
+    // read-only — no email is sent and no quota is spent.
+    .WithHttpHealthCheck("/api/diagnostics");
 
 // Blazor WebAssembly dev server. Aspire injects the API endpoint as a service
 // discovery variable; the client uses HttpClient.BaseAddress in dev anyway,
-// but the reference also makes the dashboard show the dependency.
+// but the reference also makes the dashboard show the dependency. WaitFor(api)
+// orders startup so the UI only comes up once the API is healthy; the "/" probe
+// is a simple liveness check that the dev server is serving.
 builder.AddProject<Projects.KatiesGarden_Web_Client>("web")
-    .WithReference(api);
+    .WithReference(api)
+    .WaitFor(api)
+    .WithHttpHealthCheck("/");
 
 builder.Build().Run();

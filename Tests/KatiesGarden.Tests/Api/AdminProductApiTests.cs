@@ -13,7 +13,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task ListProducts_Unauthenticated_Returns401()
     {
-        var response = await fixture.HttpClient.GetAsync("/api/admin/products");
+        var response = await fixture.HttpClient.GetAsync("/api/manage/products");
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -31,7 +31,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
             DisplayOrder = 1
         };
 
-        var response = await admin.PostAsJsonAsync("/api/admin/products", body);
+        var response = await admin.PostAsJsonAsync("/api/manage/products", body);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var dto = await response.Content.ReadFromJsonAsync<ProductSummaryDto>();
@@ -46,7 +46,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
         using var admin = fixture.CreateAdminClient();
         var body = new CreateProductRequest { Name = "", Price = -1m };
 
-        var response = await admin.PostAsJsonAsync("/api/admin/products", body);
+        var response = await admin.PostAsJsonAsync("/api/manage/products", body);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -65,12 +65,12 @@ public class AdminProductApiTests(AspireApiFixture fixture)
             StockQuantity = 3,
             DisplayOrder = 7
         };
-        var createResp = await admin.PostAsJsonAsync("/api/admin/products", create);
+        var createResp = await admin.PostAsJsonAsync("/api/manage/products", create);
         var created = await createResp.Content.ReadFromJsonAsync<ProductSummaryDto>();
         created.Should().NotBeNull();
 
         // Get
-        var getResp = await admin.GetAsync($"/api/admin/products/{created!.Id}");
+        var getResp = await admin.GetAsync($"/api/manage/products/{created!.Id}");
         getResp.IsSuccessStatusCode.Should().BeTrue();
         var detail = await getResp.Content.ReadFromJsonAsync<ProductDetailDto>();
         detail!.DisplayOrder.Should().Be(7);
@@ -86,21 +86,21 @@ public class AdminProductApiTests(AspireApiFixture fixture)
             CanLocalDeliver = true,
             DisplayOrder = 9
         };
-        var updateResp = await admin.PutAsJsonAsync($"/api/admin/products/{created.Id}", update);
+        var updateResp = await admin.PutAsJsonAsync($"/api/manage/products/{created.Id}", update);
         updateResp.IsSuccessStatusCode.Should().BeTrue();
         var updated = await updateResp.Content.ReadFromJsonAsync<ProductSummaryDto>();
         updated!.Price.Should().Be(6.50m);
 
         // Verify DisplayOrder persisted on update (regression for the silent-reset bug)
-        var refetch = await (await admin.GetAsync($"/api/admin/products/{created.Id}"))
+        var refetch = await (await admin.GetAsync($"/api/manage/products/{created.Id}"))
             .Content.ReadFromJsonAsync<ProductDetailDto>();
         refetch!.DisplayOrder.Should().Be(9);
 
         // Delete
-        var deleteResp = await admin.DeleteAsync($"/api/admin/products/{created.Id}");
+        var deleteResp = await admin.DeleteAsync($"/api/manage/products/{created.Id}");
         deleteResp.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var afterDelete = await admin.GetAsync($"/api/admin/products/{created.Id}");
+        var afterDelete = await admin.GetAsync($"/api/manage/products/{created.Id}");
         afterDelete.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -109,7 +109,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
     {
         using var admin = fixture.CreateAdminClient();
 
-        var response = await admin.GetAsync($"/api/admin/products/{Guid.NewGuid()}");
+        var response = await admin.GetAsync($"/api/manage/products/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -129,10 +129,10 @@ public class AdminProductApiTests(AspireApiFixture fixture)
             CollectionInstructions = "Knock on the green door"
         };
 
-        var putResp = await admin.PutAsJsonAsync("/api/admin/delivery-settings", update);
+        var putResp = await admin.PutAsJsonAsync("/api/manage/delivery-settings", update);
         putResp.IsSuccessStatusCode.Should().BeTrue();
 
-        var getResp = await admin.GetAsync("/api/admin/delivery-settings");
+        var getResp = await admin.GetAsync("/api/manage/delivery-settings");
         var dto = await getResp.Content.ReadFromJsonAsync<DeliverySettingsDto>();
         dto!.LocalDeliveryFee.Should().Be(7.50m);
         dto.CollectionAddress.Should().Be("1 Example Lane");

@@ -29,7 +29,7 @@ public static class OrderEmailBuilder
 
             We'll be in touch shortly to confirm your order and arrange {(order.DeliveryType == DeliveryType.Collection ? "collection" : "delivery")}.
 
-            If you have any questions, please contact us at team@katiesgarden.uk or call 07804 784522.
+            If you have any questions, please contact us at sales@katiesgarden.uk or call 07804 784522.
 
             Thank you for supporting Katie's Garden!
             """;
@@ -97,7 +97,7 @@ public static class OrderEmailBuilder
             OrderStatus.Delivered =>
                 ("Your order has been delivered", $"Your order {order.OrderNumber} has been delivered. We hope you love it! Please get in touch if you have any questions."),
             OrderStatus.Cancelled =>
-                ("Your order has been cancelled", $"Your order {order.OrderNumber} has been cancelled. If you believe this is a mistake or would like a refund, please contact us at team@katiesgarden.uk or call 07804 784522."),
+                ("Your order has been cancelled", $"Your order {order.OrderNumber} has been cancelled. If you believe this is a mistake or would like a refund, please contact us at sales@katiesgarden.uk"),
             _ => ("Update on your order", $"There's an update on your order {order.OrderNumber}. Please contact us if you have any questions.")
         };
 
@@ -109,7 +109,7 @@ public static class OrderEmailBuilder
             Order: {order.OrderNumber}
             Total: £{order.Total:F2}
 
-            If you have any questions, please contact us at team@katiesgarden.uk or call 07804 784522.
+            If you have any questions, please contact us at sales@katiesgarden.uk
 
             Katie's Garden
             """;

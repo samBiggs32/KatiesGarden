@@ -18,102 +18,151 @@ using Stripe.Checkout;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
+    .ConfigureLogging(logging =>
+    {
+        // AddConsole ensures startup errors reach stdout even before the
+        // Functions host log pipeline is fully wired up.
+        logging.AddConsole();
+        logging.SetMinimumLevel(LogLevel.Information);
+    })
     .ConfigureServices((context, services) =>
     {
-        var dbUrl = context.Configuration["DATABASE_URL"];
-        if (!string.IsNullOrWhiteSpace(dbUrl))
-            services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(dbUrl));
+        var config = context.Configuration;
+
+        // Database — AppDbContext is ALWAYS registered so every function that
+        // depends on it can be constructed by the DI container. Most functions
+        // inject AppDbContext non-nullably; if it were only registered when
+        // DATABASE_URL is set, running the API standalone (no Aspire, no DB) would
+        // fail the whole host with "Some services are not able to be constructed".
+        // EF Core defers connecting until the first query, so a placeholder
+        // connection string is harmless at startup — DB-backed endpoints simply
+        // return 503/500 at call time when the database is unreachable.
+        var dbUrl = config["DATABASE_URL"];
+        services.AddDbContext<AppDbContext>(opts => opts.UseNpgsql(
+            string.IsNullOrWhiteSpace(dbUrl)
+                ? "Host=localhost;Database=katiesgarden_unconfigured"
+                : dbUrl));
 
         services.AddHttpClient();
 
-        // Existing validators
+        // Validators
         services.AddSingleton<IValidator<ContactUsForm>, ContactUsFormValidator>();
         services.AddSingleton<IValidator<SubscribeRequest>, SubscribeRequestValidator>();
-
-        // Shop validators
         services.AddSingleton<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
         services.AddSingleton<IValidator<CreateCollectionRequest>, CreateCollectionRequestValidator>();
         services.AddSingleton<IValidator<CheckoutRequest>, CheckoutRequestValidator>();
 
-        // SMTP — required, fail at startup if missing
-        services.AddOptions<SmtpOptions>()
-            .Configure<IConfiguration>((opts, config) =>
-            {
-                opts.Host = config["SMTP_HOST"] ?? "";
-                opts.Port = int.TryParse(config["SMTP_PORT"], out var p) ? p : 587;
-                opts.Username = config["SMTP_USERNAME"] ?? "";
-                opts.Password = config["SMTP_PASSWORD"] ?? "";
-                opts.SenderEmail = config["SENDER_EMAIL"];
-                opts.RecipientEmail = config["RECIPIENT_EMAIL"] ?? "";
-            })
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Host), "SMTP_HOST must be set")
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Username), "SMTP_USERNAME must be set")
-            .Validate(o => !string.IsNullOrWhiteSpace(o.Password), "SMTP_PASSWORD must be set")
-            .Validate(o => !string.IsNullOrWhiteSpace(o.RecipientEmail), "RECIPIENT_EMAIL must be set")
-            .ValidateOnStart();
-
-        // Brevo REST — optional
-        services.AddOptions<BrevoOptions>()
-            .Configure<IConfiguration>((opts, config) =>
-            {
-                opts.ApiKey = config["BREVO_API_KEY"];
-                opts.ListId = int.TryParse(config["BREVO_LIST_ID"], out var id) ? id : null;
-            });
-
-        // Stripe — optional keys; missing keys cause graceful failures at call time, not startup
-        services.AddOptions<StripeOptions>()
-            .Configure<IConfiguration>((opts, config) =>
-            {
-                opts.SecretKey = config["STRIPE_SECRET_KEY"] ?? "";
-                opts.WebhookSecret = config["STRIPE_WEBHOOK_SECRET"] ?? "";
-                opts.SiteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
-            });
-
+        // SMTP — bound from env vars; send failures are caught and logged at call time,
+        // not at startup, so missing/wrong credentials never prevent the host from starting.
+        services.Configure<SmtpOptions>(opts =>
+        {
+            opts.Host = config["SMTP_HOST"] ?? "";
+            opts.Port = int.TryParse(config["SMTP_PORT"], out var p) ? p : 587;
+            opts.Username = config["SMTP_USERNAME"] ?? "";
+            opts.Password = config["SMTP_PASSWORD"] ?? "";
+            opts.SenderEmail = config["SENDER_EMAIL"];
+            opts.RecipientEmail = config["RECIPIENT_EMAIL"] ?? "";
+        });
         services.AddSingleton<IEmailSender, MailKitEmailSender>();
 
+        // Brevo REST — optional; subscribe endpoint degrades gracefully when absent
+        services.Configure<BrevoOptions>(opts =>
+        {
+            opts.ApiKey = config["BREVO_API_KEY"];
+            opts.ListId = int.TryParse(config["BREVO_LIST_ID"], out var id) ? id : null;
+        });
+
+        // Stripe — optional; placeholder keys report "not_configured", real keys are
+        // verified at call time (no startup validation that could mask other errors)
+        services.Configure<StripeOptions>(opts =>
+        {
+            opts.SecretKey = config["STRIPE_SECRET_KEY"] ?? "";
+            opts.WebhookSecret = config["STRIPE_WEBHOOK_SECRET"] ?? "";
+            opts.SiteUrl = config["SITE_URL"] ?? "https://www.katiesgarden.uk";
+        });
         // Stripe services — singletons because they carry no per-request state
         services.AddSingleton<SessionService>();
 
-        // Azure Blob Storage — optional, skipped gracefully if not configured
-        var storageConn = context.Configuration["AZURE_STORAGE_CONNECTION_STRING"];
+        // Azure Blob Storage — only registered when a connection string is present so
+        // GetService<BlobServiceClient>() returns null (not a nullable singleton) when unconfigured
+        var storageConn = config["AZURE_STORAGE_CONNECTION_STRING"];
         if (!string.IsNullOrWhiteSpace(storageConn))
             services.AddSingleton(new BlobServiceClient(storageConn));
-        else
-            services.AddSingleton<BlobServiceClient?>(_ => null);
 
-        // Push notification service — scoped because it uses AppDbContext
+        // Push notifications
         services.AddScoped<IPushNotificationService, PushNotificationService>();
     })
     .Build();
 
-// Set Stripe API key once at startup — avoids mutating a global static on every request
-var stripeKey = host.Services.GetRequiredService<IConfiguration>()["STRIPE_SECRET_KEY"];
-if (!string.IsNullOrWhiteSpace(stripeKey))
-    StripeConfiguration.ApiKey = stripeKey;
-
+// ── Startup diagnostics ────────────────────────────────────────────────────
+// All checks run before host.RunAsync() so any misconfiguration is visible in
+// the Aspire dashboard resource logs and in the terminal immediately on start.
 using (var scope = host.Services.CreateScope())
 {
-    try
-    {
-        var db = scope.ServiceProvider.GetService<AppDbContext>();
-        if (db is not null)
-        {
-            db.Database.EnsureCreated();
+    var log = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-            // Ensure store tables exist on pre-existing databases (EnsureCreated only creates
-            // tables when the DB is brand new; this is idempotent and safe to run every cold start)
-            var conn = db.Database.GetDbConnection();
-            await conn.OpenAsync();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = SqlMigrations.EnsureNewTablesExist;
-            await cmd.ExecuteNonQueryAsync();
+    log.LogInformation("Katie's Garden API starting up");
+
+    // ── Stripe ──────────────────────────────────────────────────────────────
+    var stripeKey = config["STRIPE_SECRET_KEY"] ?? "";
+    if (string.IsNullOrWhiteSpace(stripeKey))
+    {
+        log.LogWarning("STRIPE_SECRET_KEY not set — Stripe endpoints unavailable");
+    }
+    else if (stripeKey.Contains("placeholder", StringComparison.OrdinalIgnoreCase))
+    {
+        log.LogInformation("Stripe: placeholder key (not_configured) — OK for local dev");
+    }
+    else
+    {
+        StripeConfiguration.ApiKey = stripeKey;
+        log.LogInformation("Stripe: live key configured ({Prefix}...)", stripeKey[..Math.Min(8, stripeKey.Length)]);
+    }
+
+    // ── Blob Storage ────────────────────────────────────────────────────────
+    var storageConn = config["AZURE_STORAGE_CONNECTION_STRING"] ?? "";
+    if (string.IsNullOrWhiteSpace(storageConn))
+        log.LogInformation("Blob Storage: not configured — image uploads unavailable");
+    else
+        log.LogInformation("Blob Storage: configured");
+
+    // ── SMTP ────────────────────────────────────────────────────────────────
+    var smtpHost = config["SMTP_HOST"] ?? "";
+    var smtpUser = config["SMTP_USERNAME"] ?? "";
+    if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(smtpUser))
+        log.LogWarning("SMTP_HOST or SMTP_USERNAME not set — email sending will fail");
+    else
+        log.LogInformation("SMTP: {Host} / {User}", smtpHost, smtpUser);
+
+    // ── Database ────────────────────────────────────────────────────────────
+    // Schema init is bounded by a hard timeout: an unreachable/slow database must
+    // never hang the host so long that the Functions launcher gives up and kills
+    // the process. On timeout/failure we log and continue — the host still starts
+    // and /api/diagnostics will report the database as down.
+    var dbUrl = config["DATABASE_URL"];
+    if (string.IsNullOrWhiteSpace(dbUrl))
+    {
+        log.LogWarning("DATABASE_URL not set — database-backed endpoints will return 503/500. " +
+            "Run the API via Aspire (dotnet run --project AppHost) to provision Postgres automatically.");
+    }
+    else
+    {
+        try
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
+            await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
+            log.LogInformation("Database schema ready");
+        }
+        catch (Exception ex)
+        {
+            log.LogError(ex, "Database initialisation failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
         }
     }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Database initialisation failed — store and subscribe endpoints will be unavailable");
-    }
+
+    log.LogInformation("Startup complete — listening for requests");
 }
 
 await host.RunAsync();

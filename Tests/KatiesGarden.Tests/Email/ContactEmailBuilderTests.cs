@@ -20,7 +20,7 @@ public class ContactEmailBuilderTests
     [Fact]
     public void Build_UsesSenderAsFromAddress()
     {
-        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "team@katiesgarden.uk");
+        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "sales@katiesgarden.uk");
         msg.FromAddress.Should().Be("noreply@katiesgarden.uk");
         msg.FromName.Should().Be(ContactEmailBuilder.FromName);
     }
@@ -28,15 +28,15 @@ public class ContactEmailBuilderTests
     [Fact]
     public void Build_UsesRecipientAsToAddress()
     {
-        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "team@katiesgarden.uk");
-        msg.ToAddress.Should().Be("team@katiesgarden.uk");
+        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "sales@katiesgarden.uk");
+        msg.ToAddress.Should().Be("sales@katiesgarden.uk");
         msg.ToName.Should().Be(ContactEmailBuilder.ToName);
     }
 
     [Fact]
     public void Build_SetsReplyToToFormSubmitter()
     {
-        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "team@katiesgarden.uk");
+        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "sales@katiesgarden.uk");
         msg.ReplyToAddress.Should().Be("katie@example.com");
         msg.ReplyToName.Should().Be("Katie Porter");
     }
@@ -44,7 +44,7 @@ public class ContactEmailBuilderTests
     [Fact]
     public void Build_PrefixesSubjectWithWebsiteEnquiry()
     {
-        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "team@katiesgarden.uk");
+        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "sales@katiesgarden.uk");
         msg.Subject.Should().StartWith(ContactEmailBuilder.SubjectPrefix);
         msg.Subject.Should().Contain("Hedge trimming quote");
     }
@@ -52,7 +52,7 @@ public class ContactEmailBuilderTests
     [Fact]
     public void Build_BodyContainsAllFormData()
     {
-        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "team@katiesgarden.uk");
+        var msg = ContactEmailBuilder.Build(SampleForm(), "noreply@katiesgarden.uk", "sales@katiesgarden.uk");
         msg.BodyText.Should().Contain("Hello, please could you quote for trimming our hedges.");
         msg.BodyText.Should().Contain("Katie Porter");
         msg.BodyText.Should().Contain("katie@example.com");

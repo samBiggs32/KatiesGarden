@@ -20,7 +20,7 @@ public class AdminOrderFunction(
 {
     [Function("AdminGetOrders")]
     public async Task<HttpResponseData> GetOrders(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/orders")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -56,7 +56,7 @@ public class AdminOrderFunction(
 
     [Function("AdminGetOrder")]
     public async Task<HttpResponseData> GetOrder(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/orders/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -99,7 +99,7 @@ public class AdminOrderFunction(
 
     [Function("AdminUpdateOrderStatus")]
     public async Task<HttpResponseData> UpdateStatus(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "admin/orders/{id:guid}/status")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "manage/orders/{id:guid}/status")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -144,7 +144,7 @@ public class AdminOrderFunction(
 
     [Function("AdminUpdateOrderNotes")]
     public async Task<HttpResponseData> UpdateNotes(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "admin/orders/{id:guid}/notes")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/orders/{id:guid}/notes")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
