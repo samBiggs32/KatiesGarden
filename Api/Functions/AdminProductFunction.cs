@@ -183,7 +183,8 @@ public class AdminProductFunction(
                 .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
                 .Select(p => new ProductSummaryDto(
                     p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-                    p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder))
+                    p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+                    p.ImageUrls.Length))
                 .ToList()
         };
 
@@ -222,7 +223,8 @@ public class AdminProductFunction(
             .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
             .Select(p => new ProductSummaryDto(
                 p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-                p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder))
+                p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+                p.ImageUrls.Length))
             .ToListAsync(ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
@@ -375,7 +377,8 @@ public class AdminProductFunction(
 
     private static ProductSummaryDto ToSummary(Product p) => new(
         p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-        p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder);
+        p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+        p.ImageUrls.Length);
 }
 
 internal record DeliverySettingsUpdateRequest(

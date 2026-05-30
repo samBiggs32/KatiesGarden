@@ -155,6 +155,8 @@ using (var scope = host.Services.CreateScope())
             await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
             await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
             log.LogInformation("Database schema ready");
+
+            await CollectionSeeder.SeedAsync(db, log, dbInitTimeout.Token);
         }
         catch (Exception ex)
         {
