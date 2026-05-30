@@ -29,25 +29,62 @@
         }
         else
         {
-            var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
-            var webpSrc = $"{ImagePaths.GalleryBasePath}{System.IO.Path.ChangeExtension(image.FileName, ".webp")}";
-            <figure class="rounded-2xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
+            <button type="button"
+                    @onclick="() => Open(image)"
+                    class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-md transition-shadow text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    aria-label="@($"View larger image: {image.Title}")">
                 <picture>
-                    <source srcset="@webpSrc" type="image/webp" />
-                    <img src="@jpegSrc"
+                    <source srcset="@Webp(image)" type="image/webp" />
+                    <img src="@Jpeg(image)"
                          alt="@image.Alt"
-                         title="@image.Title"
                          class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
                          loading="lazy" />
                 </picture>
-                @if (!string.IsNullOrEmpty(image.Description))
-                {
-                    <figcaption class="sr-only">@image.Description</figcaption>
-                }
-            </figure>
+            </button>
         }
     }
 </div>
+
+<!-- Lightbox modal -->
+@if (_selected is not null)
+{
+    <div class="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="gallery-modal-title"
+         tabindex="-1" @ref="_modalRef" @onkeydown="HandleKeyDown">
+        <div class="modal-box max-w-3xl p-0 overflow-hidden relative">
+
+            <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10 bg-base-100/80 hover:bg-base-100"
+                    @onclick="Close" aria-label="Close">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+
+            <figure class="bg-base-200">
+                <picture>
+                    <source srcset="@Webp(_selected)" type="image/webp" />
+                    <img src="@Jpeg(_selected)" alt="@_selected.Alt"
+                         class="w-full max-h-[60vh] object-contain" />
+                </picture>
+            </figure>
+
+            <div class="p-6">
+                <h3 id="gallery-modal-title" class="font-serif text-2xl font-bold text-base-content mb-2">@_selected.Title</h3>
+                @if (!string.IsNullOrEmpty(_selected.Description))
+                {
+                    <p class="text-base-content/70 mb-5 leading-relaxed">@_selected.Description</p>
+                }
+                <div class="flex flex-wrap gap-3">
+                    <a href="@EnquireHref(_selected)" class="btn btn-primary">
+                        <i class="fas fa-envelope mr-2" aria-hidden="true"></i> Enquire about this
+                    </a>
+                    <a href="/shop" class="btn btn-outline btn-primary">
+                        <i class="fas fa-basket-shopping mr-2" aria-hidden="true"></i> Browse the shop
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="modal-backdrop" @onclick="Close" aria-label="Close">close</button>
+    </div>
+}
 
 @code {
     [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
@@ -55,4 +92,39 @@
     [Parameter] public List<string> Description { get; set; } = [];
     [Parameter] public string ButtonText { get; set; } = string.Empty;
     [Parameter] public EventCallback ButtonAction { get; set; }
+
+    private GalleryImage? _selected;
+    private ElementReference _modalRef;
+    private bool _focusOnRender;
+
+    private static string Jpeg(GalleryImage img) => $"{ImagePaths.GalleryBasePath}{img.FileName}";
+    private static string Webp(GalleryImage img) =>
+        $"{ImagePaths.GalleryBasePath}{System.IO.Path.ChangeExtension(img.FileName, ".webp")}";
+
+    private static string EnquireHref(GalleryImage img) =>
+        $"/contact?subject={Uri.EscapeDataString($"Enquiry about {img.Title}")}";
+
+    private void Open(GalleryImage image)
+    {
+        _selected = image;
+        _focusOnRender = true;
+    }
+
+    private void Close() => _selected = null;
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") Close();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Move focus into the dialog when it opens so keyboard users land inside it
+        // and Esc is captured.
+        if (_focusOnRender)
+        {
+            _focusOnRender = false;
+            await _modalRef.FocusAsync();
+        }
+    }
 }
