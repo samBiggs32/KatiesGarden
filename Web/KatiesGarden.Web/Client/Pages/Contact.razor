@@ -3,20 +3,30 @@
 
 <PageTitle>Contact Us — Katie's Garden</PageTitle>
 
-<div class="max-w-6xl mx-auto px-6 py-12">
-
-    <!-- Header -->
-    <div class="text-center mb-10">
-        <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Contact</p>
-        <h1 class="font-serif text-4xl md:text-5xl font-bold text-base-content mb-3">Get in Touch</h1>
-        <p class="text-base-content/65 max-w-lg mx-auto">
-            We'd love to hear about your garden. Drop us a message and we'll get back to you as soon as we can.
+<!-- Hero -->
+<section class="bg-secondary py-14 border-b border-base-300">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+        <div class="flex items-center justify-center gap-2 mb-4" aria-hidden="true">
+            <i class="fas fa-leaf text-primary opacity-40 text-lg" style="transform:rotate(-12deg)"></i>
+            <i class="fas fa-seedling text-primary text-2xl opacity-60"></i>
+            <i class="fas fa-leaf text-primary opacity-40 text-lg" style="transform:rotate(12deg)"></i>
+        </div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Get in Touch</p>
+        <h1 class="font-serif text-5xl md:text-6xl font-bold text-secondary-content leading-tight mb-4">
+            Let's Talk<br class="hidden sm:block" /> Gardens
+        </h1>
+        <p class="text-secondary-content/65 text-lg leading-relaxed max-w-lg mx-auto">
+            Whether you'd like a quote, some advice, or just want to say hello — we'd love to hear from you.
+            We respond within one working day.
         </p>
     </div>
+</section>
 
-    <div class="grid lg:grid-cols-5 gap-8 items-start">
+<!-- Main content -->
+<div class="max-w-6xl mx-auto px-6 py-14">
+    <div class="grid lg:grid-cols-5 gap-10 items-start">
 
-        <!-- Contact form — wider -->
+        <!-- ── Contact form ── -->
         <div class="lg:col-span-3">
             @if (_success)
             {
@@ -31,174 +41,178 @@
             }
             else
             {
-                <form @onsubmit="HandleSubmitAsync" @onsubmit:preventDefault="true" novalidate class="bg-base-100 rounded-2xl p-6 shadow-sm">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div class="form-control">
-                            <label class="label pb-1" for="contact-first-name">
-                                <span class="label-text font-medium">First Name <span class="text-error">*</span></span>
-                            </label>
-                            <input id="contact-first-name" type="text"
-                                   class="input input-bordered @(HasError("FirstName") ? "input-error" : "")"
-                                   @bind="model.FirstName"
-                                   autocomplete="given-name" />
-                            @if (HasError("FirstName"))
-                            {
-                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
-                            }
+                <div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden border border-base-300">
+                    <div class="px-6 py-4 bg-base-200 border-b border-base-300 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-paper-plane text-primary text-sm" aria-hidden="true"></i>
                         </div>
-                        <div class="form-control">
-                            <label class="label pb-1" for="contact-last-name">
-                                <span class="label-text font-medium">Last Name <span class="text-error">*</span></span>
-                            </label>
-                            <input id="contact-last-name" type="text"
-                                   class="input input-bordered @(HasError("LastName") ? "input-error" : "")"
-                                   @bind="model.LastName"
-                                   autocomplete="family-name" />
-                            @if (HasError("LastName"))
-                            {
-                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
-                            }
-                        </div>
-                        <div class="form-control">
-                            <label class="label pb-1" for="contact-phone">
-                                <span class="label-text font-medium">Phone Number <span class="text-error">*</span></span>
-                            </label>
-                            <input id="contact-phone" type="tel"
-                                   class="input input-bordered @(HasError("ContactNumber") ? "input-error" : "")"
-                                   @bind="model.ContactNumber"
-                                   autocomplete="tel" />
-                            @if (HasError("ContactNumber"))
-                            {
-                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("ContactNumber")</span></label>
-                            }
-                        </div>
-                        <div class="form-control">
-                            <label class="label pb-1" for="contact-email">
-                                <span class="label-text font-medium">Email Address <span class="text-error">*</span></span>
-                            </label>
-                            <input id="contact-email" type="email"
-                                   class="input input-bordered @(HasError("EmailAddress") ? "input-error" : "")"
-                                   @bind="model.EmailAddress"
-                                   autocomplete="email" />
-                            @if (HasError("EmailAddress"))
-                            {
-                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailAddress")</span></label>
-                            }
+                        <div>
+                            <h2 class="font-semibold text-base-content">Send us a message</h2>
+                            <p class="text-xs text-base-content/50">All fields marked * are required</p>
                         </div>
                     </div>
 
-                    <div class="form-control mb-4">
-                        <label class="label pb-1" for="contact-subject">
-                            <span class="label-text font-medium">Subject <span class="text-error">*</span></span>
-                        </label>
-                        <input id="contact-subject" type="text"
-                               class="input input-bordered @(HasError("EmailSubject") ? "input-error" : "")"
-                               @bind="model.EmailSubject" />
-                        @if (HasError("EmailSubject"))
+                    <form @onsubmit="HandleSubmitAsync" @onsubmit:preventDefault="true" novalidate class="p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <div class="form-control">
+                                <label class="label pb-1" for="contact-first-name">
+                                    <span class="label-text font-medium">First Name <span class="text-error">*</span></span>
+                                </label>
+                                <input id="contact-first-name" type="text"
+                                       class="input input-bordered @(HasError("FirstName") ? "input-error" : "")"
+                                       @bind="model.FirstName" autocomplete="given-name" />
+                                @if (HasError("FirstName"))
+                                {
+                                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
+                                }
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1" for="contact-last-name">
+                                    <span class="label-text font-medium">Last Name <span class="text-error">*</span></span>
+                                </label>
+                                <input id="contact-last-name" type="text"
+                                       class="input input-bordered @(HasError("LastName") ? "input-error" : "")"
+                                       @bind="model.LastName" autocomplete="family-name" />
+                                @if (HasError("LastName"))
+                                {
+                                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
+                                }
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1" for="contact-phone">
+                                    <span class="label-text font-medium">Phone Number <span class="text-error">*</span></span>
+                                </label>
+                                <input id="contact-phone" type="tel"
+                                       class="input input-bordered @(HasError("ContactNumber") ? "input-error" : "")"
+                                       @bind="model.ContactNumber" autocomplete="tel" />
+                                @if (HasError("ContactNumber"))
+                                {
+                                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("ContactNumber")</span></label>
+                                }
+                            </div>
+                            <div class="form-control">
+                                <label class="label pb-1" for="contact-email">
+                                    <span class="label-text font-medium">Email Address <span class="text-error">*</span></span>
+                                </label>
+                                <input id="contact-email" type="email"
+                                       class="input input-bordered @(HasError("EmailAddress") ? "input-error" : "")"
+                                       @bind="model.EmailAddress" autocomplete="email" />
+                                @if (HasError("EmailAddress"))
+                                {
+                                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailAddress")</span></label>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-control mb-4">
+                            <label class="label pb-1" for="contact-subject">
+                                <span class="label-text font-medium">Subject <span class="text-error">*</span></span>
+                            </label>
+                            <input id="contact-subject" type="text"
+                                   class="input input-bordered @(HasError("EmailSubject") ? "input-error" : "")"
+                                   @bind="model.EmailSubject" />
+                            @if (HasError("EmailSubject"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailSubject")</span></label>
+                            }
+                        </div>
+
+                        <div class="form-control mb-6">
+                            <label class="label pb-1" for="contact-message">
+                                <span class="label-text font-medium">Message <span class="text-error">*</span></span>
+                            </label>
+                            <textarea id="contact-message" rows="5"
+                                      class="textarea textarea-bordered min-h-32 @(HasError("EmailBody") ? "textarea-error" : "")"
+                                      @bind="model.EmailBody"
+                                      placeholder="Tell us about your garden and how we can help…"></textarea>
+                            @if (HasError("EmailBody"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailBody")</span></label>
+                            }
+                        </div>
+
+                        @if (_error is not null)
                         {
-                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailSubject")</span></label>
+                            <div class="alert alert-error mb-4" role="alert">
+                                <i class="fas fa-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
+                                <span>@_error</span>
+                            </div>
                         }
-                    </div>
 
-                    <div class="form-control mb-5">
-                        <label class="label pb-1" for="contact-message">
-                            <span class="label-text font-medium">Message <span class="text-error">*</span></span>
-                        </label>
-                        <textarea id="contact-message"
-                                  class="textarea textarea-bordered min-h-32 @(HasError("EmailBody") ? "textarea-error" : "")"
-                                  rows="5"
-                                  @bind="model.EmailBody"
-                                  placeholder="Tell us about your garden and how we can help"></textarea>
-                        @if (HasError("EmailBody"))
-                        {
-                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailBody")</span></label>
-                        }
-                    </div>
-
-                    @if (_error is not null)
-                    {
-                        <div class="alert alert-error mb-4" role="alert">
-                            <i class="fas fa-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
-                            <span>@_error</span>
+                        <div class="flex gap-3 justify-between items-center border-t border-base-300 pt-5">
+                            <button type="button" class="btn btn-ghost btn-sm text-base-content/60" @onclick="ResetForm">Reset form</button>
+                            <button type="submit" class="btn btn-primary px-8" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="loading loading-spinner loading-sm mr-1"></span>
+                                    <span>Sending…</span>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-paper-plane mr-2 text-sm" aria-hidden="true"></i>
+                                    <span>Send Message</span>
+                                }
+                            </button>
                         </div>
-                    }
-
-                    <div class="flex gap-3 justify-end">
-                        <button type="button" class="btn btn-ghost" @onclick="ResetForm">Reset</button>
-                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
-                            @if (isSubmitting)
-                            {
-                                <span class="loading loading-spinner loading-sm mr-1"></span>
-                                <span>Sending…</span>
-                            }
-                            else
-                            {
-                                <i class="fas fa-paper-plane mr-2 text-sm" aria-hidden="true"></i>
-                                <span>Send Message</span>
-                            }
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             }
         </div>
 
-        <!-- Contact info sidebar -->
-        <div class="lg:col-span-2 flex flex-col gap-4">
+        <!-- ── Sidebar ── -->
+        <aside class="lg:col-span-2 flex flex-col gap-4">
 
-            <div class="card bg-base-200 rounded-2xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <div class="card bg-base-100 rounded-2xl p-5 border border-base-300 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-phone text-primary" aria-hidden="true"></i>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-base-content mb-0.5">Phone</h3>
-                        <a href="tel:+447804784522" class="text-primary hover:underline">07804 784522</a>
+                        <p class="text-xs text-base-content/50 uppercase tracking-wide font-medium mb-0.5">Phone</p>
+                        <a href="tel:+447804784522" class="text-primary font-semibold hover:underline">07804 784522</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card bg-base-200 rounded-2xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <div class="card bg-base-100 rounded-2xl p-5 border border-base-300 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-envelope text-primary" aria-hidden="true"></i>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-base-content mb-0.5">Email</h3>
-                        <a href="mailto:sales@katiesgarden.uk" class="text-primary hover:underline break-all">sales@katiesgarden.uk</a>
+                        <p class="text-xs text-base-content/50 uppercase tracking-wide font-medium mb-0.5">Email</p>
+                        <a href="mailto:sales@katiesgarden.uk" class="text-primary font-semibold hover:underline break-all">sales@katiesgarden.uk</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card bg-base-200 rounded-2xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <div class="card bg-base-100 rounded-2xl p-5 border border-base-300 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-clock text-primary" aria-hidden="true"></i>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-base-content mb-0.5">Business Hours</h3>
-                        <p class="text-base-content/65 text-sm">Mon–Fri: 9am – 5pm</p>
+                        <p class="text-xs text-base-content/50 uppercase tracking-wide font-medium mb-0.5">Business Hours</p>
+                        <p class="text-base-content font-medium">Mon–Fri: 9am – 5pm</p>
                     </div>
                 </div>
             </div>
 
-            <div class="card bg-base-200 rounded-2xl p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-map-marker-alt text-primary" aria-hidden="true"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-base-content mb-1">Location</h3>
-                        <p class="text-base-content/65 text-sm">Milverton, Somerset</p>
-                    </div>
+            <!-- Delivery area map -->
+            <div class="rounded-2xl overflow-hidden border border-base-300 shadow-sm">
+                <div class="flex items-center gap-2 bg-primary px-4 py-3">
+                    <i class="fas fa-map text-white text-sm" aria-hidden="true"></i>
+                    <h3 class="text-white font-semibold text-sm">Delivery Area</h3>
+                </div>
+                <div id="delivery-map" style="height:300px;width:100%"></div>
+                <div class="bg-base-200 px-4 py-3 text-sm text-base-content/65 border-t border-base-300">
+                    <i class="fas fa-info-circle text-primary mr-1.5" aria-hidden="true"></i>
+                    We deliver within approx. <strong class="text-base-content">5 miles</strong> of
+                    <strong class="text-base-content">Milverton, TA4 1PZ</strong>.
+                    Click &amp; collect also available.
                 </div>
             </div>
 
-            <div class="rounded-2xl overflow-hidden shadow-sm">
-                <img src="Images/location/Location.png"
-                     alt="Map showing location of Katie's Garden in Milverton, Somerset"
-                     class="w-full h-auto"
-                     loading="lazy" />
-            </div>
-        </div>
+        </aside>
     </div>
 </div>

@@ -1,13 +1,15 @@
 using KatiesGarden.Models;
 using KatiesGarden.Models.Validators;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Net.Http.Json;
 
 namespace KatiesGarden.Web.Client.Pages
 {
-    public partial class Contact
+    public partial class Contact : IAsyncDisposable
     {
         [Inject] HttpClient Http { get; set; } = null!;
+        [Inject] IJSRuntime JS { get; set; } = null!;
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "subject")]
@@ -25,6 +27,17 @@ namespace KatiesGarden.Web.Client.Pages
         {
             if (!string.IsNullOrEmpty(Subject))
                 model.EmailSubject = Subject;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+                await JS.InvokeVoidAsync("KgMap.init", "delivery-map", 51.0191, -3.2507, 8047);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await JS.InvokeVoidAsync("KgMap.dispose", "delivery-map");
         }
 
         private async Task HandleSubmitAsync()
