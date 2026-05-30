@@ -19,9 +19,13 @@ public class Order
     public string? StripeSessionId { get; set; }
     public string? StripePaymentIntentId { get; set; }
     public string? AdminNotes { get; set; }
+    public string? CustomerId { get; set; }
+    public string? CustomerIdentityProvider { get; set; }
+    public string? OrchestrationInstanceId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<OrderLine> Lines { get; set; } = [];
+    public ICollection<OrderStatusHistory> StatusHistory { get; set; } = [];
 }
 
 public enum DeliveryType

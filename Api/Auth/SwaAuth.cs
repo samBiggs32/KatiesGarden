@@ -25,4 +25,18 @@ public static class SwaAuth
 
     public static bool IsAdmin(HttpRequestData req) =>
         _isDev || (GetPrincipal(req)?.IsAdmin ?? false);
+
+    // Returns the principal for any authenticated user (any OAuth provider).
+    // In development, returns the dev bypass principal.
+    public static ClientPrincipal? GetAuthenticatedUser(HttpRequestData req)
+    {
+        if (_isDev)
+            return new ClientPrincipal("dev", "local-dev", "local-dev",
+                ["anonymous", "authenticated", "admin"]);
+
+        var principal = GetPrincipal(req);
+        if (principal?.UserRoles?.Contains("authenticated", StringComparer.OrdinalIgnoreCase) == true)
+            return principal;
+        return null;
+    }
 }

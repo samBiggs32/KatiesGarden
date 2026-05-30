@@ -5,13 +5,24 @@
       "default": "Warning",
       "Function": "Information",
       "Host.Results": "Warning",
-      "Host.Aggregator": "Warning"
+      "Host.Aggregator": "Warning",
+      "DurableTask": "Warning"
     },
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
         "excludedTypes": "Request"
       }
+    }
+  },
+  "extensions": {
+    "durableTask": {
+      "storageProvider": {
+        "type": "azure_storage",
+        "connectionName": "AzureWebJobsStorage"
+      },
+      "maxConcurrentActivityFunctions": 10,
+      "maxConcurrentOrchestratorFunctions": 5
     }
   }
 }

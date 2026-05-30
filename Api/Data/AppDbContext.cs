@@ -12,6 +12,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OrderLine> OrderLines => Set<OrderLine>();
     public DbSet<DeliverySettings> DeliverySettings => Set<DeliverySettings>();
     public DbSet<StorePushSubscription> PushSubscriptions => Set<StorePushSubscription>();
+    public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,6 +54,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.ToTable("orders");
             e.HasIndex(o => o.OrderNumber).IsUnique();
+            e.HasIndex(o => o.CustomerId);
             e.Property(o => o.OrderNumber).HasMaxLength(20).IsRequired();
             e.Property(o => o.CustomerFirstName).HasMaxLength(100).IsRequired();
             e.Property(o => o.CustomerLastName).HasMaxLength(100).IsRequired();
@@ -61,12 +64,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(o => o.DeliveryPostcode).HasMaxLength(10);
             e.Property(o => o.CustomerNotes).HasMaxLength(1000);
             e.Property(o => o.AdminNotes).HasMaxLength(2000);
+            e.Property(o => o.CustomerId).HasMaxLength(100);
+            e.Property(o => o.CustomerIdentityProvider).HasMaxLength(50);
+            e.Property(o => o.OrchestrationInstanceId).HasMaxLength(200);
             e.Property(o => o.Subtotal).HasPrecision(10, 2);
             e.Property(o => o.DeliveryFee).HasPrecision(10, 2);
             e.Property(o => o.Total).HasPrecision(10, 2);
             e.HasMany(o => o.Lines)
              .WithOne(l => l.Order)
              .HasForeignKey(l => l.OrderId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(o => o.StatusHistory)
+             .WithOne(h => h.Order)
+             .HasForeignKey(h => h.OrderId)
              .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -97,5 +107,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(p => p.Auth).HasMaxLength(100).IsRequired();
         });
 
+        modelBuilder.Entity<OrderStatusHistory>(e =>
+        {
+            e.ToTable("order_status_history");
+            e.HasIndex(h => new { h.OrderId, h.ChangedAt });
+            e.Property(h => h.Note).HasMaxLength(500);
+            e.Property(h => h.ChangedBy).HasMaxLength(254);
+        });
+
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.ToTable("audit_logs");
+            e.HasIndex(a => a.Timestamp);
+            e.HasIndex(a => new { a.EntityType, a.EntityId });
+            e.Property(a => a.Action).HasMaxLength(100).IsRequired();
+            e.Property(a => a.EntityType).HasMaxLength(100).IsRequired();
+            e.Property(a => a.EntityId).HasMaxLength(100).IsRequired();
+            e.Property(a => a.ActorEmail).HasMaxLength(254);
+            e.Property(a => a.ActorName).HasMaxLength(200);
+            e.Property(a => a.Details).HasColumnType("text");
+        });
     }
 }

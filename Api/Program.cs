@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using FluentValidation;
+using KatiesGarden.Api.Auditing;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Entities;
@@ -101,6 +102,7 @@ var host = new HostBuilder()
             opts.Subject = config["VAPID_SUBJECT"] ?? "mailto:sales@katiesgarden.uk";
         });
         services.AddScoped<IPushNotificationService, PushNotificationService>();
+        services.AddScoped<IAuditService, AuditService>();
 
         // Azure Blob Storage container config
         services.Configure<BlobOptions>(opts =>

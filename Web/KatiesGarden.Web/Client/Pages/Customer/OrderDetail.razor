@@ -1,0 +1,166 @@
+@page "/my-orders/{OrderNumber}"
+@using KatiesGarden.Models.Shop
+@inject CustomerOrderService OrderService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Order @OrderNumber — Katie's Garden</PageTitle>
+
+@if (_loading)
+{
+    <div class="min-h-screen bg-base-100 flex items-center justify-center">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+}
+else if (_order is null)
+{
+    <div class="min-h-screen bg-base-100 flex items-center justify-center px-4">
+        <div class="card bg-base-200 shadow-sm max-w-md w-full text-center">
+            <div class="card-body gap-4">
+                <div class="text-5xl">🔍</div>
+                <h1 class="font-serif text-2xl">Order not found</h1>
+                <p class="text-base-content/60">This order doesn't exist or doesn't belong to your account.</p>
+                <a href="/my-orders" class="btn btn-primary">Back to My Orders</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="min-h-screen bg-base-100">
+        <!-- Header -->
+        <section class="bg-secondary py-10 px-4">
+            <div class="max-w-4xl mx-auto">
+                <a href="/my-orders" class="text-sm text-secondary-content/60 hover:text-secondary-content flex items-center gap-1 mb-3">
+                    <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i> My Orders
+                </a>
+                <div class="flex items-start justify-between flex-wrap gap-3">
+                    <div>
+                        <h1 class="font-serif text-3xl md:text-4xl text-secondary-content">@_order.OrderNumber</h1>
+                        <p class="text-secondary-content/70 mt-1">Placed @_order.CreatedAt.ToString("d MMMM yyyy")</p>
+                    </div>
+                    <OrderStatusBadge Status="@_order.Status" />
+                </div>
+            </div>
+        </section>
+
+        <div class="max-w-4xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: status timeline + order lines -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+
+                <!-- Status timeline -->
+                @if (_order.StatusHistory.Count > 0)
+                {
+                    <div class="card bg-base-100 border border-base-300 shadow-sm">
+                        <div class="card-body p-5">
+                            <h2 class="font-serif text-lg text-base-content mb-4">Order Progress</h2>
+                            <ul class="timeline timeline-vertical timeline-compact">
+                                @for (int i = 0; i < _order.StatusHistory.Count; i++)
+                                {
+                                    var item = _order.StatusHistory[i];
+                                    var isLast = i == _order.StatusHistory.Count - 1;
+                                    <li>
+                                        @if (i > 0) { <hr class="bg-base-300" /> }
+                                        <div class="timeline-middle">
+                                            <span class="w-3 h-3 rounded-full @(isLast ? "bg-primary" : "bg-base-300") block"></span>
+                                        </div>
+                                        <div class="timeline-end pb-4">
+                                            <div class="font-semibold text-sm">
+                                                <OrderStatusBadge Status="@item.Status" />
+                                            </div>
+                                            <div class="text-xs text-base-content/50 mt-0.5">@item.ChangedAt.ToString("d MMM yyyy, HH:mm")</div>
+                                            @if (!string.IsNullOrWhiteSpace(item.Note))
+                                            {
+                                                <div class="text-sm text-base-content/70 mt-1">@item.Note</div>
+                                            }
+                                        </div>
+                                        @if (!isLast) { <hr class="bg-base-300" /> }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                <!-- Order lines -->
+                <div class="card bg-base-100 border border-base-300 shadow-sm">
+                    <div class="card-body p-5">
+                        <h2 class="font-serif text-lg text-base-content mb-4">Items Ordered</h2>
+                        <div class="flex flex-col divide-y divide-base-200">
+                            @foreach (var line in _order.Lines)
+                            {
+                                <div class="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
+                                    @if (!string.IsNullOrWhiteSpace(line.ProductImageUrl))
+                                    {
+                                        <img src="@line.ProductImageUrl" alt="@line.ProductName"
+                                             class="w-14 h-14 object-cover rounded-lg flex-shrink-0 bg-base-200" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-14 h-14 rounded-lg bg-base-200 flex-shrink-0 flex items-center justify-center text-base-content/30">
+                                            <i class="fas fa-seedling" aria-hidden="true"></i>
+                                        </div>
+                                    }
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-base-content truncate">@line.ProductName</p>
+                                        <p class="text-sm text-base-content/60">Qty @line.Quantity &times; £@line.UnitPrice.ToString("F2")</p>
+                                    </div>
+                                    <p class="font-semibold text-primary">£@line.LineTotal.ToString("F2")</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: order summary -->
+            <div class="flex flex-col gap-4">
+                <div class="card bg-base-200 border border-base-300 shadow-sm">
+                    <div class="card-body p-5 gap-3">
+                        <h2 class="font-serif text-lg text-base-content">Order Summary</h2>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-base-content/60">Subtotal</span>
+                            <span>£@_order.Subtotal.ToString("F2")</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-base-content/60">Delivery</span>
+                            <span>@(_order.DeliveryFee == 0 ? "Free" : $"£{_order.DeliveryFee:F2}")</span>
+                        </div>
+                        <div class="divider my-0"></div>
+                        <div class="flex justify-between font-bold text-lg">
+                            <span>Total</span>
+                            <span class="text-primary">£@_order.Total.ToString("F2")</span>
+                        </div>
+                        <div class="text-sm text-base-content/60">
+                            @(_order.DeliveryType == "Collection"
+                                ? "Click & Collect from Milverton"
+                                : $"Delivery to {_order.DeliveryAddress}, {_order.DeliveryPostcode}")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <p class="text-sm text-base-content/50 mb-2">Questions about your order?</p>
+                    <a href="mailto:sales@katiesgarden.uk" class="btn btn-outline btn-sm btn-primary">
+                        <i class="fas fa-envelope" aria-hidden="true"></i> Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string OrderNumber { get; set; } = string.Empty;
+
+    private bool _loading = true;
+    private CustomerOrderDetailDto? _order;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loading = true;
+        _order = await OrderService.GetOrderAsync(OrderNumber);
+        _loading = false;
+    }
+}

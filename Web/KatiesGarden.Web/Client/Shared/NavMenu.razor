@@ -2,6 +2,7 @@
 @inject AuthService AuthService
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
+@using KatiesGarden.Models.Auth
 
 <div class="sticky top-0 z-50 bg-base-100 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -52,6 +53,14 @@
                          ActiveClass="text-primary bg-base-200">
                     Contact
                 </NavLink>
+                @if (_isAuthenticated && !_isAdmin)
+                {
+                    <NavLink href="my-orders"
+                             class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                             ActiveClass="text-primary bg-base-200">
+                        <i class="fas fa-receipt text-xs mr-1" aria-hidden="true"></i> My Orders
+                    </NavLink>
+                }
                 @if (_isAdmin)
                 {
                     <NavLink href="admin"
@@ -171,6 +180,15 @@
                          @onclick="CloseNavMenu">
                     <i class="fas fa-envelope w-4 text-center opacity-60" aria-hidden="true"></i> Contact
                 </NavLink>
+                @if (_isAuthenticated && !_isAdmin)
+                {
+                    <NavLink href="my-orders"
+                             class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                             ActiveClass="bg-base-200 text-primary"
+                             @onclick="CloseNavMenu">
+                        <i class="fas fa-receipt w-4 text-center opacity-60" aria-hidden="true"></i> My Orders
+                    </NavLink>
+                }
                 @if (_isAdmin)
                 {
                     <NavLink href="admin"
@@ -198,6 +216,7 @@
 @code {
     private bool collapseNavMenu = true;
     private bool _isAdmin;
+    private bool _isAuthenticated;
     private int _cartCount;
     private bool _searchOpen;
     private string _searchQuery = string.Empty;
@@ -234,6 +253,7 @@
     protected override async Task OnInitializedAsync()
     {
         _isAdmin = await AuthService.IsAdminAsync();
+        _isAuthenticated = await AuthService.IsAuthenticatedAsync();
         await CartService.GetItemsAsync();
         _cartCount = CartService.ItemCount;
         CartService.CartChanged += OnCartChanged;

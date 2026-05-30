@@ -1,0 +1,26 @@
+@* Reusable badge for order status — used in customer portal and admin views *@
+
+<span class="badge badge-sm @BadgeClass font-medium">@StatusLabel</span>
+
+@code {
+    [Parameter, EditorRequired] public string Status { get; set; } = string.Empty;
+
+    private string BadgeClass => Status switch
+    {
+        "Pending"              => "badge-ghost",
+        "Confirmed"            => "badge-info",
+        "Processing"           => "badge-warning",
+        "ReadyForCollection"   => "badge-success",
+        "Dispatched"           => "badge-primary",
+        "Delivered"            => "badge-success",
+        "Cancelled"            => "badge-error",
+        "Refunded"             => "badge-error badge-outline",
+        _                      => "badge-ghost"
+    };
+
+    private string StatusLabel => Status switch
+    {
+        "ReadyForCollection"   => "Ready to Collect",
+        _                      => System.Text.RegularExpressions.Regex.Replace(Status, @"(?<=[a-z])(?=[A-Z])", " ")
+    };
+}

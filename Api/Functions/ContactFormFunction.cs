@@ -3,7 +3,6 @@ using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Email;
-using KatiesGarden.Api.Configuration;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;

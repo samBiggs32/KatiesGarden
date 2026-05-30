@@ -43,4 +43,10 @@ public class AuthService(HttpClient http, IWebAssemblyHostEnvironment env)
         var principal = await GetPrincipalAsync();
         return principal?.UserRoles?.Contains("admin", StringComparer.OrdinalIgnoreCase) ?? false;
     }
+
+    public async Task<bool> IsAuthenticatedAsync()
+    {
+        var principal = await GetPrincipalAsync();
+        return principal?.UserRoles?.Contains("authenticated", StringComparer.OrdinalIgnoreCase) ?? false;
+    }
 }

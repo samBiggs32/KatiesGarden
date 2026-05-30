@@ -25,7 +25,10 @@
   "routes": [
     { "route": "/admin/login", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/admin", "allowedRoles": ["admin"] },
-    { "route": "/admin/*", "allowedRoles": ["admin"] }
+    { "route": "/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/my-orders/lookup", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/my-orders", "allowedRoles": ["authenticated"] },
+    { "route": "/my-orders/*", "allowedRoles": ["authenticated"] }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",

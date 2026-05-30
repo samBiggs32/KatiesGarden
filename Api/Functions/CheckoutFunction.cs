@@ -65,6 +65,9 @@ public class CheckoutFunction(
                 : settings.LocalDeliveryFee);
         var total = subtotal + deliveryFee;
 
+        // Capture authenticated customer identity so the order appears in "My Orders"
+        var authenticatedUser = SwaAuth.GetAuthenticatedUser(req);
+
         // Create pending order record
         var orderNumber = OrderNumberHelper.Generate();
         var order = new Order
@@ -82,6 +85,8 @@ public class CheckoutFunction(
             DeliveryFee = deliveryFee,
             Total = total,
             Status = OrderStatus.Pending,
+            CustomerId = authenticatedUser?.UserId,
+            CustomerIdentityProvider = authenticatedUser?.IdentityProvider,
             Lines = request.Items.Select(i => new OrderLine
             {
                 ProductId = i.ProductId,
