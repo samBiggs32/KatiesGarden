@@ -3,6 +3,7 @@
 @inject CustomerOrderService OrderService
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@implements IAsyncDisposable
 
 <PageTitle>Order @OrderNumber — Katie's Garden</PageTitle>
 
@@ -156,11 +157,39 @@ else
 
     private bool _loading = true;
     private CustomerOrderDetailDto? _order;
+    private Timer? _pollTimer;
+
+    private static readonly HashSet<string> TerminalStatuses =
+        ["Delivered", "Cancelled", "Refunded"];
 
     protected override async Task OnParametersSetAsync()
     {
+        _pollTimer?.Dispose();
         _loading = true;
         _order = await OrderService.GetOrderAsync(OrderNumber);
         _loading = false;
+
+        // Poll every 30 seconds until the order reaches a terminal state
+        if (_order is not null && !TerminalStatuses.Contains(_order.Status))
+        {
+            _pollTimer = new Timer(async _ =>
+            {
+                var updated = await OrderService.GetOrderAsync(OrderNumber);
+                if (updated is not null)
+                {
+                    _order = updated;
+                    await InvokeAsync(StateHasChanged);
+
+                    if (TerminalStatuses.Contains(updated.Status))
+                        _pollTimer?.Dispose();
+                }
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _pollTimer?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }
