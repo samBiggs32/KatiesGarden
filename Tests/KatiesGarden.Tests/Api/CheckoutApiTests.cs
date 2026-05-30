@@ -22,9 +22,10 @@ public class CheckoutApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task CreateSession_InvalidBody_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         var response = await fixture.HttpClient.PostAsJsonAsync(
             "/api/checkout/create-session",
-            new CheckoutRequest());
+            new CheckoutRequest(), ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -32,10 +33,11 @@ public class CheckoutApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task CreateSession_UnknownProductId_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         var body = ValidRequest();
         body.Items.Add(new CartItemRequest { ProductId = Guid.NewGuid(), Quantity = 1 });
 
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -43,11 +45,12 @@ public class CheckoutApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task CreateSession_InsufficientStock_ReturnsBadRequest()
     {
-        var product = await SeedProduct(stock: 1);
+        var ct = TestContext.Current.CancellationToken;
+        var product = await SeedProduct(stock: 1, ct);
         var body = ValidRequest();
         body.Items.Add(new CartItemRequest { ProductId = product.Id, Quantity = 5 });
 
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -55,15 +58,16 @@ public class CheckoutApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task CreateSession_StripeFailure_CleansUpOrphanOrder()
     {
+        var ct = TestContext.Current.CancellationToken;
         // With a placeholder Stripe key, sessionService.CreateAsync throws;
         // the catch block removes the orphan order.
-        var product = await SeedProduct(stock: 5);
+        var product = await SeedProduct(stock: 5, ct);
         var body = ValidRequest();
         body.Items.Add(new CartItemRequest { ProductId = product.Id, Quantity = 1 });
 
-        var ordersBefore = await CountPendingOrdersForEmail(body.Email);
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body);
-        var ordersAfter = await CountPendingOrdersForEmail(body.Email);
+        var ordersBefore = await CountPendingOrdersForEmail(body.Email, ct);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/checkout/create-session", body, ct);
+        var ordersAfter = await CountPendingOrdersForEmail(body.Email, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest,
             "Stripe rejection should return 400, not 500");
@@ -71,7 +75,7 @@ public class CheckoutApiTests(AspireApiFixture fixture)
             "the orphan pending order must be removed after Stripe failure");
     }
 
-    private async Task<Product> SeedProduct(int stock)
+    private async Task<Product> SeedProduct(int stock, CancellationToken ct = default)
     {
         var product = new Product
         {
@@ -85,14 +89,14 @@ public class CheckoutApiTests(AspireApiFixture fixture)
         };
         await using var db = fixture.CreateDbContext();
         db.Products.Add(product);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         return product;
     }
 
-    private async Task<int> CountPendingOrdersForEmail(string email)
+    private async Task<int> CountPendingOrdersForEmail(string email, CancellationToken ct = default)
     {
         await using var db = fixture.CreateDbContext();
-        return await db.Orders.CountAsync(o => o.CustomerEmail == email);
+        return await db.Orders.CountAsync(o => o.CustomerEmail == email, ct);
     }
 
     private static CheckoutRequest ValidRequest() => new()

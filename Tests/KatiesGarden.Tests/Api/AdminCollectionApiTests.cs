@@ -13,22 +13,24 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task ListCollections_Unauthenticated_Returns401()
     {
-        var response = await fixture.HttpClient.GetAsync("/api/manage/collections");
+        var ct = TestContext.Current.CancellationToken;
+        var response = await fixture.HttpClient.GetAsync("/api/manage/collections", ct);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
     public async Task ListCollections_Admin_IncludesInactive()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
 
         // Create an inactive collection so we can confirm admin sees it
-        var created = await CreateCollection(admin);
+        var created = await CreateCollection(admin, ct);
         // Deactivate it
-        await admin.DeleteAsync($"/api/manage/collections/{created.Id}");
+        await admin.DeleteAsync($"/api/manage/collections/{created.Id}", ct);
 
-        var resp = await admin.GetAsync("/api/manage/collections");
-        var list = await resp.Content.ReadFromJsonAsync<List<CollectionSummaryDto>>();
+        var resp = await admin.GetAsync("/api/manage/collections", ct);
+        var list = await resp.Content.ReadFromJsonAsync<List<CollectionSummaryDto>>(ct);
 
         list.Should().NotBeNull();
         list!.Any(c => c.Id == created.Id && !c.IsActive)
@@ -38,14 +40,15 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task GetUpdateDeleteCollection_Admin_FullLifecycle()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
 
-        var created = await CreateCollection(admin);
+        var created = await CreateCollection(admin, ct);
 
         // Get detail
-        var getResp = await admin.GetAsync($"/api/manage/collections/{created.Id}");
+        var getResp = await admin.GetAsync($"/api/manage/collections/{created.Id}", ct);
         getResp.IsSuccessStatusCode.Should().BeTrue();
-        var detail = await getResp.Content.ReadFromJsonAsync<CollectionDetailDto>();
+        var detail = await getResp.Content.ReadFromJsonAsync<CollectionDetailDto>(ct);
         detail!.Id.Should().Be(created.Id);
 
         // Update — change title and toggle inactive
@@ -57,28 +60,29 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
             StartDate = DateTime.UtcNow.AddDays(-1),
             DisplayOrder = 99
         };
-        var putResp = await admin.PutAsJsonAsync($"/api/manage/collections/{created.Id}", update);
+        var putResp = await admin.PutAsJsonAsync($"/api/manage/collections/{created.Id}", update, ct);
         putResp.IsSuccessStatusCode.Should().BeTrue();
-        var updated = await putResp.Content.ReadFromJsonAsync<CollectionSummaryDto>();
+        var updated = await putResp.Content.ReadFromJsonAsync<CollectionSummaryDto>(ct);
         updated!.IsActive.Should().BeFalse();
 
         // Delete = soft delete (deactivate)
-        var deleteResp = await admin.DeleteAsync($"/api/manage/collections/{created.Id}");
+        var deleteResp = await admin.DeleteAsync($"/api/manage/collections/{created.Id}", ct);
         deleteResp.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact]
     public async Task CreateCollection_Admin_InvalidPayload_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
         var body = new CreateCollectionRequest { Title = "", Description = "" };
 
-        var resp = await admin.PostAsJsonAsync("/api/manage/collections", body);
+        var resp = await admin.PostAsJsonAsync("/api/manage/collections", body, ct);
 
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    private async Task<CollectionSummaryDto> CreateCollection(HttpClient admin)
+    private async Task<CollectionSummaryDto> CreateCollection(HttpClient admin, CancellationToken ct)
     {
         var body = new CreateCollectionRequest
         {
@@ -87,8 +91,8 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
             StartDate = DateTime.UtcNow.AddDays(-1),
             DisplayOrder = 1
         };
-        var resp = await admin.PostAsJsonAsync("/api/manage/collections", body);
+        var resp = await admin.PostAsJsonAsync("/api/manage/collections", body, ct);
         resp.StatusCode.Should().Be(HttpStatusCode.Created);
-        return (await resp.Content.ReadFromJsonAsync<CollectionSummaryDto>())!;
+        return (await resp.Content.ReadFromJsonAsync<CollectionSummaryDto>(ct))!;
     }
 }

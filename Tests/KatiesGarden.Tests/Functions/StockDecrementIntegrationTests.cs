@@ -28,55 +28,59 @@ public class StockDecrementIntegrationTests(PostgresFixture fixture)
     [Fact]
     public async Task Decrement_SufficientStock_DecrementsByQuantity()
     {
-        var productId = await SeedProduct(stock: 5);
+        var ct = TestContext.Current.CancellationToken;
+        var productId = await SeedProduct(stock: 5, ct);
 
         await using var db = fixture.CreateDbContext();
-        var rowsUpdated = await RunDecrement(db, productId, qty: 2);
+        var rowsUpdated = await RunDecrement(db, productId, qty: 2, ct);
 
         rowsUpdated.Should().Be(1);
-        var stock = await GetStock(productId);
+        var stock = await GetStock(productId, ct);
         stock.Should().Be(3);
     }
 
     [Fact]
     public async Task Decrement_InsufficientStock_ReturnsZeroAndLeavesStockUnchanged()
     {
-        var productId = await SeedProduct(stock: 1);
+        var ct = TestContext.Current.CancellationToken;
+        var productId = await SeedProduct(stock: 1, ct);
 
         await using var db = fixture.CreateDbContext();
-        var rowsUpdated = await RunDecrement(db, productId, qty: 2);
+        var rowsUpdated = await RunDecrement(db, productId, qty: 2, ct);
 
         rowsUpdated.Should().Be(0);
-        (await GetStock(productId)).Should().Be(1);
+        (await GetStock(productId, ct)).Should().Be(1);
     }
 
     [Fact]
     public async Task Decrement_NullStock_IsIgnoredByWhereGuard()
     {
-        var productId = await SeedProduct(stock: null);
+        var ct = TestContext.Current.CancellationToken;
+        var productId = await SeedProduct(stock: null, ct);
 
         await using var db = fixture.CreateDbContext();
-        var rowsUpdated = await RunDecrement(db, productId, qty: 1);
+        var rowsUpdated = await RunDecrement(db, productId, qty: 1, ct);
 
         rowsUpdated.Should().Be(0);
-        (await GetStock(productId)).Should().BeNull();
+        (await GetStock(productId, ct)).Should().BeNull();
     }
 
     [Fact]
     public async Task Decrement_ToZero_FollowUpUpdateMarksProductUnavailable()
     {
-        var productId = await SeedProduct(stock: 1);
+        var ct = TestContext.Current.CancellationToken;
+        var productId = await SeedProduct(stock: 1, ct);
 
         await using (var db = fixture.CreateDbContext())
         {
-            await RunDecrement(db, productId, qty: 1);
+            await RunDecrement(db, productId, qty: 1, ct);
             await db.Products
                 .Where(p => p.Id == productId && p.StockQuantity == 0)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsAvailable, false));
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsAvailable, false), ct);
         }
 
         await using var verify = fixture.CreateDbContext();
-        var product = await verify.Products.FindAsync(productId);
+        var product = await verify.Products.FindAsync([productId], ct);
         product!.StockQuantity.Should().Be(0);
         product.IsAvailable.Should().BeFalse();
     }
@@ -90,15 +94,16 @@ public class StockDecrementIntegrationTests(PostgresFixture fixture)
     [Fact]
     public async Task Decrement_ManyConcurrent_NeverOversells()
     {
+        var ct = TestContext.Current.CancellationToken;
         const int initialStock = 5;
         const int concurrentRequests = 20;
-        var productId = await SeedProduct(stock: initialStock);
+        var productId = await SeedProduct(stock: initialStock, ct);
 
         var tasks = Enumerable.Range(0, concurrentRequests)
             .Select(async _ =>
             {
                 await using var db = fixture.CreateDbContext();
-                return await RunDecrement(db, productId, qty: 1);
+                return await RunDecrement(db, productId, qty: 1, ct);
             })
             .ToArray();
 
@@ -107,12 +112,12 @@ public class StockDecrementIntegrationTests(PostgresFixture fixture)
 
         successfulDecrements.Should().Be(initialStock,
             "exactly the initial stock should be sold; the WHERE guard must reject the rest");
-        (await GetStock(productId)).Should().Be(0);
+        (await GetStock(productId, ct)).Should().Be(0);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────
 
-    private async Task<Guid> SeedProduct(int? stock)
+    private async Task<Guid> SeedProduct(int? stock, CancellationToken ct = default)
     {
         var product = new Product
         {
@@ -126,22 +131,22 @@ public class StockDecrementIntegrationTests(PostgresFixture fixture)
         };
         await using var db = fixture.CreateDbContext();
         db.Products.Add(product);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(ct);
         return product.Id;
     }
 
-    private async Task<int?> GetStock(Guid productId)
+    private async Task<int?> GetStock(Guid productId, CancellationToken ct = default)
     {
         await using var db = fixture.CreateDbContext();
-        var product = await db.Products.AsNoTracking().FirstAsync(p => p.Id == productId);
+        var product = await db.Products.AsNoTracking().FirstAsync(p => p.Id == productId, ct);
         return product.StockQuantity;
     }
 
-    private static Task<int> RunDecrement(AppDbContext db, Guid productId, int qty) =>
+    private static Task<int> RunDecrement(AppDbContext db, Guid productId, int qty, CancellationToken ct = default) =>
         db.Products
             .Where(p => p.Id == productId
                      && p.StockQuantity != null
                      && p.StockQuantity >= qty)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(p => p.StockQuantity, p => p.StockQuantity!.Value - qty));
+                .SetProperty(p => p.StockQuantity, p => p.StockQuantity!.Value - qty), ct);
 }
