@@ -1,18 +1,11 @@
 :root {
-    /* Legacy vars kept for JS/carousel compatibility */
     --background-colour: #FDFAF5;
     --primary-colour: #4A7C59;
-    --secondary-colour: #F5EDD6;
-    --text-primary: #1C2B1A;
     --text-secondary: #5B7876;
-    --border-subtle: #EAE4D8;
-
-    --carousel-height-desktop: 40em;
-    --carousel-height-tablet: 25em;
-    --carousel-height-mobile: 10em;
 }
 
-/* Base typography — DaisyUI/Tailwind supply the reset; these set the brand fonts */
+/* Brand fonts — Tailwind/DaisyUI supply the reset; these set the global defaults
+   (no built-in class applies a default font family across the whole document). */
 html, body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--background-colour);
@@ -31,7 +24,6 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.75rem 1.5rem;
     background-color: var(--primary-colour);
     color: white;
-    font-family: Arial, sans-serif;
     font-weight: 600;
     z-index: 9999;
     text-decoration: none;
@@ -43,11 +35,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Keyboard focus rings — visible only for keyboard navigation, not mouse clicks */
-:focus-visible {
-    outline: 3px solid var(--primary-colour);
-    outline-offset: 2px;
-}
-
 a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible {
@@ -56,125 +43,7 @@ button:focus-visible,
     border-radius: 2px;
 }
 
-.default-font {
-    font-family: var(--mud-typography-default-family);
-}
-
-.section-title {
-    display: block;
-    font-size: 2em;
-    margin-block-start: 0.67em;
-    margin-block-end: 0.67em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-    font-weight: bold;
-}
-
-.index-paragraph {
-    text-align: justify;
-}
-
-.background-colour-primary {
-    background-color: var(--background-colour);
-}
-
-.navbar {
-    position: relative;
-}
-
-/* 3-tier navbar (phone → logo → links): make navbar-collapse stack its
-   w-100 children as rows instead of placing them side-by-side. */
-.navbar-expand-sm .navbar-collapse {
-    width: 100%;
-}
-
-hr {
-    border: 0;
-    clear: both;
-    display: block;
-    background-color: var(--border-subtle);
-    height: 1px;
-}
-
-.garden-jobs-list ul.history-left-list {
-    float: left;
-}
-
-.garden-jobs-list ul li {
-    color: var(--primary-colour);
-    font-size: 17px;
-    font-style: normal;
-    line-height: 2.5;
-    list-style: none;
-}
-
-.contact {
-    background-color: var(--secondary-colour);
-    color: #ffffff;
-}
-
-.tri-images {
-    align-items: center;
-    text-align: center;
-}
-
-    .tri-images > img {
-        display: inline-block;
-        height: auto;
-        margin-left: auto;
-        margin-right: auto;
-        width: 32%;
-    }
-
-.feature-image {
-    align-items: center;
-    text-align: center;
-}
-
-    .feature-image > img {
-        display: inline-block;
-        height: auto;
-        margin-left: auto;
-        margin-right: auto;
-        width: 100%;
-    }
-
-#promotional-text {
-    background-color: var(--primary-colour);
-    color: white;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    height: 50px;
-    margin: auto;
-    align-content: center;
-    align-items: center;
-    justify-content: center;
-}
-
-.break-banner > p {
-    display: table-cell;
-}
-
-a.navbar-brand {
-    white-space: normal;
-    text-align: center;
-    word-break: break-all;
-}
-
-/* Blazor default form validation styles */
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
-.invalid {
-    outline: 1px solid red;
-}
-
-.validation-message {
-    color: red;
-}
-
+/* Blazor unhandled-error banner (markup lives in index.html) */
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -194,7 +63,7 @@ a.navbar-brand {
         top: 0.5rem;
     }
 
-/* Blazor loading screen — shown while the WASM runtime downloads */
+/* WASM loading screen (markup lives in index.html, shown before Blazor boots) */
 .app-loading {
     display: flex;
     flex-direction: column;
@@ -212,7 +81,6 @@ a.navbar-brand {
     }
 
     .app-loading__title {
-        font-family: Arial, sans-serif;
         font-size: 1.25rem;
         color: var(--primary-colour);
         margin: 0;
@@ -220,177 +88,7 @@ a.navbar-brand {
     }
 
     .app-loading__subtitle {
-        font-family: Arial, sans-serif;
         font-size: 0.9rem;
         color: var(--text-secondary);
         margin: 0;
-    }
-
-.carousel-size {
-    min-height: var(--carousel-height-desktop);
-}
-
-.article-section {
-    padding: 3rem !important;
-}
-
-.list-orientation {
-    display: inline-block;
-}
-
-.gallery-carousel {
-    width: 50%;
-    left: 25%;
-}
-
-.gallery-text {
-    margin-left: auto;
-    margin-right: auto;
-    text-align: justify;
-    width: 50%;
-}
-
-.map-location {
-    justify-content: center;
-    max-width: 100%;
-}
-
-@media (max-width: 1300px) {
-    .carousel-size {
-        min-height: var(--carousel-height-tablet);
-    }
-}
-
-@media (max-width: 991.98px) {
-    .carousel-size {
-        min-height: var(--carousel-height-mobile);
-    }
-
-    .gallery-carousel {
-        width: 100% !important;
-        left: inherit;
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-
-    .gallery-text {
-        width: 100% !important;
-        padding-left: 1em;
-        padding-right: 1em;
-    }
-}
-
-@media (max-width: 540px) {
-    .banner-index {
-        height: 4.7em !important;
-    }
-
-    ul.list-item-mobile > li {
-        width: 100%;
-    }
-
-    .list-orientation {
-        display: block;
-    }
-
-    .hide-icon-mobile {
-        display: none !important;
-    }
-
-    .article-section {
-        padding: 0.5rem !important;
-    }
-
-    .carousel-size {
-        min-width: 100%;
-    }
-
-    .card-padding {
-        padding: 0;
-        margin: 0;
-    }
-
-    .crop {
-        height: inherit !important;
-    }
-
-    .contact-button {
-        width: 100%;
-    }
-}
-
-@media (min-width: 540px) {
-    .map-location {
-        padding: 2em;
-    }
-
-    .image-container {
-        position: relative;
-        text-align: center;
-    }
-
-    .bottom-left {
-        position: absolute;
-        bottom: 8px;
-        left: 16px;
-    }
-
-    .top-left {
-        position: absolute;
-        top: 8px;
-        left: 16px;
-    }
-
-    .top-right {
-        position: absolute;
-        top: 8px;
-        right: 16px;
-    }
-
-    .bottom-right {
-        position: absolute;
-        bottom: 8px;
-        right: 16px;
-    }
-
-    .centered {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-}
-
-@media (min-width: 1140px) {
-    .map-location {
-        max-width: 50%;
-    }
-
-    .index-paragraph {
-        padding-right: 7em;
-    }
-}
-
-/* Gallery carousel — reserve space before images load (prevents layout shift). */
-.gallery-carousel .carousel-item picture,
-.gallery-carousel .carousel-item img {
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    width: 100%;
-}
-
-.carousel_img {
-    float: left;
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-}
-
-.crop {
-    width: 100%;
-    overflow: hidden;
-}
-
-    .crop img {
-        width: 100%;
     }
