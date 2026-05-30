@@ -4,82 +4,158 @@
 
 <PageTitle>@(_product?.Name ?? "Product") — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+<!-- Toast notification -->
+@if (_toast is not null)
+{
+    <div class="toast toast-top toast-end z-50" role="status" aria-live="polite">
+        <div class="alert alert-success shadow-lg">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            <span>@_toast</span>
+        </div>
+    </div>
+}
+
+<div class="max-w-5xl mx-auto px-6 py-12">
+
     @if (_loading)
     {
-        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" Class="mb-4" />
-        <MudSkeleton Width="60%" Height="36px" />
+        <div class="grid md:grid-cols-2 gap-10 animate-pulse">
+            <div class="bg-base-300 aspect-square rounded-2xl"></div>
+            <div class="flex flex-col gap-4">
+                <div class="bg-base-300 h-9 rounded w-3/4"></div>
+                <div class="bg-base-300 h-7 rounded w-1/4"></div>
+                <div class="bg-base-300 h-4 rounded"></div>
+                <div class="bg-base-300 h-4 rounded w-4/5"></div>
+            </div>
+        </div>
     }
     else if (_product is null)
     {
-        <MudAlert Severity="Severity.Warning">Product not found.</MudAlert>
+        <div class="text-center py-20">
+            <i class="fas fa-exclamation-circle text-5xl text-warning/50 mb-4" aria-hidden="true"></i>
+            <p class="text-base-content/65 mb-4">Product not found.</p>
+            <a href="/shop" class="btn btn-outline btn-primary">Back to Shop</a>
+        </div>
     }
     else
     {
-        @if (_product.ImageUrls.Length > 0)
-        {
-            <MudCarousel Class="mb-6" Style="height:400px;" ShowArrows="true" ShowBullets="@(_product.ImageUrls.Length > 1)" AutoCycle="false" TData="object">
-                @foreach (var url in _product.ImageUrls)
+        <!-- Breadcrumb -->
+        <nav class="text-sm text-base-content/50 mb-6" aria-label="Breadcrumb">
+            <a href="/shop" class="hover:text-primary transition-colors">Shop</a>
+            @if (_product.CollectionSlug is not null)
+            {
+                <span class="mx-2" aria-hidden="true">/</span>
+                <a href="/shop/@_product.CollectionSlug"
+                   class="hover:text-primary transition-colors">@_product.CollectionTitle</a>
+            }
+            <span class="mx-2" aria-hidden="true">/</span>
+            <span class="text-base-content/80">@_product.Name</span>
+        </nav>
+
+        <div class="grid md:grid-cols-2 gap-10 items-start">
+
+            <!-- Image gallery -->
+            <div>
+                @if (_product.ImageUrls.Length > 0)
                 {
-                    <MudCarouselItem @key="url">
-                        <div style="display:flex; justify-content:center; align-items:center; height:100%;">
-                            <img src="@url" alt="@_product.Name" style="max-height:400px; max-width:100%; object-fit:contain;" loading="lazy" />
+                    <div class="rounded-2xl overflow-hidden bg-base-200 aspect-square relative">
+                        <img src="@_product.ImageUrls[_activeImage]"
+                             alt="@_product.Name"
+                             class="w-full h-full object-contain"
+                             loading="eager" />
+                    </div>
+                    @if (_product.ImageUrls.Length > 1)
+                    {
+                        <div class="flex gap-2 mt-3 flex-wrap">
+                            @for (int t = 0; t < _product.ImageUrls.Length; t++)
+                            {
+                                var idx = t;
+                                <button class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors @(idx == _activeImage ? "border-primary" : "border-base-300 hover:border-primary/50")"
+                                        @onclick="() => _activeImage = idx"
+                                        aria-label="@($"Image {idx + 1}")">
+                                    <img src="@_product.ImageUrls[idx]" alt="" class="w-full h-full object-cover" loading="lazy" />
+                                </button>
+                            }
                         </div>
-                    </MudCarouselItem>
+                    }
                 }
-            </MudCarousel>
-        }
+                else
+                {
+                    <div class="rounded-2xl bg-base-200 aspect-square flex items-center justify-center">
+                        <i class="fas fa-seedling text-6xl text-primary/20" aria-hidden="true"></i>
+                    </div>
+                }
+            </div>
 
-        <MudText Typo="Typo.h4" Class="font-weight-bold">@_product.Name</MudText>
-        <MudText Typo="Typo.h5" Color="Color.Primary" Class="mt-2">£@_product.Price.ToString("F2")</MudText>
+            <!-- Product details -->
+            <div class="flex flex-col gap-4">
+                <h1 class="font-serif text-3xl md:text-4xl font-bold text-base-content leading-tight">@_product.Name</h1>
 
-        <div class="mt-2 mb-4">
-            @if (!_product.IsAvailable)
-            {
-                <MudChip T="string" Color="Color.Error">Sold out</MudChip>
-            }
-            else if (_product.StockQuantity is > 0 and <= 3)
-            {
-                <MudChip T="string" Color="Color.Warning">Only @_product.StockQuantity left</MudChip>
-            }
-            else
-            {
-                <MudChip T="string" Color="Color.Success">In stock</MudChip>
-            }
-            @if (_product.CanLocalDeliver)
-            {
-                <MudChip T="string" Color="Color.Info">Local delivery available</MudChip>
-            }
-            else
-            {
-                <MudChip T="string">Collection only</MudChip>
-            }
+                <p class="text-primary text-3xl font-bold">£@_product.Price.ToString("F2")</p>
+
+                <!-- Status badges -->
+                <div class="flex flex-wrap gap-2">
+                    @if (!_product.IsAvailable)
+                    {
+                        <span class="badge badge-error">Sold out</span>
+                    }
+                    else if (_product.StockQuantity is > 0 and <= 3)
+                    {
+                        <span class="badge badge-warning">Only @_product.StockQuantity left</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-success">In stock</span>
+                    }
+
+                    @if (_product.CanLocalDeliver)
+                    {
+                        <span class="badge badge-info">Local delivery available</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-outline">Click & collect only</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(_product.Description))
+                {
+                    <p class="text-base-content/75 leading-relaxed">@_product.Description</p>
+                }
+
+                @if (_product.HowToBuyNote is not null)
+                {
+                    <div class="alert alert-info text-sm">
+                        <i class="fas fa-info-circle flex-shrink-0" aria-hidden="true"></i>
+                        <span>@_product.HowToBuyNote</span>
+                    </div>
+                }
+
+                <div class="divider my-1"></div>
+
+                <!-- Actions -->
+                <div class="flex gap-3 flex-wrap">
+                    <button class="btn btn-primary btn-lg flex-1"
+                            disabled="@(!_product.IsAvailable)"
+                            @onclick="AddToCartAsync">
+                        <i class="fas fa-basket-shopping mr-2" aria-hidden="true"></i>
+                        @(_product.IsAvailable ? "Add to Basket" : "Sold Out")
+                    </button>
+                    <a href="/contact?subject=@Uri.EscapeDataString($"Enquiry about {_product.Name}")"
+                       class="btn btn-outline btn-lg">
+                        Enquire
+                    </a>
+                </div>
+
+                @if (_product.CollectionSlug is not null)
+                {
+                    <a href="/shop/@_product.CollectionSlug"
+                       class="text-sm text-base-content/50 hover:text-primary transition-colors mt-2 inline-flex items-center gap-1">
+                        <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>
+                        Back to @_product.CollectionTitle
+                    </a>
+                }
+            </div>
         </div>
-
-        <MudText Typo="Typo.body1" Class="mb-4">@_product.Description</MudText>
-
-        @if (_product.HowToBuyNote is not null)
-        {
-            <MudAlert Severity="Severity.Normal" Class="mb-4">@_product.HowToBuyNote</MudAlert>
-        }
-
-        <div class="d-flex gap-3 flex-wrap">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                       Disabled="@(!_product.IsAvailable)"
-                       OnClick="AddToCartAsync">
-                @(_product.IsAvailable ? "Add to Basket" : "Sold Out")
-            </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Large"
-                       Href="@($"/contact?subject=Enquiry about {Uri.EscapeDataString(_product.Name)}")">
-                Enquire Instead
-            </MudButton>
-        </div>
-
-        @if (_product.CollectionSlug is not null)
-        {
-            <MudLink Href="@($"/shop/{_product.CollectionSlug}")" Class="mt-6 d-block">
-                ← Back to @_product.CollectionTitle
-            </MudLink>
-        }
     }
-</MudContainer>
+</div>

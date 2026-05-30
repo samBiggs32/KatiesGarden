@@ -1,33 +1,38 @@
-﻿@namespace KatiesGarden.Web.Client.Components
+@namespace KatiesGarden.Web.Client.Components
 @using KatiesGarden.Web.Client.Constants
 
-<MudGrid Class="mt-8">
-    <MudItem xs="12">
-        <MudText Typo="Typo.h5" Class="mb-4 text-center">Our Garden Services</MudText>
-    </MudItem>
+<div class="mt-12 pt-10 border-t border-base-300">
+    <div class="text-center mb-8">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Services</p>
+        <h2 class="font-serif text-3xl font-bold text-base-content">Our Garden Services</h2>
+    </div>
 
-    @foreach (var service in Services)
-    {
-        <MudItem xs="12" md="4">
-            <MudCard Elevation="2" Class="h-100">
-                <MudCardMedia Image="@($"{ImagePaths.GalleryBasePath + service.ImageFile}")" Height="200" />
-                <MudCardContent>
-                    <MudText Typo="Typo.h6">@service.Title</MudText>
-                    <MudText Typo="Typo.body2">@service.Description</MudText>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Text"
-                    Color="Color.Primary"
-                    OnClick="@(() => NavigateToContact($"{service.Title} Enquiry"))">
-                        Learn More
-                    </MudButton>
-                </MudCardActions>
-            </MudCard>
-        </MudItem>
-    }
-</MudGrid>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        @foreach (var service in Services)
+        {
+            <div class="card bg-base-100 shadow-md rounded-2xl overflow-hidden group hover:shadow-xl transition-shadow">
+                <figure class="aspect-video overflow-hidden">
+                    <img src="@($"{ImagePaths.GalleryBasePath}{service.ImageFile}")"
+                         alt="@service.Title"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy" />
+                </figure>
+                <div class="card-body p-5">
+                    <h3 class="font-serif text-xl font-bold text-base-content">@service.Title</h3>
+                    <p class="text-base-content/65 text-sm leading-relaxed">@service.Description</p>
+                    <div class="card-actions mt-3">
+                        <button class="btn btn-ghost btn-sm text-primary hover:bg-primary/10"
+                                @onclick="@(() => NavigateToContact($"{service.Title} Enquiry"))">
+                            Learn More <i class="fas fa-arrow-right text-xs ml-1" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
 @code {
-    [Parameter] public IEnumerable<GardenService> Services { get; set; }
-    [Parameter] public Action<string> NavigateToContact { get; set; }    
+    [Parameter] public IEnumerable<GardenService> Services { get; set; } = [];
+    [Parameter] public Action<string> NavigateToContact { get; set; } = _ => { };
 }

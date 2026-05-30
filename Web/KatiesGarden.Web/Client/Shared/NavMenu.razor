@@ -2,104 +2,168 @@
 @inject AuthService AuthService
 @implements IAsyncDisposable
 
-<nav class="navbar navbar-expand-sm navbar-light background-colour-primary p-0">
-    <div class="d-flex align-items-center w-100 d-sm-none">
-        <button class="navbar-toggler border-0" type="button"
-                @onclick="ToggleNavMenu"
-                aria-label="Toggle navigation"
-                aria-expanded="@(!collapseNavMenu)"
-                aria-controls="main-nav-menu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="d-block d-sm-none flex-grow-1">
-            <a href="">
-                <img src="Images/Katies-Garden-(long) 2.gif" alt="Katie's Garden" style="width: 100%" />
-            </a>
-        </div>
-    </div>
+<div class="sticky top-0 z-50 bg-base-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
 
-    <div id="main-nav-menu" class="navbar-collapse @NavMenuCssClass ml-auto">
-        <div class="nav navbar-nav ml-auto w-100">
-            <div class="w-100 text-center" style="font-size:1.1em">
-                <span class="phone-number-text">Contact Katie on </span>
-                <a href="tel:+447804784522">
-                    <span class="phone-number-text"><strong>07804 784522</strong></span>
-                </a>
-            </div>
-            <div class="w-100 text-center" style="font-size:1.1em">
-                <a href="mailto:sales@katiesgarden.uk"><strong>sales@katiesgarden.uk</strong></a>
-            </div>
-        </div>
-        <div class="nav navbar-nav ml-auto w-100 justify-content-center d-none d-sm-block" style="align-items: center; text-align: center;">
-            <a href="">
-                <img src="Images/Katies-Garden-(long) 2.gif" alt="Katie's Garden" style="max-height: 100px" />
+        <!-- Contact strip — desktop only -->
+        <div class="hidden md:flex justify-end items-center gap-6 py-1.5 text-sm border-b border-base-300 text-base-content/60">
+            <a href="tel:+447804784522"
+               class="flex items-center gap-1.5 hover:text-primary transition-colors">
+                <i class="fas fa-phone text-xs" aria-hidden="true"></i>
+                <span>07804 784522</span>
             </a>
-            <hr>
+            <a href="mailto:sales@katiesgarden.uk"
+               class="flex items-center gap-1.5 hover:text-primary transition-colors">
+                <i class="fas fa-envelope text-xs" aria-hidden="true"></i>
+                <span>sales@katiesgarden.uk</span>
+            </a>
         </div>
-        <div class="nav navbar-nav ml-auto w-100 justify-content-end">
-            <ul class="text-center w-100">
-                <li class="nav-item active pt-1 list-orientation">
-                    <div class="w-100">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
-                            <span class="oi oi-home" aria-hidden="true"></span> Home
-                        </NavLink>
-                    </div>
-                </li>
-                <li class="nav-item pt-1 list-orientation">
-                    <div class="w-100">
-                        <NavLink class="nav-link" href="gallery" @onclick="CloseNavMenu">
-                            <span class="oi oi-image" aria-hidden="true"></span> Gallery
-                        </NavLink>
-                    </div>
-                </li>
-                <li class="nav-item pt-1 list-orientation">
-                    <div class="w-100">
-                        <NavLink class="nav-link" href="shop" @onclick="CloseNavMenu">
-                            <span class="oi oi-basket" aria-hidden="true"></span> Shop
-                            @if (_cartCount > 0)
-                            {
-                                <span class="badge badge-pill badge-success ml-1" style="font-size:0.7em; vertical-align:middle;" aria-label="@_cartCount items in cart">@_cartCount</span>
-                            }
-                        </NavLink>
-                    </div>
-                </li>
-                <li class="nav-item pt-1 list-orientation">
-                    <div class="w-100">
-                        <NavLink class="nav-link" href="contact" @onclick="CloseNavMenu">
-                            <span class="oi oi-chat" aria-hidden="true"></span> Contact
-                        </NavLink>
-                    </div>
-                </li>
+
+        <!-- Main bar -->
+        <div class="flex items-center justify-between py-3 gap-4">
+
+            <!-- Logo -->
+            <a href="/" aria-label="Katie's Garden — home">
+                <img src="Images/Katies-Garden-(long) 2.gif"
+                     alt="Katie's Garden"
+                     class="h-12 md:h-14 w-auto" />
+            </a>
+
+            <!-- Desktop nav links -->
+            <nav class="hidden md:flex items-center gap-1" aria-label="Main navigation">
+                <NavLink href="" Match="NavLinkMatch.All"
+                         class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                         ActiveClass="text-primary bg-base-200">
+                    Home
+                </NavLink>
+                <NavLink href="gallery"
+                         class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                         ActiveClass="text-primary bg-base-200">
+                    Gallery
+                </NavLink>
+                <NavLink href="shop"
+                         class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                         ActiveClass="text-primary bg-base-200">
+                    Shop
+                </NavLink>
+                <NavLink href="contact"
+                         class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                         ActiveClass="text-primary bg-base-200">
+                    Contact
+                </NavLink>
                 @if (_isAdmin)
                 {
-                    <li class="nav-item pt-1 list-orientation">
-                        <div class="w-100">
-                            <NavLink class="nav-link" href="admin" @onclick="CloseNavMenu">
-                                <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin
-                            </NavLink>
-                        </div>
-                    </li>
+                    <NavLink href="admin"
+                             class="px-3 py-1.5 rounded-md text-sm font-medium text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                             ActiveClass="text-primary bg-base-200">
+                        <i class="fas fa-lock text-xs mr-1" aria-hidden="true"></i> Admin
+                    </NavLink>
                 }
-            </ul>
+            </nav>
+
+            <!-- Right: cart + mobile toggle -->
+            <div class="flex items-center gap-1">
+                <!-- Cart icon -->
+                <NavLink href="cart"
+                         class="relative p-2 rounded-md text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                         aria-label="@(_cartCount > 0 ? $"View basket — {_cartCount} item{(_cartCount == 1 ? "" : "s")}" : "View basket")">
+                    <i class="fas fa-basket-shopping text-lg" aria-hidden="true"></i>
+                    @if (_cartCount > 0)
+                    {
+                        <span class="absolute -top-0.5 -right-0.5 flex items-center justify-center w-5 h-5 rounded-full bg-primary text-primary-content text-xs font-bold leading-none"
+                              aria-hidden="true">
+                            @_cartCount
+                        </span>
+                    }
+                </NavLink>
+
+                <!-- Mobile hamburger -->
+                <button class="md:hidden p-2 rounded-md text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                        @onclick="ToggleNavMenu"
+                        aria-label="Toggle navigation"
+                        aria-expanded="@(!collapseNavMenu)"
+                        aria-controls="mobile-nav">
+                    @if (collapseNavMenu)
+                    {
+                        <i class="fas fa-bars text-lg" aria-hidden="true"></i>
+                    }
+                    else
+                    {
+                        <i class="fas fa-times text-lg" aria-hidden="true"></i>
+                    }
+                </button>
+            </div>
         </div>
+
+        <!-- Mobile menu -->
+        @if (!collapseNavMenu)
+        {
+            <nav id="mobile-nav" class="md:hidden pb-4 border-t border-base-300 flex flex-col gap-0.5 pt-2"
+                 aria-label="Mobile navigation">
+                <NavLink href="" Match="NavLinkMatch.All"
+                         class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                         ActiveClass="bg-base-200 text-primary"
+                         @onclick="CloseNavMenu">
+                    <i class="fas fa-home w-4 text-center opacity-60" aria-hidden="true"></i> Home
+                </NavLink>
+                <NavLink href="gallery"
+                         class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                         ActiveClass="bg-base-200 text-primary"
+                         @onclick="CloseNavMenu">
+                    <i class="fas fa-images w-4 text-center opacity-60" aria-hidden="true"></i> Gallery
+                </NavLink>
+                <NavLink href="shop"
+                         class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                         ActiveClass="bg-base-200 text-primary"
+                         @onclick="CloseNavMenu">
+                    <i class="fas fa-basket-shopping w-4 text-center opacity-60" aria-hidden="true"></i>
+                    Shop
+                    @if (_cartCount > 0)
+                    {
+                        <span class="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-primary-content text-xs font-bold">@_cartCount</span>
+                    }
+                </NavLink>
+                <NavLink href="contact"
+                         class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                         ActiveClass="bg-base-200 text-primary"
+                         @onclick="CloseNavMenu">
+                    <i class="fas fa-envelope w-4 text-center opacity-60" aria-hidden="true"></i> Contact
+                </NavLink>
+                @if (_isAdmin)
+                {
+                    <NavLink href="admin"
+                             class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
+                             ActiveClass="bg-base-200 text-primary"
+                             @onclick="CloseNavMenu">
+                        <i class="fas fa-lock w-4 text-center opacity-60" aria-hidden="true"></i> Admin
+                    </NavLink>
+                }
+
+                <!-- Mobile contact info -->
+                <div class="mt-3 pt-3 border-t border-base-300 flex flex-col gap-1 text-sm opacity-60">
+                    <a href="tel:+447804784522" class="flex items-center gap-2 px-3 py-1.5 hover:opacity-100 transition-opacity">
+                        <i class="fas fa-phone text-xs w-4 text-center" aria-hidden="true"></i> 07804 784522
+                    </a>
+                    <a href="mailto:sales@katiesgarden.uk" class="flex items-center gap-2 px-3 py-1.5 hover:opacity-100 transition-opacity">
+                        <i class="fas fa-envelope text-xs w-4 text-center" aria-hidden="true"></i> sales@katiesgarden.uk
+                    </a>
+                </div>
+            </nav>
+        }
     </div>
-</nav>
+</div>
 
 @code {
     private bool collapseNavMenu = true;
     private bool _isAdmin;
     private int _cartCount;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
-
     private void CloseNavMenu() => collapseNavMenu = true;
 
     protected override async Task OnInitializedAsync()
     {
         _isAdmin = await AuthService.IsAdminAsync();
-        // Force the cart to load from localStorage so the badge reflects any persisted items
         await CartService.GetItemsAsync();
         _cartCount = CartService.ItemCount;
         CartService.CartChanged += OnCartChanged;

@@ -1,50 +1,72 @@
-﻿@page "/gallery"
-@inject IJSRuntime JSRuntime
+@page "/gallery"
 @using KatiesGarden.Web.Client.Components
+@using KatiesGarden.Web.Client.Models
 
 <PageTitle>Gallery — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-8">
-    <MudText Typo="Typo.h4" Class="text-center mb-6 font-weight-bold">Our Gallery</MudText>
+<div class="max-w-7xl mx-auto px-6 py-12">
 
-    <MudCard>
-        <MudCardContent Style="padding: 0px">
-            <MudTabs Rounded="true" Centered="true" Color="Color.Primary" ApplyEffectsToContainer="true" PanelClass="pt-6 px-2">
-                <MudTabPanel Text="Woodwork" Icon="@Icons.Material.Filled.Nature">
-                    <GalleryTabContent 
-                        CarouselId="woodworkCarousel"
-                        Images="@WoodworkImages"
-                        Title="Welcome to Katie's Garden"
-                        Description="@WoodworkDescription"
-                        ButtonText="Request Custom Woodwork"
-                        ButtonAction="@(() => NavigateToContact("Custom Woodwork Enquiry"))" />
-                </MudTabPanel>
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Portfolio</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-bold text-base-content">Our Gallery</h1>
+    </div>
 
-                <MudTabPanel Text="Bugs and Hugs" Icon="@Icons.Material.Filled.Pets">
-                    <GalleryTabContent 
-                        CarouselId="bugsCarousel"
-                        Images="@BugHouseImages"
-                        Title="Welcome to Katie's Garden"
-                        Description="@BugsAndHugsDescription"
-                        ButtonText="Order Custom Bug House"
-                        ButtonAction="@(() => NavigateToContact("Bug House Order"))" />
-                </MudTabPanel>
+    <!-- DaisyUI tabs -->
+    <div role="tablist" class="tabs tabs-boxed bg-base-200 max-w-md mx-auto mb-8 p-1 rounded-xl" aria-label="Gallery categories">
+        <button role="tab"
+                class="tab text-xs sm:text-sm @(_activeTab == 0 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                @onclick="() => _activeTab = 0"
+                aria-selected="@(_activeTab == 0)">
+            <i class="fas fa-tree hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Woodwork
+        </button>
+        <button role="tab"
+                class="tab text-xs sm:text-sm @(_activeTab == 1 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                @onclick="() => _activeTab = 1"
+                aria-selected="@(_activeTab == 1)">
+            <i class="fas fa-bug hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Bugs &amp; Hugs
+        </button>
+        <button role="tab"
+                class="tab text-xs sm:text-sm @(_activeTab == 2 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                @onclick="() => _activeTab = 2"
+                aria-selected="@(_activeTab == 2)">
+            <i class="fas fa-leaf hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Maintenance
+        </button>
+    </div>
 
-                <MudTabPanel Text="Maintenance" Icon="@Icons.Material.Filled.Grass">
-                    <GalleryTabContent 
-                        CarouselId="maintenanceCarousel"                        
-                        Images="@MaintenanceImages"
-                        Title="Welcome to Katie's Garden"
-                        Description="@MaintenanceDescription"
-                        ButtonText="Enquire About Maintenance"
-                        ButtonAction="@(() => NavigateToContact("Maintenance Service Enquiry"))" />
-                </MudTabPanel>
-            </MudTabs>
-        </MudCardContent>
-    </MudCard>
+    <!-- Tab panels -->
+    @if (_activeTab == 0)
+    {
+        <GalleryTabContent Images="@WoodworkImages"
+                           Title="Where Nature Meets Craftsmanship"
+                           Description="@WoodworkDescription"
+                           ButtonText="Request Custom Woodwork"
+                           ButtonAction="@(() => NavigateToContact("Custom Woodwork Enquiry"))" />
+    }
+    else if (_activeTab == 1)
+    {
+        <GalleryTabContent Images="@BugHouseImages"
+                           Title="Homes for Garden Heroes"
+                           Description="@BugsAndHugsDescription"
+                           ButtonText="Order Custom Bug House"
+                           ButtonAction="@(() => NavigateToContact("Bug House Order"))" />
+    }
+    else
+    {
+        <GalleryTabContent Images="@MaintenanceImages"
+                           Title="Gardens in Good Hands"
+                           Description="@MaintenanceDescription"
+                           ButtonText="Enquire About Maintenance"
+                           ButtonAction="@(() => NavigateToContact("Maintenance Service Enquiry"))" />
+    }
 
-    <ServiceOverview 
-        Services="@GardenServices.AsEnumerable()" 
-        NavigateToContact="@NavigateToContact" />
-</MudContainer>
+    <!-- Services overview -->
+    <ServiceOverview Services="@GardenServices.AsEnumerable()"
+                     NavigateToContact="@NavigateToContact" />
+</div>
 
+<ContactUsPrompt ShowGallery="false" />
+
+@code {
+    private int _activeTab;
+}

@@ -1,75 +1,66 @@
 @inject HttpClient Http
 
-<section class="newsletter-section">
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-7 col-md-9 text-center pt-6">
-                <h3 class="newsletter-title"><i class="fas fa-seedling me-4"></i>Stay Up to Date<i class="fas fa-seedling ms-4"></i></h3>
-                <p class="newsletter-subtitle">Sign up for planting tips, seasonal offers, and news from the garden.</p>
+<section class="py-16 bg-base-100 border-t border-base-300">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+        <i class="fas fa-seedling text-primary text-2xl mb-4" aria-hidden="true"></i>
+        <h2 class="font-serif text-3xl font-bold text-base-content mb-2">Stay Up to Date</h2>
+        <p class="text-base-content/65 mb-8">
+            Sign up for planting tips, seasonal offers, and news from the garden.
+        </p>
 
-                @if (_submitted)
-                {
-                    <MudAlert Severity="Severity.Success" Class="mt-2">
-                        Thanks for signing up — we'll be in touch when there's something worth sharing.
-                    </MudAlert>
-                }
-                else
-                {
-                    <div class="newsletter-form">
-                        <div class="row g-2 justify-content-center">
-                            <div class="col-sm-4">
-                                <MudTextField @bind-Value="_firstName"
-                                              Placeholder="First name (optional)"
-                                              Variant="Variant.Outlined"
-                                              Margin="Margin.Dense"
-                                              Class="newsletter-field"
-                                              Disabled="_loading" />
-                            </div>
-                            <div class="col-sm-5">
-                                <MudTextField @bind-Value="_email"
-                                              Placeholder="Your email address"
-                                              Variant="Variant.Outlined"
-                                              Margin="Margin.Dense"
-                                              InputType="InputType.Email"
-                                              Class="newsletter-field"
-                                              Disabled="_loading"
-                                              Error="@(!string.IsNullOrEmpty(_emailError))"
-                                              ErrorText="@_emailError" />
-                            </div>
-                            <div class="col-sm-auto">
-                                <MudButton Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           OnClick="SubscribeAsync"
-                                           Disabled="_loading"
-                                           Class="newsletter-btn">
-                                    @if (_loading)
-                                    {
-                                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-1" />
-                                    }
-                                    Subscribe
-                                </MudButton>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center mt-2">
-                            <div class="col-lg-9 text-start">
-                                <MudCheckBox T="bool" @bind-Value="_consent"
-                                             Dense="true"
-                                             Color="Color.Primary">
-                                    <p class="mb-0" style="font-size:0.85rem">
-                                        I agree to receive occasional email updates from Katie's Garden.
-                                        You can unsubscribe at any time. We will never share your email with third parties.
-                                    </p>
-                                </MudCheckBox>
-                                @if (_consentError)
-                                {
-                                    <p class="mud-error-text" style="font-size:0.75rem; margin-left:2rem">Please tick the box to subscribe.</p>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
+        @if (_submitted)
+        {
+            <div class="alert alert-success max-w-md mx-auto" role="status">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <span>Thanks for signing up — we'll be in touch when there's something worth sharing.</span>
             </div>
-        </div>
+        }
+        else
+        {
+            <form @onsubmit="SubscribeAsync" @onsubmit:preventDefault="true" novalidate>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center mb-3">
+                    <input type="text"
+                           class="input input-bordered w-full sm:w-40"
+                           placeholder="First name (optional)"
+                           @bind="_firstName"
+                           disabled="@_loading"
+                           autocomplete="given-name" />
+                    <input type="email"
+                           class="input input-bordered w-full sm:flex-1 @(_emailError.Length > 0 ? "input-error" : "")"
+                           placeholder="Your email address"
+                           @bind="_email"
+                           disabled="@_loading"
+                           required
+                           autocomplete="email"
+                           aria-describedby="@(_emailError.Length > 0 ? "email-error" : null)" />
+                    <button type="submit"
+                            class="btn btn-primary @(_loading ? "loading" : "")"
+                            disabled="@_loading">
+                        Subscribe
+                    </button>
+                </div>
+
+                @if (_emailError.Length > 0)
+                {
+                    <p id="email-error" class="text-error text-sm mt-1" role="alert">@_emailError</p>
+                }
+
+                <label class="flex items-start gap-2 max-w-md mx-auto text-left cursor-pointer mt-2">
+                    <input type="checkbox"
+                           class="checkbox checkbox-primary checkbox-sm mt-0.5 flex-shrink-0"
+                           @bind="_consent"
+                           aria-describedby="@(_consentError ? "consent-error" : null)" />
+                    <span class="text-xs text-base-content/60 leading-relaxed">
+                        I agree to receive occasional email updates from Katie's Garden.
+                        You can unsubscribe at any time. We will never share your email with third parties.
+                    </span>
+                </label>
+                @if (_consentError)
+                {
+                    <p id="consent-error" class="text-error text-xs mt-1" role="alert">Please tick the box to subscribe.</p>
+                }
+            </form>
+        }
     </div>
 </section>
 
@@ -79,7 +70,7 @@
     string _email = string.Empty;
     string _firstName = string.Empty;
     string _emailError = string.Empty;
-    bool _consent { get; set; }
+    bool _consent;
     bool _consentError;
     bool _loading;
     bool _submitted;
@@ -93,14 +84,10 @@
         var validation = _validator.Validate(request);
 
         if (!validation.IsValid)
-        {
             _emailError = validation.Errors.First().ErrorMessage;
-        }
 
         if (!_consent)
-        {
             _consentError = true;
-        }
 
         if (!validation.IsValid || !_consent) return;
 

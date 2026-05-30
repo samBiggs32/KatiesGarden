@@ -10,4 +10,5 @@ public record ProductSummaryDto(
     bool IsAvailable,
     bool CanLocalDeliver,
     string? CoverImageUrl,
-    int DisplayOrder);
+    int DisplayOrder,
+    int ImageCount = 0);

@@ -24,6 +24,7 @@ else
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
         </ToolBarContent>
         <HeaderContent>
+            <MudTh>Image</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Price</MudTh>
             <MudTh>Stock</MudTh>
@@ -31,7 +32,31 @@ else
             <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd>@context.Name</MudTd>
+            <MudTd DataLabel="Image">
+                <div style="position:relative; width:56px; height:56px;">
+                    @if (!string.IsNullOrEmpty(context.CoverImageUrl))
+                    {
+                        <MudImage Src="@context.CoverImageUrl" Alt="@context.Name"
+                                  Width="56" Height="56" ObjectFit="ObjectFit.Cover" Class="rounded"
+                                  Style="display:block; width:56px; height:56px;" />
+                    }
+                    else
+                    {
+                        <div class="rounded d-flex align-center justify-center"
+                             style="width:56px; height:56px; background:var(--mud-palette-background-grey);">
+                            <MudIcon Icon="@Icons.Material.Filled.Image" Color="Color.Default" Size="Size.Small" />
+                        </div>
+                    }
+                    @if (context.ImageCount > 1)
+                    {
+                        <MudTooltip Text="@($"{context.ImageCount} images — open Edit to manage them")">
+                            <MudBadge Content="@context.ImageCount" Color="Color.Primary" Overlap="true"
+                                      Origin="Origin.BottomRight" Style="position:absolute; bottom:0; right:0;" />
+                        </MudTooltip>
+                    }
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd>£@context.Price.ToString("F2")</MudTd>
             <MudTd>@(context.StockQuantity?.ToString() ?? "Not tracked")</MudTd>
             <MudTd>

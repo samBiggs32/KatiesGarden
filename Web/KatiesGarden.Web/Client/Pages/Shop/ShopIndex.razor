@@ -3,57 +3,84 @@
 
 <PageTitle>Shop — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
-    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold text-center">Our Shop</MudText>
+<div class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Shop</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-bold text-base-content mb-3">Our Collections</h1>
+        <p class="text-base-content/65 max-w-xl mx-auto">
+            Handcrafted woodwork, seasonal planting, and garden gifts — made with care in Somerset.
+        </p>
+    </div>
 
     @if (_loading)
     {
-        <MudGrid>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (int i = 0; i < 3; i++)
             {
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard>
-                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
-                        <MudCardContent>
-                            <MudSkeleton Width="60%" />
-                            <MudSkeleton Width="40%" />
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
+                <div class="card bg-base-100 shadow-md animate-pulse">
+                    <div class="bg-base-300 aspect-video rounded-t-2xl"></div>
+                    <div class="card-body gap-2">
+                        <div class="bg-base-300 h-5 rounded w-3/4"></div>
+                        <div class="bg-base-300 h-4 rounded w-1/2"></div>
+                    </div>
+                </div>
             }
-        </MudGrid>
+        </div>
     }
     else if (_collections?.Count > 0)
     {
-        <MudGrid>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach (var collection in _collections)
             {
-                <MudItem @key="collection.Id" xs="12" sm="6" md="4">
-                    <MudCard Elevation="3" Class="h-100">
-                        @if (collection.CoverImageUrl is not null)
-                        {
-                            <MudCardMedia Image="@collection.CoverImageUrl" Height="200" />
-                        }
-                        <MudCardContent>
-                            <MudText Typo="Typo.h6">@collection.Title</MudText>
-                            <MudText Typo="Typo.body2" Class="mt-1">@collection.Description</MudText>
-                            <MudChip T="string" Size="Size.Small" Class="mt-2">
+                <a @key="collection.Id" href="/shop/@collection.Slug"
+                   class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow group rounded-2xl overflow-hidden">
+                    @if (collection.CoverImageUrl is not null)
+                    {
+                        <figure class="aspect-video overflow-hidden">
+                            <img src="@collection.CoverImageUrl"
+                                 alt="@collection.Title"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 loading="lazy" />
+                        </figure>
+                    }
+                    else
+                    {
+                        <div class="aspect-video bg-base-200 flex items-center justify-center">
+                            <i class="fas fa-seedling text-4xl text-primary/30" aria-hidden="true"></i>
+                        </div>
+                    }
+                    <div class="card-body p-5">
+                        <div class="flex items-start justify-between gap-2">
+                            <h2 class="font-serif text-xl font-bold text-base-content group-hover:text-primary transition-colors">
+                                @collection.Title
+                            </h2>
+                            <span class="badge badge-outline text-xs flex-shrink-0 mt-1">
                                 @collection.ProductCount item@(collection.ProductCount == 1 ? "" : "s")
-                            </MudChip>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                       Href="@($"/shop/{collection.Slug}")">
-                                Browse Collection
-                            </MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(collection.Description))
+                        {
+                            <p class="text-base-content/65 text-sm leading-relaxed line-clamp-2">@collection.Description</p>
+                        }
+                        <div class="card-actions mt-3">
+                            <span class="btn btn-primary btn-sm">
+                                Browse Collection <i class="fas fa-arrow-right ml-1 text-xs" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </div>
+                </a>
             }
-        </MudGrid>
+        </div>
     }
     else
     {
-        <MudAlert Severity="Severity.Info">No collections are available right now. Check back soon!</MudAlert>
+        <div class="text-center py-20">
+            <i class="fas fa-seedling text-5xl text-primary/30 mb-4" aria-hidden="true"></i>
+            <p class="text-base-content/65">No collections are available right now. Check back soon!</p>
+        </div>
     }
-</MudContainer>
+</div>
+
+<ContactUsPrompt />

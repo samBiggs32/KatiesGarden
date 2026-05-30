@@ -1,11 +1,26 @@
-﻿
-<div class="alert alert-secondary mt-4" style="background: var(--primary-colour); color: white; text-align:center" role="alert">
-    <span class="oi oi-people mr-2" aria-hidden="true"></span>    
-        <span><a href="/contact"><strong style="color: white;">Get in touch</strong></a></span>    
-</div>
+<section class="bg-primary py-16">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+        <i class="fas fa-seedling text-primary-content/60 text-3xl mb-4" aria-hidden="true"></i>
+        <h2 class="font-serif text-3xl md:text-4xl font-bold text-primary-content mb-4">
+            Ready to Transform Your Garden?
+        </h2>
+        <p class="text-primary-content/80 text-lg mb-8 max-w-lg mx-auto">
+            Get in touch for a free initial consultation. We'll help bring your garden vision to life.
+        </p>
+        <div class="flex flex-wrap gap-3 justify-center">
+            <a href="/contact" class="btn btn-lg bg-white text-primary hover:bg-base-200 border-none shadow-md">
+                Get in Touch
+            </a>
+            @if (ShowGallery)
+            {
+                <a href="/gallery" class="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
+                    View Our Work
+                </a>
+            }
+        </div>
+    </div>
+</section>
 
 @code {
-
     [Parameter] public bool ShowGallery { get; set; }
-
 }

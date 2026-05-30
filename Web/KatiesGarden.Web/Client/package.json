@@ -1,0 +1,14 @@
+{
+  "name": "katiesgarden-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tailwind CSS + DaisyUI build for the Katie's Garden public site",
+  "scripts": {
+    "build:css": "tailwindcss -i ./Styles/app.css -o ./wwwroot/css/app.css --minify",
+    "watch:css": "tailwindcss -i ./Styles/app.css -o ./wwwroot/css/app.css --watch"
+  },
+  "devDependencies": {
+    "daisyui": "^4.12.14",
+    "tailwindcss": "^3.4.17"
+  }
+}
