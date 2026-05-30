@@ -32,7 +32,6 @@
     <base href="/" />
 
     <!-- Preconnect -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,10 +44,8 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha384-nRgPTkuX86pH8yjPJUAFuASXQSSl2/bBUiNV47vSYpKFxHJhbcrGnmlYpYJMeD7a" crossorigin="anonymous">
 
-    <!-- DaisyUI component styles -->
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet">
-
-    <!-- Custom styles -->
+    <!-- Tailwind + DaisyUI (compiled from Styles/app.css via `npm run build:css`;
+         contains the katiesgarden theme + only the utilities the site actually uses) -->
     <link href="css/app.css" rel="stylesheet" />
     <link href="KatiesGarden.Web.Client.styles.css" rel="stylesheet" />
 
@@ -58,41 +55,6 @@
     <link href="manifest.json" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="KatiesGardenLogo.png" />
     <link rel="shortcut icon" type="image/ico" href="KatiesGardenLogo.png" />
-
-    <!-- Tailwind CSS (CDN — development only; replace with Tailwind CLI build for production) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        daisyui: {
-          themes: [{
-            katiesgarden: {
-              "primary":          "#4A7C59",
-              "primary-content":  "#FFFFFF",
-              "secondary":        "#F5EDD6",
-              "secondary-content":"#3D2B1F",
-              "accent":           "#C47B4A",
-              "neutral":          "#3D4A3A",
-              "base-100":         "#FDFAF5",
-              "base-200":         "#F5F0E8",
-              "base-300":         "#EAE4D8",
-              "base-content":     "#1C2B1A",
-              "info":             "#4A90D9",
-              "success":          "#5FAD7E",
-              "warning":          "#D4A017",
-              "error":            "#C0392B"
-            }
-          }]
-        },
-        theme: {
-          extend: {
-            fontFamily: {
-              serif: ["Playfair Display", "Georgia", "serif"],
-              sans:  ["Inter", "system-ui", "sans-serif"]
-            }
-          }
-        }
-      }
-    </script>
 </head>
 
 <body>

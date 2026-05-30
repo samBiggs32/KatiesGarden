@@ -44,6 +44,7 @@ namespace KatiesGarden.Web.Client.Pages
             new() { FileName = "bug_house_2.jpg",  Alt = "Assembled bug house",          Title = "Assembled Bug House",  Description = "A cozy sanctuary for beneficial insects" },
             new() { FileName = "bug_house_3.jpeg", Alt = "Bug house installed in garden",Title = "Garden Installation",  Description = "Encourages beneficial insects" },
             new() { FileName = "bug_house_4.jpeg", Alt = "Bug house in natural setting", Title = "Integrated in Nature", Description = "Blends beautifully into your garden" },
+            new() { FileName = "bug_house_5_tall.jpg", Alt = "Tall stacked bug house",   Title = "Stacked Bug Hotel",    Description = "A multi-storey home for solitary bees and ladybirds" },
         ];
 
         private List<GalleryImage> MaintenanceImages { get; set; } =

@@ -26,16 +26,17 @@
         </picture>
     }
 
-    <!-- Gradient overlay for text legibility -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/60"
+    <!-- Gradient overlay for text legibility — darker scrim through the middle
+         where the headline + subtitle sit, so they stay readable over bright photos -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/65"
          aria-hidden="true"></div>
 
     <!-- Overlay text + CTA -->
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pb-12">
-        <h1 class="font-serif text-5xl md:text-7xl text-white font-bold drop-shadow-lg mb-4 leading-tight">
+        <h1 class="font-serif text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] mb-4 leading-tight">
             Your Garden,<br class="hidden sm:block" /> Our Passion
         </h1>
-        <p class="text-white/90 text-lg md:text-xl mb-8 max-w-lg drop-shadow font-light">
+        <p class="text-white text-lg md:text-xl mb-8 max-w-lg font-medium drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
             Professional garden services in Milverton, Somerset
         </p>
         <div class="flex gap-3 flex-wrap justify-center">

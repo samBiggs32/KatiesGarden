@@ -2,6 +2,14 @@
 	<Target Name="PublishServiceWorker" AfterTargets="CopyFilesToPublishDirectory">
 		<WriteLinesToFile File="$(PublishDir)wwwroot\service-worker.js" Lines="/* $([System.Guid]::NewGuid()) */" />
 	</Target>
+
+	<!-- Recompile wwwroot/css/app.css from Styles/app.css (Tailwind + DaisyUI) when the
+	     npm dependencies are present. Developers run `npm install` once; the committed
+	     app.css is used as-is in environments without node_modules (e.g. SWA CI). -->
+	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild"
+	        Condition="Exists('$(MSBuildProjectDirectory)/node_modules')">
+		<Exec Command="npm run build:css" WorkingDirectory="$(MSBuildProjectDirectory)" />
+	</Target>
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
@@ -327,9 +335,6 @@
 		</Content>
 		<Content Update="wwwroot\logo.jpg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Update="wwwroot\scripts\GlobalFunctions.js">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
