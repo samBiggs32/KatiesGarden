@@ -31,6 +31,11 @@ var host = new HostBuilder()
     {
         var config = context.Configuration;
 
+        // Application Insights — no-op when APPLICATIONINSIGHTS_CONNECTION_STRING is
+        // absent (local dev), live telemetry in production without any code change.
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.ConfigureFunctionsApplicationInsights();
+
         // Database — AppDbContext is ALWAYS registered so every function that
         // depends on it can be constructed by the DI container. Most functions
         // inject AppDbContext non-nullably; if it were only registered when
@@ -103,6 +108,7 @@ var host = new HostBuilder()
         });
         services.AddScoped<IPushNotificationService, PushNotificationService>();
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IOrderService, OrderService>();
 
         // Azure Blob Storage container config
         services.Configure<BlobOptions>(opts =>
@@ -154,10 +160,12 @@ using (var scope = host.Services.CreateScope())
         log.LogInformation("SMTP: {Host} / {User}", smtpHost, smtpUser);
 
     // ── Database ────────────────────────────────────────────────────────────
-    // Schema init is bounded by a hard timeout: an unreachable/slow database must
-    // never hang the host so long that the Functions launcher gives up and kills
-    // the process. On timeout/failure we log and continue — the host still starts
-    // and /api/diagnostics will report the database as down.
+    // MigrateAsync runs all pending EF Core migrations on startup. The initial
+    // migration uses IF NOT EXISTS guards, so it is safe on pre-existing databases
+    // that were created before migrations were introduced — they just get the
+    // __EFMigrationsHistory table created and the InitialSchema row inserted.
+    // Bounded by a hard 30-second timeout: an unreachable database must never hang
+    // the host long enough for the Functions launcher to kill the process.
     var dbUrl = config["DATABASE_URL"];
     if (string.IsNullOrWhiteSpace(dbUrl))
     {
@@ -169,16 +177,16 @@ using (var scope = host.Services.CreateScope())
         try
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
-            await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
-            log.LogInformation("Database schema ready");
+            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await db.Database.MigrateAsync(dbInitTimeout.Token);
+            log.LogInformation("Database schema up to date ({Migrations} migration(s) applied)",
+                (await db.Database.GetAppliedMigrationsAsync(dbInitTimeout.Token)).Count());
 
             await CollectionSeeder.SeedAsync(db, log, dbInitTimeout.Token);
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "Database initialisation failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
+            log.LogError(ex, "Database migration failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
         }
     }
 

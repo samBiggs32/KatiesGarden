@@ -9,6 +9,7 @@ using Microsoft.DurableTask.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using Stripe;
 using Stripe.Checkout;
 using System.Net;
@@ -49,6 +50,20 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
+        // Event-level idempotency: record this event ID before doing any work.
+        // A unique constraint violation means Stripe is replaying an event we already
+        // handled — acknowledge it and return immediately so we never double-process.
+        try
+        {
+            db.StripeProcessedEvents.Add(new StripeProcessedEvent { EventId = stripeEvent.Id });
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+        {
+            logger.LogInformation("Stripe event {EventId} already processed — skipping", stripeEvent.Id);
+            return req.CreateResponse(HttpStatusCode.OK);
+        }
+
         if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
             return req.CreateResponse(HttpStatusCode.OK);
 
@@ -69,10 +84,9 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.OK);
         }
 
-        // Idempotency guard
         if (order.Status != OrderStatus.Pending)
         {
-            logger.LogInformation("Order {OrderId} already processed (status: {Status})", orderId, order.Status);
+            logger.LogInformation("Order {OrderId} already confirmed (status: {Status})", orderId, order.Status);
             return req.CreateResponse(HttpStatusCode.OK);
         }
 
@@ -80,8 +94,7 @@ public class StripeWebhookFunction(
         order.StripePaymentIntentId = session.PaymentIntentId;
         order.UpdatedAt = DateTime.UtcNow;
 
-        // Start Durable orchestration to handle all post-payment work asynchronously.
-        // Instance ID is deterministic per order to prevent duplicate orchestrations on retry.
+        // Deterministic instance ID prevents duplicate orchestrations on Stripe retries
         var instanceId = $"order-{order.Id}";
         var orchestratorInput = new OrderOrchestratorInput(
             order.Id,
@@ -109,7 +122,6 @@ public class StripeWebhookFunction(
         }
         catch (Exception ex)
         {
-            // If the instance already exists (e.g. Stripe retry), log and continue — idempotency is handled above
             logger.LogWarning(ex, "Could not start orchestration for order {OrderNumber} — may already exist", order.OrderNumber);
         }
 

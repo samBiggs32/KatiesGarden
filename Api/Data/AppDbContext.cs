@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<StorePushSubscription> PushSubscriptions => Set<StorePushSubscription>();
     public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<StripeProcessedEvent> StripeProcessedEvents => Set<StripeProcessedEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -126,6 +127,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(a => a.ActorEmail).HasMaxLength(254);
             e.Property(a => a.ActorName).HasMaxLength(200);
             e.Property(a => a.Details).HasColumnType("text");
+        });
+
+        modelBuilder.Entity<StripeProcessedEvent>(e =>
+        {
+            e.ToTable("stripe_processed_events");
+            e.HasKey(s => s.EventId);
+            e.Property(s => s.EventId).HasMaxLength(100).IsRequired();
         });
     }
 }

@@ -1,7 +1,7 @@
 using KatiesGarden.Api.Auditing;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
-using KatiesGarden.Api.Functions.Orchestration;
+using KatiesGarden.Api.Services;
 using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
@@ -17,6 +17,7 @@ namespace KatiesGarden.Api.Functions;
 public class AdminOrderFunction(
     AppDbContext db,
     IAuditService audit,
+    IOrderService orderService,
     RefundService refundService,
     ILogger<AdminOrderFunction> logger)
 {
@@ -124,33 +125,8 @@ public class AdminOrderFunction(
         logger.LogInformation("Order {OrderNumber} status updated from {From} to {To}",
             order.OrderNumber, previousStatus, newStatus);
 
-        // Raise external event on the Durable orchestration so it can record history + send email
-        if (!string.IsNullOrWhiteSpace(order.OrchestrationInstanceId))
-        {
-            var actor = SwaAuth.GetPrincipal(req);
-            try
-            {
-                await durableClient.RaiseEventAsync(
-                    order.OrchestrationInstanceId,
-                    "StatusChanged",
-                    new OrderStatusChangedEvent(
-                        request.Status,
-                        request.Note,
-                        actor?.UserDetails ?? "Admin"),
-                    ct);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Could not raise StatusChanged event on orchestration {InstanceId}", order.OrchestrationInstanceId);
-            }
-        }
-
-        // Audit the status change
-        var principal = SwaAuth.GetPrincipal(req);
-        await audit.LogAsync("StatusChanged", "Order", order.Id.ToString(),
-            principal?.UserDetails, principal?.UserDetails,
-            new { from = previousStatus.ToString(), to = newStatus.ToString(), note = request.Note },
-            ct);
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.RecordTransitionAsync(order, previousStatus, request.Status, request.Note, actor, durableClient, ct);
 
         return req.CreateResponse(HttpStatusCode.NoContent);
     }
@@ -219,28 +195,9 @@ public class AdminOrderFunction(
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Order {OrderNumber} refunded via Stripe", order.OrderNumber);
 
-        if (!string.IsNullOrWhiteSpace(order.OrchestrationInstanceId))
-        {
-            var actor = SwaAuth.GetPrincipal(req);
-            try
-            {
-                await durableClient.RaiseEventAsync(
-                    order.OrchestrationInstanceId,
-                    "StatusChanged",
-                    new OrderStatusChangedEvent(nameof(OrderStatus.Refunded), "Refunded via Stripe admin", actor?.UserDetails ?? "Admin"),
-                    ct);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Could not raise StatusChanged event for refund on {InstanceId}", order.OrchestrationInstanceId);
-            }
-        }
-
-        var principal = SwaAuth.GetPrincipal(req);
-        await audit.LogAsync("Refunded", "Order", order.Id.ToString(),
-            principal?.UserDetails, principal?.UserDetails,
-            new { from = previousStatus.ToString(), stripePaymentIntentId = order.StripePaymentIntentId },
-            ct);
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.RecordTransitionAsync(order, previousStatus, nameof(OrderStatus.Refunded),
+            "Refunded via Stripe admin", actor, durableClient, ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new { status = "Refunded", orderNumber = order.OrderNumber });
