@@ -51,7 +51,7 @@ jobs:
         run: docker info
 
       - name: Install Azure Functions Core Tools
-        run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
+        run: npm install -g azure-functions-core-tools@4
 
       - name: Run integration tests
         run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category=Integration" --logger "trx;LogFileName=integration-results.trx"

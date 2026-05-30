@@ -18,7 +18,6 @@ public class AdminOrderFunction(
     AppDbContext db,
     IEmailSender emailSender,
     IOptions<SmtpOptions> smtpOptions,
-    IOptions<StripeOptions> stripeOptions,
     RefundService refundService,
     ILogger<AdminOrderFunction> logger)
 {
