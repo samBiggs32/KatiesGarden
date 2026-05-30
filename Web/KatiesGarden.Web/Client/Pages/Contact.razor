@@ -1,134 +1,204 @@
-﻿@page "/contact"
+@page "/contact"
 @inject ILogger<Contact> Logger
 
 <PageTitle>Contact Us — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
-    <MudText Typo="Typo.h4" Class="text-center mb-6 font-weight-bold">Get in Touch</MudText>
+<div class="max-w-6xl mx-auto px-6 py-12">
 
-    <!-- Location Section -->
-    <MudCard Elevation="3" Class="mb-6">
-        <MudCardHeader>
-            <MudText Typo="Typo.h6">Our Location</MudText>
-        </MudCardHeader>
-        <MudCardContent>
-            <MudText Typo="Typo.body1" Class="mb-4 text-center">
-                We're based in the beautiful countryside of Milverton, Somerset
-            </MudText>
-            <div class="d-flex justify-center mb-4">
-                <img class="rounded" style="max-width: 100%; height: auto;" src="Images/location/Location.png" alt="Location of Katie's Garden" />
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Contact</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-bold text-base-content mb-3">Get in Touch</h1>
+        <p class="text-base-content/65 max-w-lg mx-auto">
+            We'd love to hear about your garden. Drop us a message and we'll get back to you as soon as we can.
+        </p>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-8 items-start">
+
+        <!-- Contact form — wider -->
+        <div class="lg:col-span-3">
+            @if (_success)
+            {
+                <div class="text-center py-16 bg-base-200 rounded-2xl">
+                    <div class="w-16 h-16 rounded-full bg-success/15 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-success text-2xl" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="font-serif text-2xl font-bold text-base-content mb-2">Message sent!</h2>
+                    <p class="text-base-content/65 mb-6">Thanks for getting in touch — we'll be back to you soon.</p>
+                    <button class="btn btn-outline btn-primary" @onclick="ResetForm">Send another message</button>
+                </div>
+            }
+            else
+            {
+                <form @onsubmit="HandleSubmitAsync" @onsubmit:preventDefault="true" novalidate class="bg-base-100 rounded-2xl p-6 shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div class="form-control">
+                            <label class="label pb-1" for="contact-first-name">
+                                <span class="label-text font-medium">First Name <span class="text-error">*</span></span>
+                            </label>
+                            <input id="contact-first-name" type="text"
+                                   class="input input-bordered @(HasError("FirstName") ? "input-error" : "")"
+                                   @bind="model.FirstName"
+                                   autocomplete="given-name" />
+                            @if (HasError("FirstName"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
+                            }
+                        </div>
+                        <div class="form-control">
+                            <label class="label pb-1" for="contact-last-name">
+                                <span class="label-text font-medium">Last Name <span class="text-error">*</span></span>
+                            </label>
+                            <input id="contact-last-name" type="text"
+                                   class="input input-bordered @(HasError("LastName") ? "input-error" : "")"
+                                   @bind="model.LastName"
+                                   autocomplete="family-name" />
+                            @if (HasError("LastName"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
+                            }
+                        </div>
+                        <div class="form-control">
+                            <label class="label pb-1" for="contact-phone">
+                                <span class="label-text font-medium">Phone Number <span class="text-error">*</span></span>
+                            </label>
+                            <input id="contact-phone" type="tel"
+                                   class="input input-bordered @(HasError("ContactNumber") ? "input-error" : "")"
+                                   @bind="model.ContactNumber"
+                                   autocomplete="tel" />
+                            @if (HasError("ContactNumber"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("ContactNumber")</span></label>
+                            }
+                        </div>
+                        <div class="form-control">
+                            <label class="label pb-1" for="contact-email">
+                                <span class="label-text font-medium">Email Address <span class="text-error">*</span></span>
+                            </label>
+                            <input id="contact-email" type="email"
+                                   class="input input-bordered @(HasError("EmailAddress") ? "input-error" : "")"
+                                   @bind="model.EmailAddress"
+                                   autocomplete="email" />
+                            @if (HasError("EmailAddress"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailAddress")</span></label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-control mb-4">
+                        <label class="label pb-1" for="contact-subject">
+                            <span class="label-text font-medium">Subject <span class="text-error">*</span></span>
+                        </label>
+                        <input id="contact-subject" type="text"
+                               class="input input-bordered @(HasError("EmailSubject") ? "input-error" : "")"
+                               @bind="model.EmailSubject" />
+                        @if (HasError("EmailSubject"))
+                        {
+                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailSubject")</span></label>
+                        }
+                    </div>
+
+                    <div class="form-control mb-5">
+                        <label class="label pb-1" for="contact-message">
+                            <span class="label-text font-medium">Message <span class="text-error">*</span></span>
+                        </label>
+                        <textarea id="contact-message"
+                                  class="textarea textarea-bordered min-h-32 @(HasError("EmailBody") ? "textarea-error" : "")"
+                                  rows="5"
+                                  @bind="model.EmailBody"
+                                  placeholder="Tell us about your garden and how we can help"></textarea>
+                        @if (HasError("EmailBody"))
+                        {
+                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("EmailBody")</span></label>
+                        }
+                    </div>
+
+                    @if (_error is not null)
+                    {
+                        <div class="alert alert-error mb-4" role="alert">
+                            <i class="fas fa-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
+                            <span>@_error</span>
+                        </div>
+                    }
+
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="btn btn-ghost" @onclick="ResetForm">Reset</button>
+                        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="loading loading-spinner loading-sm mr-1"></span>
+                                <span>Sending…</span>
+                            }
+                            else
+                            {
+                                <i class="fas fa-paper-plane mr-2 text-sm" aria-hidden="true"></i>
+                                <span>Send Message</span>
+                            }
+                        </button>
+                    </div>
+                </form>
+            }
+        </div>
+
+        <!-- Contact info sidebar -->
+        <div class="lg:col-span-2 flex flex-col gap-4">
+
+            <div class="card bg-base-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-phone text-primary" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-base-content mb-0.5">Phone</h3>
+                        <a href="tel:+447804784522" class="text-primary hover:underline">07804 784522</a>
+                    </div>
+                </div>
             </div>
-        </MudCardContent>
-    </MudCard>
 
-    <!-- Contact Form Section -->
-    <MudCard Elevation="3">
-        <MudCardHeader>
-            <MudText Typo="Typo.h6">Send us a Query</MudText>
-        </MudCardHeader>
-        <MudForm Model="@model" @ref="@form">
-            <MudCardContent>
-                <MudGrid>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="model.FirstName"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.FirstName)"
-                                      Immediate="true"
-                                      Label="First Name"
-                                      Variant="Variant.Outlined"
-                                      Class="mb-3" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="model.LastName"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.LastName)"
-                                      Immediate="true"
-                                      Label="Last Name"
-                                      Variant="Variant.Outlined"
-                                      Class="mb-3" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="model.ContactNumber"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.ContactNumber)"
-                                      Immediate="true"
-                                      Label="Phone Number"
-                                      Variant="Variant.Outlined"
-                                      Class="mb-3" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="model.EmailAddress"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.EmailAddress)"
-                                      Immediate="true"
-                                      Label="Email Address"
-                                      InputType="InputType.Email"
-                                      Variant="Variant.Outlined"
-                                      Class="mb-3" />
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.EmailSubject"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.EmailSubject)"
-                                      Immediate="true"
-                                      Label="Subject"
-                                      Variant="Variant.Outlined"
-                                      Class="mb-3" />
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="model.EmailBody"
-                                      Validation="@(ValidateField)"
-                                      For="@(() => model.EmailBody)"
-                                      Immediate="true"
-                                      Label="Message"
-                                      Lines="5"
-                                      Variant="Variant.Outlined"
-                                      HelperText="Tell us about your garden and how we can help" />
-                    </MudItem>
-                </MudGrid>
-            </MudCardContent>
-            <MudCardActions Class="pb-4 px-4 justify-end">
-                <MudButton Variant="Variant.Outlined"
-                           Color="Color.Default"
-                           Class="mr-2"
-                           OnClick="ResetFormAsync">Reset</MudButton>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Send"
-                           OnClick="@(async () => await HandleSubmitAsync())"
-                           Disabled="@isSubmitting">
-                    @(isSubmitting ? "Sending..." : "Send Message")
-                </MudButton>
-            </MudCardActions>
-        </MudForm>
-    </MudCard>
+            <div class="card bg-base-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-envelope text-primary" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-base-content mb-0.5">Email</h3>
+                        <a href="mailto:sales@katiesgarden.uk" class="text-primary hover:underline break-all">sales@katiesgarden.uk</a>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Additional Contact Information -->
-    <MudGrid Class="mt-6">
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
-                <MudIcon Icon="@Icons.Material.Filled.Phone" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
-                <MudText Typo="Typo.h6">Phone</MudText>
-                <MudText Typo="Typo.body2" Class="mt-2">
-                    <a href="tel:+447804784522">07804 784522</a>
-                </MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
-                <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
-                <MudText Typo="Typo.h6">Email</MudText>
-                <MudText Typo="Typo.body2" Class="mt-2">
-                    <a href="mailto:sales@katiesgarden.uk">sales@katiesgarden.uk</a>
-                </MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="pa-4 text-center h-100">
-                <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Large" Color="Color.Primary" Class="mb-2" />
-                <MudText Typo="Typo.h6">Business Hours</MudText>
-                <MudText Typo="Typo.body2" Class="mt-2">Mon-Fri: 9am - 5pm</MudText>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-</MudContainer>
+            <div class="card bg-base-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-clock text-primary" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-base-content mb-0.5">Business Hours</h3>
+                        <p class="text-base-content/65 text-sm">Mon–Fri: 9am – 5pm</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-200 rounded-2xl p-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-map-marker-alt text-primary" aria-hidden="true"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-base-content mb-1">Location</h3>
+                        <p class="text-base-content/65 text-sm">Milverton, Somerset</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden shadow-sm">
+                <img src="Images/location/Location.png"
+                     alt="Map showing location of Katie's Garden in Milverton, Somerset"
+                     class="w-full h-auto"
+                     loading="lazy" />
+            </div>
+        </div>
+    </div>
+</div>

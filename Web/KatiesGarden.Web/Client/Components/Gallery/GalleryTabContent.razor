@@ -1,37 +1,47 @@
-﻿@namespace KatiesGarden.Web.Client.Components
+@namespace KatiesGarden.Web.Client.Components
+@using KatiesGarden.Web.Client.Constants
 @using KatiesGarden.Web.Client.Models
 
-<div class="mb-4">
-    <GalleryCarousel Id="@CarouselId"
-                     Images="@Images" />
+<!-- Description block -->
+<div class="bg-primary rounded-2xl p-6 md:p-8 mb-8 text-center">
+    <h2 class="font-serif text-2xl md:text-3xl font-bold text-primary-content mb-4">@Title</h2>
+    @foreach (var paragraph in Description)
+    {
+        <p class="text-primary-content/85 leading-relaxed mb-3 max-w-2xl mx-auto">@paragraph</p>
+    }
+    <button class="btn bg-white text-primary hover:bg-base-200 border-none shadow-sm mt-2"
+            @onclick="ButtonAction">
+        @ButtonText
+    </button>
 </div>
 
-<MudPaper Elevation="0" Class="rounded-lg overflow-hidden">
-    <MudItem xs="9" md="9" Class="pa-5 mx-auto d-flex flex-column align-center" Style="background-color: var(--mud-palette-primary); color: white;">
-        <MudText Typo="Typo.h5" Class="mb-4 text-center" Style="font-weight: 500;">@Title</MudText>
-
-        @foreach (var paragraph in Description)
-        {
-            <MudText Typo="Typo.body1" Class="mb-3 text-center" Style="line-height: 1.7;">
-                @paragraph
-            </MudText>
-        }
-    </MudItem>
-</MudPaper>
-
-<div class="text-center pa-5">
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Secondary"
-               OnClick="@ButtonAction">
-        @ButtonText
-    </MudButton>
+<!-- Image grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    @foreach (var image in Images)
+    {
+        var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
+        var webpSrc = $"{ImagePaths.GalleryBasePath}{System.IO.Path.ChangeExtension(image.FileName, ".webp")}";
+        <figure class="rounded-2xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
+            <picture>
+                <source srcset="@webpSrc" type="image/webp" />
+                <img src="@jpegSrc"
+                     alt="@image.Alt"
+                     title="@image.Title"
+                     class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
+                     loading="lazy" />
+            </picture>
+            @if (!string.IsNullOrEmpty(image.Description))
+            {
+                <figcaption class="sr-only">@image.Description</figcaption>
+            }
+        </figure>
+    }
 </div>
 
 @code {
-    [Parameter] public string CarouselId { get; set; }
     [Parameter] public IEnumerable<GalleryImage> Images { get; set; } = [];
-    [Parameter] public string Title { get; set; }
-    [Parameter] public List<string> Description { get; set; }
-    [Parameter] public string ButtonText { get; set; }
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public List<string> Description { get; set; } = [];
+    [Parameter] public string ButtonText { get; set; } = string.Empty;
     [Parameter] public EventCallback ButtonAction { get; set; }
 }
