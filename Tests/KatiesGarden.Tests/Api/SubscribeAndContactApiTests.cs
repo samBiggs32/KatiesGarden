@@ -1,5 +1,6 @@
 using FluentAssertions;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net;

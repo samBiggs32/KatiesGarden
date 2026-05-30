@@ -1,4 +1,4 @@
-namespace KatiesGarden.Web.Client.Models;
+namespace KatiesGarden.Models.Shop;
 
 public class CartItem
 {

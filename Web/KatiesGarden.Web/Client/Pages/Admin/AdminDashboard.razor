@@ -17,8 +17,16 @@
         }
     </MudGrid>
 }
+else if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-6">
+        <MudText>@_error</MudText>
+        <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="RetryAsync" Class="mt-2">Retry</MudButton>
+    </MudAlert>
+}
 else
 {
+    <!-- Stat cards -->
     <MudGrid Class="mb-8">
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Elevation="2" Class="pa-4 text-center">
@@ -31,7 +39,7 @@ else
             <MudPaper Elevation="2" Class="pa-4 text-center">
                 <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
                 <MudText Typo="Typo.h4">@_confirmedCount</MudText>
-                <MudText Typo="Typo.body2">Confirmed Orders</MudText>
+                <MudText Typo="Typo.body2">Active Orders</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
@@ -43,39 +51,81 @@ else
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Elevation="2" Class="pa-4 text-center">
-                <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Size="Size.Large" />
-                <MudText Typo="Typo.h4">@_lowStockCount</MudText>
-                <MudText Typo="Typo.body2">Low / No Stock</MudText>
+                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Large" />
+                <MudText Typo="Typo.h4">£@_revenue30d.ToString("F0")</MudText>
+                <MudText Typo="Typo.body2">Revenue (30 days)</MudText>
             </MudPaper>
         </MudItem>
     </MudGrid>
 
-    <MudText Typo="Typo.h6" Class="mb-3">Recent Orders</MudText>
-    @if (_recentOrders.Count > 0)
-    {
-        <MudTable Items="_recentOrders" Dense="true" Hover="true">
-            <HeaderContent>
-                <MudTh>Order</MudTh>
-                <MudTh>Customer</MudTh>
-                <MudTh>Total</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Date</MudTh>
-                <MudTh></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.OrderNumber</MudTd>
-                <MudTd>@context.CustomerFirstName @context.CustomerLastName</MudTd>
-                <MudTd>£@context.Total.ToString("F2")</MudTd>
-                <MudTd><MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
-                <MudTd>@context.CreatedAt.ToString("dd MMM yyyy")</MudTd>
-                <MudTd><MudButton Size="Size.Small" Href="@($"/admin/orders/{context.Id}")">View</MudButton></MudTd>
-            </RowTemplate>
-        </MudTable>
-    }
-    else
-    {
-        <MudText Typo="Typo.body2" Color="Color.Secondary">No orders yet.</MudText>
-    }
+    <MudGrid>
+        <!-- Recent orders -->
+        <MudItem xs="12" md="8">
+            <MudText Typo="Typo.h6" Class="mb-3">Recent Orders</MudText>
+            @if (_recentOrders.Count > 0)
+            {
+                <MudTable Items="_recentOrders" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh>Order</MudTh>
+                        <MudTh>Customer</MudTh>
+                        <MudTh>Total</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Date</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.OrderNumber</MudTd>
+                        <MudTd>@context.CustomerFirstName @context.CustomerLastName</MudTd>
+                        <MudTd>£@context.Total.ToString("F2")</MudTd>
+                        <MudTd><MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
+                        <MudTd>@context.CreatedAt.ToString("dd MMM")</MudTd>
+                        <MudTd><MudButton Size="Size.Small" Href="@($"/admin/orders/{context.Id}")">View</MudButton></MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">No orders yet.</MudText>
+            }
+        </MudItem>
+
+        <!-- Low stock alert panel -->
+        <MudItem xs="12" md="4">
+            <MudText Typo="Typo.h6" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Size="Size.Small" Class="mr-1" />
+                Low / No Stock
+            </MudText>
+            @if (_lowStockProducts.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">All products have sufficient stock.</MudText>
+            }
+            else
+            {
+                <MudList T="string" Dense="true">
+                    @foreach (var p in _lowStockProducts)
+                    {
+                        <MudListItem>
+                            <MudText Typo="Typo.body2">
+                                <strong>@p.Name</strong>
+                                @if (!p.IsAvailable)
+                                {
+                                    <MudChip T="string" Color="Color.Error" Size="Size.Small" Class="ml-1">Unavailable</MudChip>
+                                }
+                                else if (p.StockQuantity.HasValue)
+                                {
+                                    <MudChip T="string" Color="Color.Warning" Size="Size.Small" Class="ml-1">@p.StockQuantity left</MudChip>
+                                }
+                            </MudText>
+                            <MudButton Size="Size.Small" Href="@($"/admin/products/{p.Id}/edit")">Edit</MudButton>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+            <MudButton Href="/admin/products" Variant="Variant.Text" Color="Color.Primary" Class="mt-2" Size="Size.Small">
+                View all products →
+            </MudButton>
+        </MudItem>
+    </MudGrid>
 }
 
 @code {
@@ -83,24 +133,56 @@ else
     [Inject] AdminProductService AdminProductService { get; set; } = null!;
 
     private bool _loading = true;
-    private int _pendingCount, _confirmedCount, _productCount, _lowStockCount;
+    private string? _error;
+    private int _pendingCount, _confirmedCount, _productCount;
+    private decimal _revenue30d;
     private List<OrderSummaryDto> _recentOrders = [];
+    private List<ProductSummaryDto> _lowStockProducts = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task RetryAsync()
     {
-        var ordersTask = AdminOrderService.GetOrdersAsync();
-        var productsTask = AdminProductService.GetProductsAsync();
-        await Task.WhenAll(ordersTask, productsTask);
+        _loading = true;
+        _error = null;
+        await LoadAsync();
+    }
 
-        var orders = await ordersTask ?? [];
-        var products = await productsTask ?? [];
+    private async Task LoadAsync()
+    {
+        try
+        {
+            var ordersTask = AdminOrderService.GetOrdersAsync();
+            var productsTask = AdminProductService.GetProductsAsync();
+            await Task.WhenAll(ordersTask, productsTask);
 
-        _pendingCount = orders.Count(o => o.Status == "Pending");
-        _confirmedCount = orders.Count(o => o.Status == "Confirmed" || o.Status == "Processing");
-        _productCount = products.Count(p => p.IsAvailable);
-        _lowStockCount = products.Count(p => !p.IsAvailable || (p.StockQuantity.HasValue && p.StockQuantity <= 2));
-        _recentOrders = orders.Take(5).ToList();
-        _loading = false;
+            var orders = ordersTask.Result ?? [];
+            var products = productsTask.Result ?? [];
+
+            var cutoff = DateTime.UtcNow.AddDays(-30);
+            _pendingCount = orders.Count(o => o.Status == "Pending");
+            _confirmedCount = orders.Count(o => o.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched");
+            _productCount = products.Count(p => p.IsAvailable);
+            _revenue30d = orders
+                .Where(o => o.CreatedAt >= cutoff && o.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" or "Delivered")
+                .Sum(o => o.Total);
+
+            _recentOrders = orders.Take(5).ToList();
+            _lowStockProducts = products
+                .Where(p => !p.IsAvailable || (p.StockQuantity.HasValue && p.StockQuantity <= 3))
+                .OrderBy(p => p.StockQuantity ?? -1)
+                .Take(8)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _ = ex;
+            _error = "Could not load dashboard data. Check your network connection or API status.";
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private static Color StatusColor(string status) => status switch

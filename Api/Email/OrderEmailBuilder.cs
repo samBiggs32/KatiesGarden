@@ -1,4 +1,4 @@
-using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Email;
 
 namespace KatiesGarden.Api.Email;

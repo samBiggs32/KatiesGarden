@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using FluentValidation;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Services;
 using KatiesGarden.Models;
@@ -82,6 +83,7 @@ var host = new HostBuilder()
         });
         // Stripe services — singletons because they carry no per-request state
         services.AddSingleton<SessionService>();
+        services.AddSingleton<Stripe.RefundService>();
 
         // Azure Blob Storage — only registered when a connection string is present so
         // GetService<BlobServiceClient>() returns null (not a nullable singleton) when unconfigured

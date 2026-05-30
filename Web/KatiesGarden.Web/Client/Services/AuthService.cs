@@ -1,3 +1,4 @@
+using KatiesGarden.Models.Auth;
 using KatiesGarden.Web.Client.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Net.Http.Json;
@@ -18,13 +19,8 @@ public class AuthService(HttpClient http, IWebAssemblyHostEnvironment env)
         // the SWA CLI. In production env.IsDevelopment() is always false.
         if (env.IsDevelopment())
         {
-            _principal = new ClientPrincipal
-            {
-                IdentityProvider = "dev",
-                UserId = "local-dev",
-                UserDetails = "local-dev",
-                UserRoles = ["anonymous", "authenticated", "admin"]
-            };
+            _principal = new ClientPrincipal("dev", "local-dev", "local-dev",
+                ["anonymous", "authenticated", "admin"]);
             _loaded = true;
             return _principal;
         }

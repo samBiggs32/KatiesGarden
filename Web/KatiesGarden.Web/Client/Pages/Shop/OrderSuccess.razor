@@ -1,4 +1,6 @@
 @page "/order/success"
+@using KatiesGarden.Models.Shop
+@inject ShopService ShopService
 
 <PageTitle>Order Confirmed — Katie's Garden</PageTitle>
 
@@ -11,9 +13,39 @@
         Thank you for your order!
     </h1>
 
+    @if (_order is not null)
+    {
+        <div class="bg-base-200 rounded-2xl p-5 mb-6 text-left">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-sm text-base-content/60 uppercase tracking-wide font-medium">Order number</span>
+                <span class="font-mono font-semibold text-base-content">@_order.OrderNumber</span>
+            </div>
+            @if (_order.Lines.Count > 0)
+            {
+                <ul class="divide-y divide-base-300 mb-3">
+                    @foreach (var line in _order.Lines)
+                    {
+                        <li class="py-2 flex justify-between text-sm">
+                            <span class="text-base-content/80">@line.ProductName × @line.Quantity</span>
+                            <span class="font-medium">£@line.LineTotal.ToString("F2")</span>
+                        </li>
+                    }
+                </ul>
+            }
+            <div class="flex justify-between text-sm text-base-content/70 border-t border-base-300 pt-2">
+                <span>Delivery</span>
+                <span>@(_order.DeliveryFee > 0 ? $"£{_order.DeliveryFee:F2}" : "Free (Click & Collect)")</span>
+            </div>
+            <div class="flex justify-between font-semibold mt-1">
+                <span>Total</span>
+                <span class="text-primary">£@_order.Total.ToString("F2")</span>
+            </div>
+        </div>
+    }
+
     <p class="text-base-content/65 text-lg mb-8 leading-relaxed max-w-sm mx-auto">
-        We've received your order and you'll get a confirmation email shortly.
-        Katie will be in touch to arrange collection or delivery.
+        A confirmation email is on its way.
+        Katie will be in touch to arrange @(_order?.DeliveryType == "LocalDelivery" ? "delivery" : "collection").
     </p>
 
     <div class="flex gap-3 justify-center flex-wrap">
@@ -25,3 +57,18 @@
         </a>
     </div>
 </div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "session_id")] public string? SessionId { get; set; }
+
+    private OrderLookupDto? _order;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(SessionId))
+        {
+            try { _order = await ShopService.GetOrderLookupAsync(SessionId); }
+            catch { /* non-critical — page still works without order details */ }
+        }
+    }
+}

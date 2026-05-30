@@ -70,8 +70,26 @@
         }
         else
         {
+            <!-- Sort / filter toolbar -->
+            <div class="flex flex-wrap items-center gap-3 mb-5">
+                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" class="checkbox checkbox-sm checkbox-primary"
+                           @bind="_inStockOnly" />
+                    <span>In stock only</span>
+                </label>
+                <div class="ml-auto flex items-center gap-2 text-sm">
+                    <span class="text-base-content/60">Sort:</span>
+                    <select class="select select-bordered select-sm" @bind="_sort">
+                        <option value="featured">Featured</option>
+                        <option value="price_asc">Price ↑</option>
+                        <option value="price_desc">Price ↓</option>
+                        <option value="name">Name A–Z</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach (var product in _collection.Products)
+                @foreach (var product in SortedProducts)
                 {
                     <div @key="product.Id" class="card bg-base-100 shadow-md hover:shadow-xl transition-shadow rounded-2xl overflow-hidden group">
                         <a href="/shop/product/@product.Slug" class="block aspect-square overflow-hidden">

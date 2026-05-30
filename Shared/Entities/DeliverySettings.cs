@@ -1,4 +1,4 @@
-namespace KatiesGarden.Api.Data;
+namespace KatiesGarden.Models.Entities;
 
 public class DeliverySettings
 {

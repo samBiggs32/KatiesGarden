@@ -1,5 +1,6 @@
 using KatiesGarden.Models.Shop;
 using KatiesGarden.Models.Validators;
+using KatiesGarden.Models.Shop;
 using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Services;
 using Microsoft.AspNetCore.Components;

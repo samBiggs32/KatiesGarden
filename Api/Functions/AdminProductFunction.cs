@@ -1,6 +1,7 @@
 using FluentValidation;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Helpers;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
