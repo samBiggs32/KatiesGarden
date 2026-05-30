@@ -15,7 +15,9 @@ namespace KatiesGarden.Api.Functions;
 public class AdminProductFunction(
     AppDbContext db,
     IValidator<CreateProductRequest> createProductValidator,
+    IValidator<UpdateProductRequest> updateProductValidator,
     IValidator<CreateCollectionRequest> createCollectionValidator,
+    IValidator<UpdateCollectionRequest> updateCollectionValidator,
     ILogger<AdminProductFunction> logger)
 {
     // ── Products ────────────────────────────────────────────────────────────
@@ -79,6 +81,10 @@ public class AdminProductFunction(
         try { request = await req.ReadFromJsonAsync<UpdateProductRequest>(); }
         catch { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+
+        var validation = await updateProductValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return await Responses.BadRequest(req, string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
 
         product.Name = request.Name;
         product.Description = request.Description;
@@ -291,6 +297,10 @@ public class AdminProductFunction(
         try { request = await req.ReadFromJsonAsync<UpdateCollectionRequest>(); }
         catch { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+
+        var validation = await updateCollectionValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return await Responses.BadRequest(req, string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
 
         collection.Title = request.Title;
         collection.Description = request.Description;

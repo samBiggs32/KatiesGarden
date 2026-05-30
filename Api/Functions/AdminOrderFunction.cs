@@ -183,8 +183,6 @@ public class AdminOrderFunction(
         if (!refundableStatuses.Contains(order.Status))
             return await Responses.BadRequest(req, $"Orders with status '{order.Status}' cannot be refunded.");
 
-        StripeConfiguration.ApiKey = stripeOptions.Value.SecretKey;
-
         try
         {
             await refundService.CreateAsync(new RefundCreateOptions

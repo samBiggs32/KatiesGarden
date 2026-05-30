@@ -176,8 +176,7 @@ else
         }
         catch (Exception ex)
         {
-            _ = ex;
-            _error = "Could not load dashboard data. Check your network connection or API status.";
+            _error = $"Could not load dashboard data: {ex.Message}";
         }
         finally
         {

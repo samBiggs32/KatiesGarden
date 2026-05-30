@@ -148,8 +148,8 @@
 
         _loading = true;
         StateHasChanged();
-        _results = await ShopService.SearchAsync(_query, _sort);
-        _loading = false;
+        try { _results = await ShopService.SearchAsync(_query, _sort); }
+        finally { _loading = false; }
     }
 
     private async Task Search()
@@ -160,18 +160,17 @@
         _query = q;
         _loading = true;
         StateHasChanged();
-        _results = await ShopService.SearchAsync(q, _sort);
-        _loading = false;
+        try { _results = await ShopService.SearchAsync(q, _sort); }
+        finally { _loading = false; }
     }
 
-    private async void OnSortChanged(ChangeEventArgs e)
+    private async Task OnSortChanged(ChangeEventArgs e)
     {
         _sort = e.Value?.ToString() ?? "featured";
         if (_query.Length == 0) return;
         _loading = true;
         StateHasChanged();
-        _results = await ShopService.SearchAsync(_query, _sort);
-        _loading = false;
-        StateHasChanged();
+        try { _results = await ShopService.SearchAsync(_query, _sort); }
+        finally { _loading = false; StateHasChanged(); }
     }
 }
