@@ -28,8 +28,7 @@ public class AdminOrderFunction(
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-        var statusFilter = query["status"];
+        var statusFilter = req.GetQueryParam("status");
 
         var ordersQuery = db.Orders.AsQueryable();
         if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, out var status))
@@ -122,7 +121,6 @@ public class AdminOrderFunction(
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Order {OrderNumber} status updated to {Status}", order.OrderNumber, newStatus);
 
-        // Send status update email to customer for relevant transitions
         var notifyStatuses = new[] {
             OrderStatus.Confirmed, OrderStatus.ReadyForCollection,
             OrderStatus.Dispatched, OrderStatus.Delivered, OrderStatus.Cancelled
@@ -178,7 +176,10 @@ public class AdminOrderFunction(
         if (string.IsNullOrWhiteSpace(order.StripePaymentIntentId))
             return await Responses.BadRequest(req, "This order has no payment intent — it cannot be refunded via Stripe.");
 
-        var refundableStatuses = new[] { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection, OrderStatus.Dispatched, OrderStatus.Delivered };
+        var refundableStatuses = new[] {
+            OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection,
+            OrderStatus.Dispatched, OrderStatus.Delivered
+        };
         if (!refundableStatuses.Contains(order.Status))
             return await Responses.BadRequest(req, $"Orders with status '{order.Status}' cannot be refunded.");
 
@@ -216,5 +217,3 @@ public class AdminOrderFunction(
         return response;
     }
 }
-
-internal record AdminNotesRequest(string? Notes);

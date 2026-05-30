@@ -93,8 +93,20 @@ var host = new HostBuilder()
         if (!string.IsNullOrWhiteSpace(storageConn))
             services.AddSingleton(new BlobServiceClient(storageConn));
 
-        // Push notifications
+        // VAPID / push notifications
+        services.Configure<PushOptions>(opts =>
+        {
+            opts.PublicKey = config["VAPID_PUBLIC_KEY"];
+            opts.PrivateKey = config["VAPID_PRIVATE_KEY"];
+            opts.Subject = config["VAPID_SUBJECT"] ?? "mailto:sales@katiesgarden.uk";
+        });
         services.AddScoped<IPushNotificationService, PushNotificationService>();
+
+        // Azure Blob Storage container config
+        services.Configure<BlobOptions>(opts =>
+        {
+            opts.Container = config["AZURE_STORAGE_CONTAINER"] ?? "product-images";
+        });
     })
     .Build();
 

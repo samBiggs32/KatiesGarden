@@ -1,3 +1,4 @@
+using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
@@ -110,8 +111,7 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/delivery-settings")] HttpRequestData req)
     {
         var ct = req.FunctionContext.CancellationToken;
-        var settings = await db.DeliverySettings.FindAsync([1], ct)
-            ?? new DeliverySettings();
+        var settings = await db.DeliverySettings.FindAsync([1], ct) ?? new DeliverySettings();
 
         var dto = new DeliverySettingsDto(
             settings.LocalDeliveryFee,
@@ -134,8 +134,7 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/order-lookup")] HttpRequestData req)
     {
         var ct = req.FunctionContext.CancellationToken;
-        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-        var sessionId = query["sessionId"];
+        var sessionId = req.GetQueryParam("sessionId");
 
         if (string.IsNullOrWhiteSpace(sessionId))
             return req.CreateResponse(HttpStatusCode.BadRequest);
@@ -167,9 +166,8 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/search")] HttpRequestData req)
     {
         var ct = req.FunctionContext.CancellationToken;
-        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-        var q = (query["q"] ?? string.Empty).Trim();
-        var sort = query["sort"] ?? "featured";
+        var q = (req.GetQueryParam("q") ?? string.Empty).Trim();
+        var sort = req.GetQueryParam("sort") ?? "featured";
 
         var productsQuery = db.Products
             .Include(p => p.Collection)
@@ -177,10 +175,12 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
 
         if (!string.IsNullOrWhiteSpace(q))
         {
-            var lower = q.ToLower();
+            // Escape LIKE metacharacters so user input is treated as literal text,
+            // then use Postgres-native ILIKE for efficient case-insensitive matching.
+            var pattern = $"%{q.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
             productsQuery = productsQuery.Where(p =>
-                p.Name.ToLower().Contains(lower) ||
-                p.Description.ToLower().Contains(lower));
+                EF.Functions.ILike(p.Name, pattern, "\\") ||
+                (p.Description != null && EF.Functions.ILike(p.Description, pattern, "\\")));
         }
 
         productsQuery = sort switch

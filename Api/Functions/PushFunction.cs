@@ -1,17 +1,21 @@
 using KatiesGarden.Api.Auth;
+using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace KatiesGarden.Api.Functions;
 
-public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFunction> logger)
+public class PushFunction(
+    AppDbContext db,
+    IOptions<PushOptions> pushOptions,
+    ILogger<PushFunction> logger)
 {
     [Function("PushGetVapidPublicKey")]
     public async Task<HttpResponseData> GetVapidPublicKey(
@@ -19,12 +23,9 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
     {
         if (req.RequireAdmin() is { } deny) return deny;
 
-        var key = config["VAPID_PUBLIC_KEY"] ?? string.Empty;
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "text/plain");
-        
-        await response.WriteStringAsync(key);
-
+        await response.WriteStringAsync(pushOptions.Value.PublicKey ?? string.Empty);
         return response;
     }
 
@@ -39,7 +40,6 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
         if (request is null || string.IsNullOrWhiteSpace(request.Endpoint))
             return await Responses.BadRequest(req, "Endpoint is required.");
 
-        // Upsert by endpoint
         var existing = await db.PushSubscriptions
             .FirstOrDefaultAsync(s => s.Endpoint == request.Endpoint, ct);
 
