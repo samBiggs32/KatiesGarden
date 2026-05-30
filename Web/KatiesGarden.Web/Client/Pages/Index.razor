@@ -7,8 +7,7 @@
 <PageTitle>Katie's Garden — Garden Services in Milverton, Somerset</PageTitle>
 
 <!-- ═══════════════════════════════════════ HERO CAROUSEL ═══════════════════════════════════════ -->
-<section class="relative overflow-hidden bg-neutral"
-         style="height: clamp(420px, 70vh, 800px);"
+<section class="relative overflow-hidden bg-neutral h-[clamp(420px,70vh,800px)]"
          aria-label="Garden photo slideshow"
          role="region">
 
@@ -16,8 +15,7 @@
     {
         var slide = Images.Slides[i];
         var active = i == _currentSlide;
-        <picture class="absolute inset-0 w-full h-full transition-opacity duration-1000"
-                 style="opacity: @(active ? 1 : 0)">
+        <picture class="absolute inset-0 w-full h-full transition-opacity duration-1000 @(active ? "opacity-100" : "opacity-0")">
             <source type="image/webp" srcset="@slide.WebpSrc" />
             <img src="@slide.Src"
                  srcset="@slide.SrcSet"
@@ -65,7 +63,7 @@
 </section>
 
 <!-- ══════════════════════════════════════ SERVICES STRIP ══════════════════════════════════════ -->
-<section class="py-12" style="background-color: color-mix(in srgb, #4A7C59 12%, white);">
+<section class="py-12 bg-primary/10">
     <div class="max-w-6xl mx-auto px-6">
         <p class="text-center text-sm font-semibold uppercase tracking-widest text-primary mb-8 opacity-80">
             What we do

@@ -23,7 +23,7 @@
         <div class="flex flex-col divide-y divide-base-300 mb-8">
             @foreach (var item in _items)
             {
-                <div @key="item.ProductId" class="flex items-center gap-4 py-4">
+                <div @key="item.ProductId" class="flex items-center gap-3 py-4">
                     @if (item.ImageUrl is not null)
                     {
                         <img src="@item.ImageUrl" alt="@item.ProductName"
@@ -39,20 +39,24 @@
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-base-content truncate">@item.ProductName</p>
                         <p class="text-primary text-sm">£@item.UnitPrice.ToString("F2") each</p>
+                        <!-- Line total shown here on mobile (the standalone column is hidden < sm) -->
+                        <p class="text-base-content font-semibold text-sm sm:hidden mt-0.5">
+                            £@item.LineTotal.ToString("F2")
+                        </p>
                     </div>
 
                     <input type="number"
-                           class="input input-bordered input-sm w-20 text-center"
+                           class="input input-bordered input-sm w-16 text-center flex-shrink-0"
                            value="@item.Quantity"
                            min="0" max="99"
                            @onchange="e => UpdateQuantityAsync(item.ProductId, int.TryParse(e.Value?.ToString(), out var q) ? q : item.Quantity)"
                            aria-label="@($"Quantity for {item.ProductName}")" />
 
-                    <p class="text-base-content font-semibold w-16 text-right">
+                    <p class="hidden sm:block text-base-content font-semibold w-16 text-right flex-shrink-0">
                         £@item.LineTotal.ToString("F2")
                     </p>
 
-                    <button class="btn btn-ghost btn-sm btn-square text-error hover:bg-error/10"
+                    <button class="btn btn-ghost btn-sm btn-square text-error hover:bg-error/10 flex-shrink-0"
                             @onclick="() => RemoveAsync(item.ProductId)"
                             aria-label="@($"Remove {item.ProductName} from basket")">
                         <i class="fas fa-trash text-sm" aria-hidden="true"></i>

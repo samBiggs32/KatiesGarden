@@ -15,22 +15,22 @@
     <!-- DaisyUI tabs -->
     <div role="tablist" class="tabs tabs-boxed bg-base-200 max-w-md mx-auto mb-8 p-1 rounded-xl" aria-label="Gallery categories">
         <button role="tab"
-                class="tab @(_activeTab == 0 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                class="tab text-xs sm:text-sm @(_activeTab == 0 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
                 @onclick="() => _activeTab = 0"
                 aria-selected="@(_activeTab == 0)">
-            <i class="fas fa-tree mr-2 text-sm" aria-hidden="true"></i>Woodwork
+            <i class="fas fa-tree hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Woodwork
         </button>
         <button role="tab"
-                class="tab @(_activeTab == 1 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                class="tab text-xs sm:text-sm @(_activeTab == 1 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
                 @onclick="() => _activeTab = 1"
                 aria-selected="@(_activeTab == 1)">
-            <i class="fas fa-bug mr-2 text-sm" aria-hidden="true"></i>Bugs &amp; Hugs
+            <i class="fas fa-bug hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Bugs &amp; Hugs
         </button>
         <button role="tab"
-                class="tab @(_activeTab == 2 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
+                class="tab text-xs sm:text-sm @(_activeTab == 2 ? "tab-active bg-base-100 shadow-sm rounded-lg" : "")"
                 @onclick="() => _activeTab = 2"
                 aria-selected="@(_activeTab == 2)">
-            <i class="fas fa-leaf mr-2 text-sm" aria-hidden="true"></i>Maintenance
+            <i class="fas fa-leaf hidden sm:inline-block sm:mr-2 text-sm" aria-hidden="true"></i>Maintenance
         </button>
     </div>
 
