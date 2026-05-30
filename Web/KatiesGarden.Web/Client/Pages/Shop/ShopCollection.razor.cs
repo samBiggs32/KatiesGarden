@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace KatiesGarden.Web.Client.Pages.Shop;
 
-public partial class ShopCollection : ComponentBase, IDisposable
+public partial class ShopCollection : ComponentBase
 {
     [Inject] ShopService ShopService { get; set; } = null!;
     [Inject] CartService CartService { get; set; } = null!;
@@ -14,7 +14,6 @@ public partial class ShopCollection : ComponentBase, IDisposable
     private CollectionDetailDto? _collection;
     private bool _loading = true;
     private string? _toast;
-    private System.Threading.Timer? _toastTimer;
     private string _sort = "featured";
     private bool _inStockOnly;
 
@@ -52,17 +51,6 @@ public partial class ShopCollection : ComponentBase, IDisposable
             ImageUrl = product.CoverImageUrl,
             CanLocalDeliver = product.CanLocalDeliver
         });
-        ShowToast($"{product.Name} added to basket");
+        _toast = $"{product.Name} added to basket";
     }
-
-    private void ShowToast(string message)
-    {
-        _toast = message;
-        _toastTimer?.Dispose();
-        _toastTimer = new System.Threading.Timer(_ =>
-            InvokeAsync(() => { _toast = null; StateHasChanged(); }),
-            null, 3000, Timeout.Infinite);
-    }
-
-    public void Dispose() => _toastTimer?.Dispose();
 }

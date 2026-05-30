@@ -26,7 +26,7 @@ public class AdminOrderFunction(
     public async Task<HttpResponseData> GetOrders(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
@@ -63,7 +63,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders
@@ -106,7 +106,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "manage/orders/{id:guid}/status")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders.Include(o => o.Lines).FirstOrDefaultAsync(o => o.Id == id, ct);
@@ -151,7 +151,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/orders/{id:guid}/notes")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders.FindAsync([id], ct);
@@ -170,7 +170,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/refund")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders.Include(o => o.Lines).FirstOrDefaultAsync(o => o.Id == id, ct);

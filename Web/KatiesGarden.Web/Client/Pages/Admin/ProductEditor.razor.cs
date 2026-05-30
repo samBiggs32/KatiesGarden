@@ -40,33 +40,43 @@ public partial class ProductEditor
     protected override async Task OnParametersSetAsync()
     {
         _loading = true;
-
-        var collectionsTask = AdminProductService.GetCollectionsAsync();
-
-        if (!_isNew)
+        _saveError = string.Empty;
+        try
         {
-            var product = await AdminProductService.GetProductAsync(Id!.Value);
-            if (product is null)
+            var collectionsTask = AdminProductService.GetCollectionsAsync();
+
+            if (!_isNew)
             {
-                Navigation.NavigateTo("/admin/products");
-                return;
+                var product = await AdminProductService.GetProductAsync(Id!.Value);
+                if (product is null)
+                {
+                    Navigation.NavigateTo("/admin/products");
+                    return;
+                }
+
+                _name = product.Name;
+                _description = product.Description;
+                _howToBuyNote = product.HowToBuyNote ?? string.Empty;
+                _price = product.Price;
+                _isAvailable = product.IsAvailable;
+                _canLocalDeliver = product.CanLocalDeliver;
+                _trackStock = product.StockQuantity.HasValue;
+                _stockQuantity = product.StockQuantity;
+                _collectionId = product.CollectionId;
+                _imageUrls = product.ImageUrls.ToList();
+                _displayOrder = product.DisplayOrder;
             }
 
-            _name = product.Name;
-            _description = product.Description;
-            _howToBuyNote = product.HowToBuyNote ?? string.Empty;
-            _price = product.Price;
-            _isAvailable = product.IsAvailable;
-            _canLocalDeliver = product.CanLocalDeliver;
-            _trackStock = product.StockQuantity.HasValue;
-            _stockQuantity = product.StockQuantity;
-            _collectionId = product.CollectionId;
-            _imageUrls = product.ImageUrls.ToList();
-            _displayOrder = product.DisplayOrder;
+            _collections = await collectionsTask ?? [];
         }
-
-        _collections = await collectionsTask ?? [];
-        _loading = false;
+        catch (Exception ex)
+        {
+            _saveError = $"Failed to load: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private void RemoveImage(int index)

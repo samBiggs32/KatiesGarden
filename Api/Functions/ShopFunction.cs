@@ -109,7 +109,8 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
     public async Task<HttpResponseData> GetDeliverySettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/delivery-settings")] HttpRequestData req)
     {
-        var settings = await db.DeliverySettings.FindAsync(1)
+        var ct = req.FunctionContext.CancellationToken;
+        var settings = await db.DeliverySettings.FindAsync([1], ct)
             ?? new DeliverySettings();
 
         var dto = new DeliverySettingsDto(

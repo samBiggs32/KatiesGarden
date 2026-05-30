@@ -55,7 +55,7 @@ public class CheckoutFunction(
         }
 
         // Calculate totals
-        var settings = await db.DeliverySettings.FindAsync(1) ?? new DeliverySettings();
+        var settings = await db.DeliverySettings.FindAsync([1], ct) ?? new DeliverySettings();
         var subtotal = request.Items.Sum(i => products[i.ProductId].Price * i.Quantity);
         var deliveryType = Enum.Parse<DeliveryType>(request.DeliveryType);
         var deliveryFee = deliveryType == DeliveryType.Collection

@@ -17,7 +17,7 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
     public async Task<HttpResponseData> GetVapidPublicKey(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "push/vapid-public-key")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var key = config["VAPID_PUBLIC_KEY"] ?? string.Empty;
         var response = req.CreateResponse(HttpStatusCode.OK);
@@ -32,7 +32,7 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
     public async Task<HttpResponseData> Subscribe(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "push/subscribe")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var request = await req.ReadFromJsonAsync<PushSubscribeRequest>();
@@ -67,7 +67,7 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
     public async Task<HttpResponseData> Unsubscribe(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "push/subscribe")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var request = await req.ReadFromJsonAsync<PushSubscribeRequest>();

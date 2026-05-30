@@ -4,16 +4,7 @@
 
 <PageTitle>@(_collection?.Title ?? "Collection") — Katie's Garden</PageTitle>
 
-<!-- Toast notification -->
-@if (_toast is not null)
-{
-    <div class="toast toast-top toast-end z-50" role="status" aria-live="polite">
-        <div class="alert alert-success shadow-lg">
-            <i class="fas fa-check-circle" aria-hidden="true"></i>
-            <span>@_toast</span>
-        </div>
-    </div>
-}
+<ToastNotification Message="@_toast" OnDismissed="@(() => _toast = null)" />
 
 <div class="max-w-7xl mx-auto px-6 py-12">
 
