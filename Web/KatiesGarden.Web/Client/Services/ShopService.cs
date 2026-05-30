@@ -26,4 +26,21 @@ public class ShopService(HttpClient http)
 
     public Task<DeliverySettingsDto?> GetDeliverySettingsAsync()
         => http.GetFromJsonAsync<DeliverySettingsDto>("api/shop/delivery-settings");
+
+    public async Task<OrderLookupDto?> GetOrderLookupAsync(string sessionId)
+    {
+        var response = await http.GetAsync($"api/shop/order-lookup?sessionId={Uri.EscapeDataString(sessionId)}");
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<OrderLookupDto>()
+            : null;
+    }
+
+    public async Task<List<ProductSearchResultDto>> SearchAsync(string q, string sort = "featured")
+    {
+        var url = $"api/shop/search?q={Uri.EscapeDataString(q)}&sort={Uri.EscapeDataString(sort)}";
+        var response = await http.GetAsync(url);
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<List<ProductSearchResultDto>>() ?? []
+            : [];
+    }
 }

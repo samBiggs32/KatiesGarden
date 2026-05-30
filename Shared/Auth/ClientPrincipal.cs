@@ -26,3 +26,10 @@ public record ClientPrincipal(
 
     public bool IsAdmin => UserRoles?.Contains("admin", StringComparer.OrdinalIgnoreCase) ?? false;
 }
+
+// Wrapper for the SWA /.auth/me response envelope
+public class ClientPrincipalWrapper
+{
+    [JsonPropertyName("clientPrincipal")]
+    public ClientPrincipal? ClientPrincipal { get; set; }
+}

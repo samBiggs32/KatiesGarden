@@ -1,5 +1,6 @@
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Models.Shop;
@@ -8,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Stripe;
 using System.Net;
 
 namespace KatiesGarden.Api.Functions;
@@ -16,13 +18,14 @@ public class AdminOrderFunction(
     AppDbContext db,
     IEmailSender emailSender,
     IOptions<SmtpOptions> smtpOptions,
+    RefundService refundService,
     ILogger<AdminOrderFunction> logger)
 {
     [Function("AdminGetOrders")]
     public async Task<HttpResponseData> GetOrders(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
@@ -59,7 +62,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/orders/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders
@@ -102,7 +105,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "manage/orders/{id:guid}/status")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders.Include(o => o.Lines).FirstOrDefaultAsync(o => o.Id == id, ct);
@@ -147,7 +150,7 @@ public class AdminOrderFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/orders/{id:guid}/notes")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders.FindAsync([id], ct);
@@ -159,6 +162,58 @@ public class AdminOrderFunction(
         await db.SaveChangesAsync(ct);
 
         return req.CreateResponse(HttpStatusCode.NoContent);
+    }
+
+    [Function("AdminRefundOrder")]
+    public async Task<HttpResponseData> RefundOrder(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/refund")] HttpRequestData req,
+        Guid id)
+    {
+        if (req.RequireAdmin() is { } deny) return deny;
+
+        var ct = req.FunctionContext.CancellationToken;
+        var order = await db.Orders.Include(o => o.Lines).FirstOrDefaultAsync(o => o.Id == id, ct);
+        if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        if (string.IsNullOrWhiteSpace(order.StripePaymentIntentId))
+            return await Responses.BadRequest(req, "This order has no payment intent — it cannot be refunded via Stripe.");
+
+        var refundableStatuses = new[] { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection, OrderStatus.Dispatched, OrderStatus.Delivered };
+        if (!refundableStatuses.Contains(order.Status))
+            return await Responses.BadRequest(req, $"Orders with status '{order.Status}' cannot be refunded.");
+
+        try
+        {
+            await refundService.CreateAsync(new RefundCreateOptions
+            {
+                PaymentIntent = order.StripePaymentIntentId
+            }, cancellationToken: ct);
+        }
+        catch (StripeException ex)
+        {
+            logger.LogError(ex, "Stripe refund failed for order {OrderNumber}", order.OrderNumber);
+            return await Responses.BadRequest(req, $"Stripe refund failed: {ex.StripeError?.Message ?? ex.Message}");
+        }
+
+        order.Status = OrderStatus.Refunded;
+        order.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Order {OrderNumber} refunded via Stripe", order.OrderNumber);
+
+        try
+        {
+            var smtp = smtpOptions.Value;
+            var email = OrderEmailBuilder.BuildStatusUpdate(order, smtp.EffectiveSenderEmail, "Katie's Garden");
+            await emailSender.SendAsync(email, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send refund confirmation email for order {OrderNumber}", order.OrderNumber);
+        }
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(new { status = "Refunded", orderNumber = order.OrderNumber });
+        return response;
     }
 }
 

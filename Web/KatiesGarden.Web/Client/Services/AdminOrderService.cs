@@ -26,4 +26,7 @@ public class AdminOrderService(HttpClient http)
 
     public Task<HttpResponseMessage> UpdateNotesAsync(Guid id, string? notes)
         => http.PutAsJsonAsync($"api/manage/orders/{id}/notes", new { notes });
+
+    public Task<HttpResponseMessage> RefundAsync(Guid id)
+        => http.PostAsync($"api/manage/orders/{id}/refund", null);
 }

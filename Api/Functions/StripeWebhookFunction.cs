@@ -1,5 +1,6 @@
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Services;
 using Microsoft.Azure.Functions.Worker;

@@ -109,11 +109,35 @@ else
             </MudCard>
         </MudItem>
     </MudGrid>
+
+    @if (_order.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" or "Delivered")
+    {
+        <MudCard Elevation="1" Class="mb-4 border border-error">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6" Color="Color.Error">
+                    <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Class="mr-1" />
+                    Issue Refund
+                </MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body2" Class="mb-3">
+                    Issues a full refund of <strong>£@_order.Total.ToString("F2")</strong> via Stripe
+                    and marks this order as Refunded.
+                </MudText>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Replay"
+                           OnClick="RefundOrderAsync" Disabled="@_refunding">
+                    @(_refunding ? "Processing refund…" : "Issue Full Refund")
+                </MudButton>
+            </MudCardContent>
+        </MudCard>
+    }
 }
 
 @code {
     [Inject] AdminOrderService AdminOrderService { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
 
     [Parameter] public Guid Id { get; set; }
 
@@ -121,7 +145,7 @@ else
     private bool _loading = true;
     private string _newStatus = string.Empty;
     private string? _adminNotes;
-    private bool _updatingStatus, _savingNotes;
+    private bool _updatingStatus, _savingNotes, _refunding;
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,6 +180,30 @@ else
         await AdminOrderService.UpdateNotesAsync(Id, _adminNotes);
         Snackbar.Add("Notes saved", Severity.Success);
         _savingNotes = false;
+    }
+
+    private async Task RefundOrderAsync()
+    {
+        var confirmed = await DialogService.ShowMessageBox(
+            "Confirm Refund",
+            $"Issue a full refund of £{_order!.Total:F2} for order {_order.OrderNumber}? This cannot be undone.",
+            yesText: "Yes, Refund",
+            cancelText: "Cancel");
+        if (confirmed is not true) return;
+
+        _refunding = true;
+        var response = await AdminOrderService.RefundAsync(Id);
+        if (response.IsSuccessStatusCode)
+        {
+            _order = _order! with { Status = "Refunded" };
+            _newStatus = "Refunded";
+            Snackbar.Add("Refund issued successfully", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed to issue refund. Check Stripe dashboard.", Severity.Error);
+        }
+        _refunding = false;
     }
 
     private static Color StatusColor(string status) => status switch

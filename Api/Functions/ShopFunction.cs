@@ -1,4 +1,5 @@
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -108,7 +109,8 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
     public async Task<HttpResponseData> GetDeliverySettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/delivery-settings")] HttpRequestData req)
     {
-        var settings = await db.DeliverySettings.FindAsync(1)
+        var ct = req.FunctionContext.CancellationToken;
+        var settings = await db.DeliverySettings.FindAsync([1], ct)
             ?? new DeliverySettings();
 
         var dto = new DeliverySettingsDto(
@@ -120,6 +122,86 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(dto);
+        return response;
+    }
+
+    // Returns a minimal order summary keyed by Stripe session ID so the order success
+    // page can show the customer their order number without requiring authentication.
+    // The session ID acts as an opaque token — only Stripe and the redirected customer
+    // possess it, so it is safe to use as the sole auth mechanism here.
+    [Function("GetOrderBySession")]
+    public async Task<HttpResponseData> GetOrderBySession(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/order-lookup")] HttpRequestData req)
+    {
+        var ct = req.FunctionContext.CancellationToken;
+        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
+        var sessionId = query["sessionId"];
+
+        if (string.IsNullOrWhiteSpace(sessionId))
+            return req.CreateResponse(HttpStatusCode.BadRequest);
+
+        var order = await db.Orders
+            .Include(o => o.Lines)
+            .FirstOrDefaultAsync(o => o.StripeSessionId == sessionId, ct);
+
+        if (order is null)
+            return req.CreateResponse(HttpStatusCode.NotFound);
+
+        var dto = new OrderLookupDto(
+            order.OrderNumber,
+            order.Total,
+            order.DeliveryFee,
+            order.DeliveryType.ToString(),
+            order.CreatedAt,
+            order.Lines.Select(l => new OrderLookupLineDto(l.ProductName, l.Quantity, l.LineTotal)).ToList());
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(dto);
+        return response;
+    }
+
+    // Full-text search across available products. Sort options: featured (default),
+    // price_asc, price_desc, name. Returns at most 50 results.
+    [Function("SearchProducts")]
+    public async Task<HttpResponseData> SearchProducts(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "shop/search")] HttpRequestData req)
+    {
+        var ct = req.FunctionContext.CancellationToken;
+        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
+        var q = (query["q"] ?? string.Empty).Trim();
+        var sort = query["sort"] ?? "featured";
+
+        var productsQuery = db.Products
+            .Include(p => p.Collection)
+            .Where(p => p.IsAvailable);
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var lower = q.ToLower();
+            productsQuery = productsQuery.Where(p =>
+                p.Name.ToLower().Contains(lower) ||
+                p.Description.ToLower().Contains(lower));
+        }
+
+        productsQuery = sort switch
+        {
+            "price_asc"  => productsQuery.OrderBy(p => p.Price).ThenBy(p => p.DisplayOrder),
+            "price_desc" => productsQuery.OrderByDescending(p => p.Price).ThenBy(p => p.DisplayOrder),
+            "name"       => productsQuery.OrderBy(p => p.Name),
+            _            => productsQuery.OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name),
+        };
+
+        var results = await productsQuery
+            .Take(50)
+            .Select(p => new ProductSearchResultDto(
+                p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
+                p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+                p.Collection != null ? p.Collection.Title : null,
+                p.Collection != null ? p.Collection.Slug : null))
+            .ToListAsync(ct);
+
+        var response = req.CreateResponse(HttpStatusCode.OK);
+        await response.WriteAsJsonAsync(results);
         return response;
     }
 }

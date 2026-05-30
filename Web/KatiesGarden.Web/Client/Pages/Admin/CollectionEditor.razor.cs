@@ -35,27 +35,36 @@ public partial class CollectionEditor
     protected override async Task OnParametersSetAsync()
     {
         _loading = true;
-
-        if (!_isNew)
+        _saveError = string.Empty;
+        try
         {
-            var collection = await AdminProductService.GetCollectionAsync(Id!.Value);
-            if (collection is null)
+            if (!_isNew)
             {
-                Navigation.NavigateTo("/admin/collections");
-                return;
+                var collection = await AdminProductService.GetCollectionAsync(Id!.Value);
+                if (collection is null)
+                {
+                    Navigation.NavigateTo("/admin/collections");
+                    return;
+                }
+
+                _title = collection.Title;
+                _description = collection.Description;
+                _coverImageUrl = collection.CoverImageUrl;
+                _isActive = collection.IsActive;
+                _displayOrder = collection.DisplayOrder;
+                _startDate = collection.StartDate;
+                _hasEndDate = collection.EndDate.HasValue;
+                _endDate = collection.EndDate;
             }
-
-            _title = collection.Title;
-            _description = collection.Description;
-            _coverImageUrl = collection.CoverImageUrl;
-            _isActive = collection.IsActive;
-            _displayOrder = collection.DisplayOrder;
-            _startDate = collection.StartDate;
-            _hasEndDate = collection.EndDate.HasValue;
-            _endDate = collection.EndDate;
         }
-
-        _loading = false;
+        catch (Exception ex)
+        {
+            _saveError = $"Failed to load: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task TriggerCoverUpload()

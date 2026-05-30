@@ -1,6 +1,7 @@
 using FluentValidation;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Helpers;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
@@ -14,7 +15,9 @@ namespace KatiesGarden.Api.Functions;
 public class AdminProductFunction(
     AppDbContext db,
     IValidator<CreateProductRequest> createProductValidator,
+    IValidator<UpdateProductRequest> updateProductValidator,
     IValidator<CreateCollectionRequest> createCollectionValidator,
+    IValidator<UpdateCollectionRequest> updateCollectionValidator,
     ILogger<AdminProductFunction> logger)
 {
     // ── Products ────────────────────────────────────────────────────────────
@@ -23,7 +26,7 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> CreateProduct(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/products")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         CreateProductRequest? request;
@@ -68,7 +71,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var product = await db.Products.FindAsync([id], ct);
@@ -78,6 +81,10 @@ public class AdminProductFunction(
         try { request = await req.ReadFromJsonAsync<UpdateProductRequest>(); }
         catch { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+
+        var validation = await updateProductValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return await Responses.BadRequest(req, string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
 
         product.Name = request.Name;
         product.Description = request.Description;
@@ -103,7 +110,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var product = await db.Products.FindAsync([id], ct);
@@ -122,7 +129,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var product = await db.Products
@@ -159,7 +166,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var collection = await db.Collections
@@ -197,7 +204,7 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> GetAllCollections(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/collections")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var collections = await db.Collections
@@ -216,7 +223,7 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> GetAllProducts(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/products")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var products = await db.Products
@@ -236,7 +243,7 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> CreateCollection(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/collections")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         CreateCollectionRequest? request;
@@ -280,7 +287,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var collection = await db.Collections.FindAsync([id], ct);
@@ -290,6 +297,10 @@ public class AdminProductFunction(
         try { request = await req.ReadFromJsonAsync<UpdateCollectionRequest>(); }
         catch { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+
+        var validation = await updateCollectionValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return await Responses.BadRequest(req, string.Join("; ", validation.Errors.Select(e => e.ErrorMessage)));
 
         collection.Title = request.Title;
         collection.Description = request.Description;
@@ -315,7 +326,7 @@ public class AdminProductFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var collection = await db.Collections.FindAsync([id], ct);
@@ -333,9 +344,10 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> GetDeliverySettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/delivery-settings")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
-        var settings = await db.DeliverySettings.FindAsync(1) ?? new DeliverySettings();
+        var ct = req.FunctionContext.CancellationToken;
+        var settings = await db.DeliverySettings.FindAsync([1], ct) ?? new DeliverySettings();
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new DeliverySettingsDto(
@@ -349,13 +361,13 @@ public class AdminProductFunction(
     public async Task<HttpResponseData> UpdateDeliverySettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/delivery-settings")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
         var request = await req.ReadFromJsonAsync<DeliverySettingsUpdateRequest>();
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
-        var settings = await db.DeliverySettings.FindAsync(1)
+        var settings = await db.DeliverySettings.FindAsync([1], ct)
             ?? new DeliverySettings();
 
         settings.LocalDeliveryFee = request.LocalDeliveryFee;

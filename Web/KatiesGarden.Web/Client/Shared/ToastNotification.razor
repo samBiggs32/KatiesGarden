@@ -1,0 +1,33 @@
+@implements IDisposable
+
+@if (Message is not null)
+{
+    <div class="toast toast-top toast-end z-50" role="status" aria-live="polite">
+        <div class="alert alert-success shadow-lg">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            <span>@Message</span>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public EventCallback OnDismissed { get; set; }
+
+    private Timer? _timer;
+
+    protected override void OnParametersSet()
+    {
+        if (Message is null) return;
+        _timer?.Dispose();
+        _timer = new Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await OnDismissed.InvokeAsync();
+            });
+        }, null, 3000, Timeout.Infinite);
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}

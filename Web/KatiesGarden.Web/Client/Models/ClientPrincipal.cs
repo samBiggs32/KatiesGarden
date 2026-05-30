@@ -1,24 +1,3 @@
-using System.Text.Json.Serialization;
-
-namespace KatiesGarden.Web.Client.Models;
-
-public class ClientPrincipalWrapper
-{
-    [JsonPropertyName("clientPrincipal")]
-    public ClientPrincipal? ClientPrincipal { get; set; }
-}
-
-public class ClientPrincipal
-{
-    [JsonPropertyName("identityProvider")]
-    public string IdentityProvider { get; set; } = string.Empty;
-
-    [JsonPropertyName("userId")]
-    public string UserId { get; set; } = string.Empty;
-
-    [JsonPropertyName("userDetails")]
-    public string UserDetails { get; set; } = string.Empty;
-
-    [JsonPropertyName("userRoles")]
-    public string[] UserRoles { get; set; } = [];
-}
+// ClientPrincipal and ClientPrincipalWrapper are defined in KatiesGarden.Shared
+// (Shared/Auth/ClientPrincipal.cs, namespace KatiesGarden.Models.Auth).
+// This file intentionally left empty — kept to avoid stale git references.

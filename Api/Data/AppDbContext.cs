@@ -1,3 +1,4 @@
+using KatiesGarden.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace KatiesGarden.Api.Data;

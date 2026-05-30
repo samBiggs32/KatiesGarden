@@ -1,5 +1,6 @@
 @inject CartService CartService
 @inject AuthService AuthService
+@inject NavigationManager Navigation
 @implements IAsyncDisposable
 
 <div class="sticky top-0 z-50 bg-base-100 shadow-sm">
@@ -61,8 +62,17 @@
                 }
             </nav>
 
-            <!-- Right: cart + mobile toggle -->
+            <!-- Right: search + cart + mobile toggle -->
             <div class="flex items-center gap-1">
+
+                <!-- Search toggle (desktop) -->
+                <button class="hidden md:flex p-2 rounded-md text-base-content hover:text-primary hover:bg-base-200 transition-colors"
+                        @onclick="ToggleSearch"
+                        aria-label="Search products"
+                        aria-expanded="@_searchOpen">
+                    <i class="fas fa-magnifying-glass text-lg" aria-hidden="true"></i>
+                </button>
+
                 <!-- Cart icon -->
                 <NavLink href="cart"
                          class="relative p-2 rounded-md text-base-content hover:text-primary hover:bg-base-200 transition-colors"
@@ -95,11 +105,43 @@
             </div>
         </div>
 
+        <!-- Inline search bar (desktop) -->
+        @if (_searchOpen)
+        {
+            <div class="hidden md:block pb-3" @onkeydown="OnSearchKeyDown">
+                <div class="relative max-w-xl mx-auto">
+                    <input @ref="_searchInput" type="search" @bind="_searchQuery" @bind:event="oninput"
+                           placeholder="Search products…"
+                           class="input input-bordered w-full pr-10"
+                           aria-label="Search products" />
+                    <button class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-primary"
+                            @onclick="ExecuteSearch" aria-label="Submit search">
+                        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        }
+
         <!-- Mobile menu -->
         @if (!collapseNavMenu)
         {
             <nav id="mobile-nav" class="md:hidden pb-4 border-t border-base-300 flex flex-col gap-0.5 pt-2"
                  aria-label="Mobile navigation">
+
+                <!-- Mobile search -->
+                <div class="px-3 pb-2" @onkeydown="OnSearchKeyDown">
+                    <div class="relative">
+                        <input type="search" @bind="_searchQuery" @bind:event="oninput"
+                               placeholder="Search products…"
+                               class="input input-bordered input-sm w-full pr-9"
+                               aria-label="Search products" />
+                        <button class="absolute right-2.5 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-primary"
+                                @onclick="ExecuteSearch" aria-label="Submit search">
+                            <i class="fas fa-magnifying-glass text-sm" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <NavLink href="" Match="NavLinkMatch.All"
                          class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-base-content hover:bg-base-200 hover:text-primary transition-colors"
                          ActiveClass="bg-base-200 text-primary"
@@ -157,9 +199,37 @@
     private bool collapseNavMenu = true;
     private bool _isAdmin;
     private int _cartCount;
+    private bool _searchOpen;
+    private string _searchQuery = string.Empty;
+    private ElementReference _searchInput;
 
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
     private void CloseNavMenu() => collapseNavMenu = true;
+
+    private async void ToggleSearch()
+    {
+        _searchOpen = !_searchOpen;
+        if (_searchOpen)
+        {
+            await Task.Delay(50);
+            try { await _searchInput.FocusAsync(); } catch { /* non-critical */ }
+        }
+    }
+
+    private void OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") ExecuteSearch();
+        if (e.Key == "Escape") { _searchOpen = false; _searchQuery = string.Empty; }
+    }
+
+    private void ExecuteSearch()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery)) return;
+        _searchOpen = false;
+        collapseNavMenu = true;
+        Navigation.NavigateTo($"/shop/search?q={Uri.EscapeDataString(_searchQuery.Trim())}");
+        _searchQuery = string.Empty;
+    }
 
     protected override async Task OnInitializedAsync()
     {
