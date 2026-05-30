@@ -41,13 +41,22 @@ else
             </MudItem>
 
             <MudItem xs="12" md="6">
-                <MudSelect @bind-Value="_collectionId" Label="Collection (optional)" Clearable="true" Class="mb-4">
-                    <MudSelectItem T="Guid?" Value="null">None</MudSelectItem>
+                <MudSelect @bind-Value="_collectionId" Label="Collection (optional)" Clearable="true"
+                           Class="mb-1"
+                           HelperText="Group this product into a seasonal range or category.">
+                    <MudSelectItem T="Guid?" Value="@((Guid?)null)">None — not in a collection</MudSelectItem>
                     @foreach (var c in _collections)
                     {
                         <MudSelectItem @key="c.Id" T="Guid?" Value="c.Id">@c.Title</MudSelectItem>
                     }
                 </MudSelect>
+                @if (_collections.Count == 0)
+                {
+                    <MudText Typo="Typo.caption" Class="mb-4 d-block mud-text-secondary">
+                        No collections yet — <MudLink Href="/admin/collections/new">create one</MudLink>
+                        to group products into ranges. Products can still be saved without a collection.
+                    </MudText>
+                }
             </MudItem>
             <MudItem xs="12" md="3">
                 <MudNumericField @bind-Value="_displayOrder" Label="Display Order" Min="0" Class="mb-4" />
