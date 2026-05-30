@@ -1,16 +1,25 @@
-@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
 :root {
-    --background-colour: #F0F5F3;   /* matches MudTheme Background */
-    --primary-colour: #1f8270;
-    --secondary-colour: rgba(47, 79, 79);
-    --text-primary: #2D3E40;
+    /* Legacy vars kept for JS/carousel compatibility */
+    --background-colour: #FDFAF5;
+    --primary-colour: #4A7C59;
+    --secondary-colour: #F5EDD6;
+    --text-primary: #1C2B1A;
     --text-secondary: #5B7876;
-    --border-subtle: #a79d96;
+    --border-subtle: #EAE4D8;
 
     --carousel-height-desktop: 40em;
     --carousel-height-tablet: 25em;
     --carousel-height-mobile: 10em;
+}
+
+/* Base typography — DaisyUI/Tailwind supply the reset; these set the brand fonts */
+html, body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--background-colour);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
 }
 
 /* Skip navigation — visually hidden until focused by keyboard */
