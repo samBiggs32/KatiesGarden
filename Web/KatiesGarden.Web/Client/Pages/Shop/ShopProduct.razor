@@ -1,78 +1,101 @@
 @page "/shop/product/{Slug}"
 @using KatiesGarden.Models.Shop
 @using KatiesGarden.Web.Client.Models
+@implements IDisposable
 
 <PageTitle>@(_product?.Name ?? "Product") — Katie's Garden</PageTitle>
 
-<!-- Toast notification -->
-@if (_toast is not null)
+@if (_product is not null)
 {
-    <div class="toast toast-top toast-end z-50" role="status" aria-live="polite">
-        <div class="alert alert-success shadow-lg">
-            <i class="fas fa-check-circle" aria-hidden="true"></i>
-            <span>@_toast</span>
-        </div>
-    </div>
+    <HeadContent>
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content="@(_product.Name) — Katie's Garden" />
+        <meta property="og:description" content="@(_product.Description.Length > 160 ? _product.Description[..157] + "…" : _product.Description)" />
+        @if (_product.ImageUrls.Length > 0)
+        {
+            <meta property="og:image" content="@_product.ImageUrls[0]" />
+        }
+        <meta property="og:url" content="https://www.katiesgarden.uk/shop/product/@_product.Slug" />
+        <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org/",
+          "@@type": "Product",
+          "name": "@_product.Name.Replace("\"", "\\\"")",
+          "description": "@_product.Description.Replace("\"", "\\\"").Replace("\n", " ")",
+          @if (_product.ImageUrls.Length > 0)
+          {
+              @:"image": "@_product.ImageUrls[0]",
+          }
+          "offers": {
+            "@@type": "Offer",
+            "priceCurrency": "GBP",
+            "price": "@_product.Price.ToString("F2")",
+            "availability": "@(_product.IsAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")",
+            "url": "https://www.katiesgarden.uk/shop/product/@_product.Slug"
+          },
+          "brand": {
+            "@@type": "Brand",
+            "name": "Katie's Garden"
+          }
+        }
+        </script>
+    </HeadContent>
 }
 
-<div class="max-w-5xl mx-auto px-6 py-12">
+<div class="max-w-5xl mx-auto px-4 py-8">
 
     @if (_loading)
     {
-        <div class="grid md:grid-cols-2 gap-10 animate-pulse">
-            <div class="bg-base-300 aspect-square rounded-2xl"></div>
-            <div class="flex flex-col gap-4">
-                <div class="bg-base-300 h-9 rounded w-3/4"></div>
-                <div class="bg-base-300 h-7 rounded w-1/4"></div>
-                <div class="bg-base-300 h-4 rounded"></div>
-                <div class="bg-base-300 h-4 rounded w-4/5"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="skeleton h-96 rounded-2xl"></div>
+            <div class="space-y-4">
+                <div class="skeleton h-8 w-3/4"></div>
+                <div class="skeleton h-6 w-1/4"></div>
+                <div class="skeleton h-24 w-full"></div>
+                <div class="skeleton h-12 w-full"></div>
             </div>
         </div>
     }
     else if (_product is null)
     {
-        <div class="text-center py-20">
-            <i class="fas fa-exclamation-circle text-5xl text-warning/50 mb-4" aria-hidden="true"></i>
-            <p class="text-base-content/65 mb-4">Product not found.</p>
-            <a href="/shop" class="btn btn-outline btn-primary">Back to Shop</a>
+        <div role="alert" class="alert alert-warning max-w-md mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Product not found. <a href="/shop" class="link">Browse our shop</a></span>
         </div>
     }
     else
     {
-        <!-- Breadcrumb -->
-        <nav class="text-sm text-base-content/50 mb-6" aria-label="Breadcrumb">
-            <a href="/shop" class="hover:text-primary transition-colors">Shop</a>
-            @if (_product.CollectionSlug is not null)
-            {
-                <span class="mx-2" aria-hidden="true">/</span>
-                <a href="/shop/@_product.CollectionSlug"
-                   class="hover:text-primary transition-colors">@_product.CollectionTitle</a>
-            }
-            <span class="mx-2" aria-hidden="true">/</span>
-            <span class="text-base-content/80">@_product.Name</span>
-        </nav>
+        @if (_product.CollectionSlug is not null)
+        {
+            <a href="/shop/@_product.CollectionSlug" class="inline-flex items-center gap-1 text-sm text-base-content/60 hover:text-primary transition-colors mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to @_product.CollectionTitle
+            </a>
+        }
 
-        <div class="grid md:grid-cols-2 gap-10 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
 
-            <!-- Image gallery -->
+            <!-- ── Images ──────────────────────────────────────── -->
             <div>
                 @if (_product.ImageUrls.Length > 0)
                 {
-                    <div class="rounded-2xl overflow-hidden bg-base-200 aspect-square relative">
-                        <img src="@_product.ImageUrls[_activeImage]"
-                             alt="@_product.Name"
-                             class="w-full h-full object-contain"
-                             loading="eager" />
+                    <div class="aspect-square rounded-2xl overflow-hidden bg-base-200 mb-3">
+                        <img src="@_product.ImageUrls[_activeImage]" alt="@_product.Name"
+                             class="w-full h-full object-cover" loading="lazy" />
                     </div>
                     @if (_product.ImageUrls.Length > 1)
                     {
-                        <div class="flex gap-2 mt-3 flex-wrap">
-                            @for (int t = 0; t < _product.ImageUrls.Length; t++)
+                        <div class="flex gap-2 flex-wrap">
+                            @for (int i = 0; i < _product.ImageUrls.Length; i++)
                             {
-                                var idx = t;
-                                <button class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors @(idx == _activeImage ? "border-primary" : "border-base-300 hover:border-primary/50")"
-                                        @onclick="() => _activeImage = idx"
-                                        aria-label="@($"Image {idx + 1}")">
+                                var idx = i;
+                                <button type="button" @onclick="() => _activeImage = idx"
+                                        class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-all @(_activeImage == idx ? "border-primary" : "border-transparent opacity-60 hover:opacity-100")"
+                                        aria-label="View image @(idx + 1)">
                                     <img src="@_product.ImageUrls[idx]" alt="" class="w-full h-full object-cover" loading="lazy" />
                                 </button>
                             }
@@ -81,20 +104,20 @@
                 }
                 else
                 {
-                    <div class="rounded-2xl bg-base-200 aspect-square flex items-center justify-center">
-                        <i class="fas fa-seedling text-6xl text-primary/20" aria-hidden="true"></i>
+                    <div class="aspect-square rounded-2xl bg-base-200 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-base-content/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                     </div>
                 }
             </div>
 
-            <!-- Product details -->
-            <div class="flex flex-col gap-4">
-                <h1 class="font-serif text-3xl md:text-4xl font-bold text-base-content leading-tight">@_product.Name</h1>
+            <!-- ── Details ─────────────────────────────────────── -->
+            <div class="flex flex-col">
+                <h1 class="font-serif text-3xl font-semibold text-base-content mb-2">@_product.Name</h1>
+                <p class="text-2xl font-semibold text-primary mb-4">£@_product.Price.ToString("F2")</p>
 
-                <p class="text-primary text-3xl font-bold">£@_product.Price.ToString("F2")</p>
-
-                <!-- Status badges -->
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 mb-5">
                     @if (!_product.IsAvailable)
                     {
                         <span class="badge badge-error">Sold out</span>
@@ -107,53 +130,70 @@
                     {
                         <span class="badge badge-success">In stock</span>
                     }
-
                     @if (_product.CanLocalDeliver)
                     {
-                        <span class="badge badge-info">Local delivery available</span>
+                        <span class="badge badge-outline">Local delivery available</span>
                     }
                     else
                     {
-                        <span class="badge badge-outline">Click & collect only</span>
+                        <span class="badge badge-outline">Collection only — Milverton</span>
                     }
                 </div>
 
-                @if (!string.IsNullOrEmpty(_product.Description))
-                {
-                    <p class="text-base-content/75 leading-relaxed">@_product.Description</p>
-                }
+                <p class="text-base-content/80 leading-relaxed mb-5">@_product.Description</p>
 
                 @if (_product.HowToBuyNote is not null)
                 {
-                    <div class="alert alert-info text-sm">
-                        <i class="fas fa-info-circle flex-shrink-0" aria-hidden="true"></i>
+                    <div role="note" class="alert alert-info mb-5 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         <span>@_product.HowToBuyNote</span>
                     </div>
                 }
 
-                <div class="divider my-1"></div>
+                @if (_product.IsAvailable)
+                {
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="join">
+                            <button type="button" class="btn btn-outline join-item btn-sm px-3"
+                                    @onclick="DecrementQty" disabled="@(_quantity <= 1)">−</button>
+                            <span class="join-item flex items-center justify-center px-4 text-sm font-medium border border-base-300 bg-base-100 min-w-[3rem]">@_quantity</span>
+                            <button type="button" class="btn btn-outline join-item btn-sm px-3"
+                                    @onclick="IncrementQty" disabled="@(_product.StockQuantity.HasValue && _quantity >= _product.StockQuantity.Value)">+</button>
+                        </div>
+                        @if (_product.StockQuantity.HasValue)
+                        {
+                            <span class="text-sm text-base-content/50">@_product.StockQuantity available</span>
+                        }
+                    </div>
+                }
 
-                <!-- Actions -->
-                <div class="flex gap-3 flex-wrap">
-                    <button class="btn btn-primary btn-lg flex-1"
-                            disabled="@(!_product.IsAvailable)"
-                            @onclick="AddToCartAsync">
-                        <i class="fas fa-basket-shopping mr-2" aria-hidden="true"></i>
+                <div class="flex gap-3 flex-wrap mt-auto">
+                    <button type="button" class="btn btn-primary flex-1 gap-2"
+                            @onclick="AddToCartAsync" disabled="@(!_product.IsAvailable)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-10H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
                         @(_product.IsAvailable ? "Add to Basket" : "Sold Out")
                     </button>
-                    <a href="/contact?subject=@Uri.EscapeDataString($"Enquiry about {_product.Name}")"
-                       class="btn btn-outline btn-lg">
-                        Enquire
+                    <a href="@($"/contact?subject=Enquiry about {Uri.EscapeDataString(_product.Name)}")"
+                       class="btn btn-outline flex-1 gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        Enquire Instead
                     </a>
                 </div>
 
-                @if (_product.CollectionSlug is not null)
+                @if (_toast is not null)
                 {
-                    <a href="/shop/@_product.CollectionSlug"
-                       class="text-sm text-base-content/50 hover:text-primary transition-colors mt-2 inline-flex items-center gap-1">
-                        <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i>
-                        Back to @_product.CollectionTitle
-                    </a>
+                    <div role="status" class="mt-4 alert alert-success text-sm py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        @_toast
+                    </div>
                 }
             </div>
         </div>

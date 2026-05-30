@@ -1,8 +1,7 @@
 @inherits LayoutComponentBase
 
-@inject IJSRuntime JSRuntime
-
-<!-- Skip navigation — keyboard users press Tab once then Enter to jump past nav -->
+<!-- First focusable element in the DOM — keyboard users press Tab once
+     to reach this, then Enter to jump past the navigation. -->
 <a class="skip-nav" href="#main-content">Skip to main content</a>
 
 <header>
@@ -23,17 +22,21 @@
                     <i class="fas fa-seedling text-primary text-xl" aria-hidden="true"></i>
                     <span class="font-serif text-xl text-base-100">Katie's Garden</span>
                 </div>
-                <p class="text-sm opacity-70 leading-relaxed">
-                    Designed by the many hands of the Porter family, built by Samuel Biggs using
-                    <a href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor"
-                       class="underline hover:opacity-100 transition-opacity">.NET Blazor</a>
+                <p class="text-sm opacity-70 leading-relaxed max-w-xs">
+                    Garden services, handmade woodwork, and seasonal planting in Milverton, Somerset.
                 </p>
-                <p class="text-sm opacity-50 mt-1">Site Version @version</p>
+                <p class="text-xs opacity-40 mt-3">
+                    Built by <a href="https://github.com/samBiggs32/KatiesGarden"
+                                class="underline hover:opacity-100 transition-opacity inline-flex items-center gap-1">
+                        <img src="Images/github.svg" class="h-4 w-4 invert" alt="" aria-hidden="true" />
+                        Samuel Biggs
+                    </a> using .NET Blazor &middot; @version
+                </p>
             </div>
 
-            <!-- Links -->
+            <!-- Explore links -->
             <div>
-                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">Links</h6>
+                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">Explore</h6>
                 <ul class="space-y-2 text-sm opacity-70">
                     <li><a href="/" class="hover:opacity-100 hover:text-base-100 transition-opacity">Home</a></li>
                     <li><a href="/gallery" class="hover:opacity-100 hover:text-base-100 transition-opacity">Gallery</a></li>
@@ -42,28 +45,24 @@
                 </ul>
             </div>
 
-            <!-- About -->
+            <!-- Legal -->
             <div>
-                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">About</h6>
+                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">Legal</h6>
                 <ul class="space-y-2 text-sm opacity-70">
-                    <li>
-                        <a href="https://github.com/samBiggs32/KatiesGarden"
-                           class="hover:opacity-100 hover:text-base-100 transition-opacity inline-flex items-center gap-1.5">
-                            <img src="Images/github.svg" class="h-4 w-4 invert" alt="" aria-hidden="true" />
-                            GitHub
-                        </a>
-                    </li>
+                    <li><a href="/privacy-policy" class="hover:opacity-100 hover:text-base-100 transition-opacity">Privacy Policy</a></li>
+                    <li><a href="/returns" class="hover:opacity-100 hover:text-base-100 transition-opacity">Returns &amp; Refunds</a></li>
+                    <li><a href="/terms" class="hover:opacity-100 hover:text-base-100 transition-opacity">Terms &amp; Conditions</a></li>
                 </ul>
             </div>
         </div>
 
         <!-- Bottom bar -->
         <div class="mt-10 pt-6 border-t border-neutral-content/20 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs opacity-50">
-            <p>&copy; @DateTime.Now.Year Katie's Garden. All rights reserved.</p>
+            <p>&copy; @DateTime.UtcNow.Year Katie's Garden. All rights reserved.</p>
             <p>
                 <a href="tel:+447804784522" class="hover:opacity-100 transition-opacity">07804 784522</a>
                 &nbsp;·&nbsp;
-                <a href="mailto:sales@katiesgarden.uk" class="hover:opacity-100 transition-opacity">sales@katiesgarden.uk</a>
+                <a href="mailto:team@katiesgarden.uk" class="hover:opacity-100 transition-opacity">team@katiesgarden.uk</a>
             </p>
         </div>
     </div>

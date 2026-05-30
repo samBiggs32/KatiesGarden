@@ -15,15 +15,28 @@ public partial class ShopProduct : ComponentBase, IDisposable
     private ProductDetailDto? _product;
     private bool _loading = true;
     private int _activeImage;
+    private int _quantity = 1;
     private string? _toast;
-    private System.Threading.Timer? _toastTimer;
+    private Timer? _toastTimer;
 
     protected override async Task OnParametersSetAsync()
     {
         _loading = true;
         _activeImage = 0;
+        _quantity = 1;
         _product = await ShopService.GetProductAsync(Slug);
         _loading = false;
+    }
+
+    private void IncrementQty()
+    {
+        if (_product?.StockQuantity.HasValue == true && _quantity >= _product.StockQuantity.Value) return;
+        _quantity++;
+    }
+
+    private void DecrementQty()
+    {
+        if (_quantity > 1) _quantity--;
     }
 
     private async Task AddToCartAsync()
@@ -34,20 +47,26 @@ public partial class ShopProduct : ComponentBase, IDisposable
             ProductId = _product.Id,
             ProductName = _product.Name,
             UnitPrice = _product.Price,
-            Quantity = 1,
+            Quantity = _quantity,
             ImageUrl = _product.ImageUrls.FirstOrDefault(),
             CanLocalDeliver = _product.CanLocalDeliver
         });
-        ShowToast($"{_product.Name} added to basket");
+        ShowToast(_quantity > 1
+            ? $"{_quantity}× {_product.Name} added to basket"
+            : $"{_product.Name} added to basket");
+        _quantity = 1;
     }
 
     private void ShowToast(string message)
     {
         _toast = message;
         _toastTimer?.Dispose();
-        _toastTimer = new System.Threading.Timer(_ =>
-            InvokeAsync(() => { _toast = null; StateHasChanged(); }),
-            null, 3000, Timeout.Infinite);
+        _toastTimer = new Timer(_ =>
+        {
+            _toast = null;
+            _ = InvokeAsync(StateHasChanged);
+        }, null, 3000, Timeout.Infinite);
+        StateHasChanged();
     }
 
     public void Dispose() => _toastTimer?.Dispose();
