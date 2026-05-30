@@ -4,54 +4,145 @@
 
 <PageTitle>Checkout — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
-    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Your Details</MudText>
+<div class="max-w-lg mx-auto px-6 py-12">
 
-    <MudForm @ref="_form" Model="_request">
-        <MudGrid>
-            <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="_request.FirstName" Label="First Name" Variant="Variant.Outlined"
-                              Required="true" Class="mb-3" />
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="_request.LastName" Label="Last Name" Variant="Variant.Outlined"
-                              Required="true" Class="mb-3" />
-            </MudItem>
-            <MudItem xs="12">
-                <MudTextField @bind-Value="_request.Email" Label="Email Address" Variant="Variant.Outlined"
-                              InputType="InputType.Email" Required="true" Class="mb-3" />
-            </MudItem>
-            <MudItem xs="12">
-                <MudTextField @bind-Value="_request.Phone" Label="Phone Number" Variant="Variant.Outlined"
-                              Required="true" Class="mb-3" />
-            </MudItem>
+    <!-- Progress indicator -->
+    <div class="flex items-center gap-2 mb-8 text-sm">
+        <span class="text-base-content/40">Basket</span>
+        <i class="fas fa-chevron-right text-xs text-base-content/30" aria-hidden="true"></i>
+        <span class="font-semibold text-primary">Your Details</span>
+        <i class="fas fa-chevron-right text-xs text-base-content/30" aria-hidden="true"></i>
+        <span class="text-base-content/40">Payment</span>
+    </div>
 
-            @if (_deliveryType == "LocalDelivery")
+    <h1 class="font-serif text-3xl font-bold text-base-content mb-6">Your Details</h1>
+
+    <form @onsubmit="SubmitAsync" @onsubmit:preventDefault="true" novalidate class="flex flex-col gap-4">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label pb-1" for="first-name">
+                    <span class="label-text font-medium">First Name <span class="text-error">*</span></span>
+                </label>
+                <input id="first-name" type="text"
+                       class="input input-bordered @(HasError("FirstName") ? "input-error" : "")"
+                       @bind="_request.FirstName"
+                       autocomplete="given-name"
+                       placeholder="Katie" />
+                @if (HasError("FirstName"))
+                {
+                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
+                }
+            </div>
+            <div class="form-control">
+                <label class="label pb-1" for="last-name">
+                    <span class="label-text font-medium">Last Name <span class="text-error">*</span></span>
+                </label>
+                <input id="last-name" type="text"
+                       class="input input-bordered @(HasError("LastName") ? "input-error" : "")"
+                       @bind="_request.LastName"
+                       autocomplete="family-name"
+                       placeholder="Porter" />
+                @if (HasError("LastName"))
+                {
+                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
+                }
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label pb-1" for="email">
+                <span class="label-text font-medium">Email Address <span class="text-error">*</span></span>
+            </label>
+            <input id="email" type="email"
+                   class="input input-bordered @(HasError("Email") ? "input-error" : "")"
+                   @bind="_request.Email"
+                   autocomplete="email"
+                   placeholder="katie@example.com" />
+            @if (HasError("Email"))
             {
-                <MudItem xs="12">
-                    <MudTextField @bind-Value="_request.DeliveryAddress" Label="Delivery Address" Variant="Variant.Outlined"
-                                  Required="true" Lines="2" Class="mb-3" />
-                </MudItem>
-                <MudItem xs="12">
-                    <MudTextField @bind-Value="_request.DeliveryPostcode" Label="Postcode" Variant="Variant.Outlined"
-                                  Required="true" Class="mb-3" />
-                </MudItem>
+                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Email")</span></label>
             }
+        </div>
 
-            <MudItem xs="12">
-                <MudTextField @bind-Value="_request.Notes" Label="Order Notes (optional)" Variant="Variant.Outlined"
-                              Lines="3" Class="mb-3" />
-            </MudItem>
-        </MudGrid>
+        <div class="form-control">
+            <label class="label pb-1" for="phone">
+                <span class="label-text font-medium">Phone Number <span class="text-error">*</span></span>
+            </label>
+            <input id="phone" type="tel"
+                   class="input input-bordered @(HasError("Phone") ? "input-error" : "")"
+                   @bind="_request.Phone"
+                   autocomplete="tel"
+                   placeholder="07800 000000" />
+            @if (HasError("Phone"))
+            {
+                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Phone")</span></label>
+            }
+        </div>
+
+        @if (_deliveryType == "LocalDelivery")
+        {
+            <div class="form-control">
+                <label class="label pb-1" for="address">
+                    <span class="label-text font-medium">Delivery Address <span class="text-error">*</span></span>
+                </label>
+                <textarea id="address"
+                          class="textarea textarea-bordered @(HasError("DeliveryAddress") ? "textarea-error" : "")"
+                          rows="2"
+                          @bind="_request.DeliveryAddress"
+                          autocomplete="street-address"
+                          placeholder="1 Garden Lane, Milverton"></textarea>
+                @if (HasError("DeliveryAddress"))
+                {
+                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryAddress")</span></label>
+                }
+            </div>
+            <div class="form-control">
+                <label class="label pb-1" for="postcode">
+                    <span class="label-text font-medium">Postcode <span class="text-error">*</span></span>
+                </label>
+                <input id="postcode" type="text"
+                       class="input input-bordered @(HasError("DeliveryPostcode") ? "input-error" : "")"
+                       @bind="_request.DeliveryPostcode"
+                       autocomplete="postal-code"
+                       placeholder="TA4 1AB" />
+                @if (HasError("DeliveryPostcode"))
+                {
+                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryPostcode")</span></label>
+                }
+            </div>
+        }
+
+        <div class="form-control">
+            <label class="label pb-1" for="notes">
+                <span class="label-text font-medium">Order Notes <span class="text-base-content/40 font-normal">(optional)</span></span>
+            </label>
+            <textarea id="notes"
+                      class="textarea textarea-bordered"
+                      rows="3"
+                      @bind="_request.Notes"
+                      placeholder="Any special instructions…"></textarea>
+        </div>
 
         @if (_error is not null)
         {
-            <MudAlert Severity="Severity.Error" Class="mb-4">@_error</MudAlert>
+            <div class="alert alert-error" role="alert">
+                <i class="fas fa-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
+                <span>@_error</span>
+            </div>
         }
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                   Size="Size.Large" OnClick="SubmitAsync" Disabled="@_submitting">
-            @(_submitting ? "Preparing payment…" : "Continue to Payment")
-        </MudButton>
-    </MudForm>
-</MudContainer>
+        <button type="submit" class="btn btn-primary btn-lg w-full mt-2" disabled="@_submitting">
+            @if (_submitting)
+            {
+                <span class="loading loading-spinner loading-sm mr-2"></span>
+                <span>Preparing payment…</span>
+            }
+            else
+            {
+                <i class="fas fa-lock mr-2 text-sm" aria-hidden="true"></i>
+                <span>Continue to Payment</span>
+            }
+        </button>
+    </form>
+</div>

@@ -1,55 +1,70 @@
-﻿@inherits LayoutComponentBase
-@using KatiesGarden.Web.Client.Theme
+@inherits LayoutComponentBase
 
 @inject IJSRuntime JSRuntime
 
-<!-- First focusable element in the DOM — keyboard users press Tab once
-     to reach this, then Enter to jump past the navigation. -->
+<!-- Skip navigation — keyboard users press Tab once then Enter to jump past nav -->
 <a class="skip-nav" href="#main-content">Skip to main content</a>
-
-<MudThemeProvider Theme="KatiesGardenTheme.Instance" />
-<MudDialogProvider />
-<MudSnackbarProvider />
 
 <header>
     <NavMenu />
 </header>
 
-<div class="container m-0 p-0" style="max-width: 100%">
-    <!-- tabindex="-1" lets the skip link move focus here programmatically -->
-    <main role="main" id="main-content" tabindex="-1" class="pb-3">
-        @Body
-    </main>
-</div>
+<main role="main" id="main-content" tabindex="-1">
+    @Body
+</main>
 
-<footer class="bd-footer py-4 py-md-5 mt-5 bg-body-tertiary">
-    <div class="container py-4 py-md-5 px-4 px-md-3 text-body-secondary">
-        <div class="row">
-            <div class="col-lg-3 mb-3">
-                <a class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/" aria-label="Bootstrap">
-                    <h5>
-                        <i class="fas fa-seedling d-block me-2" width="40" height="32" title="Katie's Garden"><span class="fs-5 default-font">  Katie's Garden</span></i>
-                    </h5>
-                </a>
-                <ul class="list-unstyled small">
-                    <li class="mb-2">Designed by the many hands of the Porter family, built by Samuel Biggs using <a href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor">.NET Blazor</a></li>
-                    <li class="mb-2">Site Version @version</li>
+<footer class="bg-neutral text-neutral-content mt-16">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+            <!-- Brand -->
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-seedling text-primary text-xl" aria-hidden="true"></i>
+                    <span class="font-serif text-xl text-base-100">Katie's Garden</span>
+                </div>
+                <p class="text-sm opacity-70 leading-relaxed">
+                    Designed by the many hands of the Porter family, built by Samuel Biggs using
+                    <a href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor"
+                       class="underline hover:opacity-100 transition-opacity">.NET Blazor</a>
+                </p>
+                <p class="text-sm opacity-50 mt-1">Site Version @version</p>
+            </div>
+
+            <!-- Links -->
+            <div>
+                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">Links</h6>
+                <ul class="space-y-2 text-sm opacity-70">
+                    <li><a href="/" class="hover:opacity-100 hover:text-base-100 transition-opacity">Home</a></li>
+                    <li><a href="/gallery" class="hover:opacity-100 hover:text-base-100 transition-opacity">Gallery</a></li>
+                    <li><a href="/shop" class="hover:opacity-100 hover:text-base-100 transition-opacity">Shop</a></li>
+                    <li><a href="/contact" class="hover:opacity-100 hover:text-base-100 transition-opacity">Contact</a></li>
                 </ul>
             </div>
-            <div class="col-6 col-lg-2 offset-lg-2 mb-3">
-                <h5>Links</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="/">Home</a></li>
-                    <li class="mb-2"><a href="/gallery">Gallery</a></li>
+
+            <!-- About -->
+            <div>
+                <h6 class="font-semibold text-base-100 mb-3 text-sm uppercase tracking-wider">About</h6>
+                <ul class="space-y-2 text-sm opacity-70">
+                    <li>
+                        <a href="https://github.com/samBiggs32/KatiesGarden"
+                           class="hover:opacity-100 hover:text-base-100 transition-opacity inline-flex items-center gap-1.5">
+                            <img src="Images/github.svg" class="h-4 w-4 invert" alt="" aria-hidden="true" />
+                            GitHub
+                        </a>
+                    </li>
                 </ul>
             </div>
-            <div class="col-6 col-lg-2 offset-lg-2 mb-3">
-                <h5>About</h5>
-                <ul class="list-unstyled">
-                    <li class="mb-2"><a href="/contact">Contact</a></li>
-                    <li class="mb-2"><a href="https://github.com/samBiggs32/KatiesGarden"><img src="Images/github.svg" height="17" alt="Github Logo" /> GitHub</a></li>
-                </ul>
-            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="mt-10 pt-6 border-t border-neutral-content/20 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs opacity-50">
+            <p>&copy; @DateTime.Now.Year Katie's Garden. All rights reserved.</p>
+            <p>
+                <a href="tel:+447804784522" class="hover:opacity-100 transition-opacity">07804 784522</a>
+                &nbsp;·&nbsp;
+                <a href="mailto:sales@katiesgarden.uk" class="hover:opacity-100 transition-opacity">sales@katiesgarden.uk</a>
+            </p>
         </div>
     </div>
 </footer>

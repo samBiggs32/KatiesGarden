@@ -16,7 +16,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task ListOrders_Unauthenticated_Returns401()
     {
-        var response = await fixture.HttpClient.GetAsync("/api/admin/orders");
+        var response = await fixture.HttpClient.GetAsync("/api/manage/orders");
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -27,7 +27,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         var pending = await SeedOrder(OrderStatus.Pending);
         var confirmed = await SeedOrder(OrderStatus.Confirmed);
 
-        var resp = await admin.GetAsync("/api/admin/orders?status=Confirmed");
+        var resp = await admin.GetAsync("/api/manage/orders?status=Confirmed");
         resp.IsSuccessStatusCode.Should().BeTrue();
         var list = await resp.Content.ReadFromJsonAsync<List<OrderSummaryDto>>();
 
@@ -42,7 +42,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         using var admin = fixture.CreateAdminClient();
         var order = await SeedOrder(OrderStatus.Confirmed, includeLine: true);
 
-        var resp = await admin.GetAsync($"/api/admin/orders/{order.Id}");
+        var resp = await admin.GetAsync($"/api/manage/orders/{order.Id}");
         resp.IsSuccessStatusCode.Should().BeTrue();
         var dto = await resp.Content.ReadFromJsonAsync<OrderDetailDto>();
 
@@ -56,7 +56,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
     {
         using var admin = fixture.CreateAdminClient();
 
-        var resp = await admin.GetAsync($"/api/admin/orders/{Guid.NewGuid()}");
+        var resp = await admin.GetAsync($"/api/manage/orders/{Guid.NewGuid()}");
 
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -68,7 +68,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         var order = await SeedOrder(OrderStatus.Pending);
 
         var resp = await admin.PatchAsJsonAsync(
-            $"/api/admin/orders/{order.Id}/status",
+            $"/api/manage/orders/{order.Id}/status",
             new UpdateOrderStatusRequest("Processing"));
         resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -84,7 +84,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         var order = await SeedOrder(OrderStatus.Pending);
 
         var resp = await admin.PatchAsJsonAsync(
-            $"/api/admin/orders/{order.Id}/status",
+            $"/api/manage/orders/{order.Id}/status",
             new UpdateOrderStatusRequest("NotARealStatus"));
 
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -97,7 +97,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         var order = await SeedOrder(OrderStatus.Confirmed);
 
         var resp = await admin.PutAsJsonAsync(
-            $"/api/admin/orders/{order.Id}/notes",
+            $"/api/manage/orders/{order.Id}/notes",
             new { Notes = "Customer prefers Friday collection" });
         resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
 

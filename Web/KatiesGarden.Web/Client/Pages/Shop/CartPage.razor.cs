@@ -2,7 +2,6 @@ using KatiesGarden.Models.Shop;
 using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Services;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
 
 namespace KatiesGarden.Web.Client.Pages.Shop;
 
@@ -11,7 +10,6 @@ public partial class CartPage : ComponentBase, IDisposable
     [Inject] CartService CartService { get; set; } = null!;
     [Inject] ShopService ShopService { get; set; } = null!;
     [Inject] CheckoutService CheckoutService { get; set; } = null!;
-    [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] NavigationManager Navigation { get; set; } = null!;
 
     private List<CartItem> _items = [];
@@ -71,6 +69,9 @@ public partial class CartPage : ComponentBase, IDisposable
         // For now, navigate to checkout detail page where customer enters their info
         Navigation.NavigateTo($"/checkout?delivery={_deliveryType}");
     }
+
+    private void SelectCollection(Microsoft.AspNetCore.Components.ChangeEventArgs _) => _deliveryType = "Collection";
+    private void SelectLocalDelivery(Microsoft.AspNetCore.Components.ChangeEventArgs _) => _deliveryType = "LocalDelivery";
 
     public void Dispose()
     {

@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Brand fonts — set the global defaults (no utility applies a document-wide font). */
+@layer base {
+    html, body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Playfair Display', Georgia, serif;
+    }
+}
+
+/* ── App-shell chrome below is outside the DaisyUI theme system on purpose:
+      it renders before Blazor boots (loading screen) or is global a11y. ── */
+
+:root {
+    --kg-bg: #FDFAF5;
+    --kg-primary: #4A7C59;
+    --kg-text-secondary: #5B7876;
+}
+
+/* Skip navigation — visually hidden until focused by keyboard */
+.skip-nav {
+    position: absolute;
+    transform: translateY(-100%);
+    left: 0;
+    top: 0;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--kg-primary);
+    color: white;
+    font-weight: 600;
+    z-index: 9999;
+    text-decoration: none;
+    transition: transform 0.1s;
+}
+
+.skip-nav:focus {
+    transform: translateY(0);
+}
+
+/* Keyboard focus rings — visible only for keyboard navigation, not mouse clicks */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--kg-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Blazor unhandled-error banner (markup lives in index.html) */
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+/* WASM loading screen (markup lives in index.html, shown before Blazor boots) */
+.app-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 1rem;
+    background-color: var(--kg-bg);
+}
+
+    .app-loading__logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+    }
+
+    .app-loading__title {
+        font-size: 1.25rem;
+        color: var(--kg-primary);
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .app-loading__subtitle {
+        font-size: 0.9rem;
+        color: var(--kg-text-secondary);
+        margin: 0;
+    }

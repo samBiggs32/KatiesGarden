@@ -1,82 +1,200 @@
-﻿@page "/"
+@page "/"
 @using KatiesGarden.Web.Client.Constants
-
+@using KatiesGarden.Web.Client.Models
 @inject HttpClient httpClient
+@implements IDisposable
 
 <PageTitle>Katie's Garden — Garden Services in Milverton, Somerset</PageTitle>
 
-<Carousel />
+<!-- ═══════════════════════════════════════ HERO CAROUSEL ═══════════════════════════════════════ -->
+<section class="relative overflow-hidden bg-neutral h-[clamp(420px,70vh,800px)]"
+         aria-label="Garden photo slideshow"
+         role="region">
 
-<section id="promotional-text" class="m-2 break-banner banner-index">
-    <div class="row">
-        <div class="col-lg-12 col-md-12 text-center break-banner" style="font-size: 1.5em">
-            <p>Garden Services <i class="fas fa-seedling me-4"></i></p>
+    @for (int i = 0; i < Images.Slides.Count; i++)
+    {
+        var slide = Images.Slides[i];
+        var active = i == _currentSlide;
+        <picture class="absolute inset-0 w-full h-full transition-opacity duration-1000 @(active ? "opacity-100" : "opacity-0")">
+            <source type="image/webp" srcset="@slide.WebpSrc" />
+            <img src="@slide.Src"
+                 srcset="@slide.SrcSet"
+                 sizes="100vw"
+                 alt="@slide.Alt"
+                 class="w-full h-full object-cover"
+                 loading="@(i == 0 ? "eager" : "lazy")" />
+        </picture>
+    }
+
+    <!-- Gradient overlay for text legibility — darker scrim through the middle
+         where the headline + subtitle sit, so they stay readable over bright photos -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/35 to-black/65"
+         aria-hidden="true"></div>
+
+    <!-- Overlay text + CTA -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pb-12">
+        <h1 class="font-serif text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.7)] mb-4 leading-tight">
+            Your Garden,<br class="hidden sm:block" /> Our Passion
+        </h1>
+        <p class="text-white text-lg md:text-xl mb-8 max-w-lg font-medium drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
+            Professional garden services in Milverton, Somerset
+        </p>
+        <div class="flex gap-3 flex-wrap justify-center">
+            <a href="/shop" class="btn btn-primary px-8 text-base shadow-lg">
+                <i class="fas fa-basket-shopping mr-2" aria-hidden="true"></i>Explore Our Shop
+            </a>
+            <a href="/contact" class="btn btn-outline text-white border-white hover:bg-white hover:text-neutral px-8 text-base">
+                Get a Free Quote
+            </a>
+        </div>
+    </div>
+
+    <!-- Slide indicator dots -->
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2"
+         aria-hidden="true">
+        @for (int d = 0; d < Images.Slides.Count; d++)
+        {
+            var dot = d;
+            <button class="h-2 rounded-full transition-all duration-300 bg-white @(dot == _currentSlide ? "w-6" : "w-2 opacity-50")"
+                    @onclick="() => GoToSlide(dot)"
+                    aria-label="@($"Slide {dot + 1}")">
+            </button>
+        }
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════ SERVICES STRIP ══════════════════════════════════════ -->
+<section class="py-12 bg-primary/10">
+    <div class="max-w-6xl mx-auto px-6">
+        <p class="text-center text-sm font-semibold uppercase tracking-widest text-primary mb-8 opacity-80">
+            What we do
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+            @foreach (var svc in _services)
+            {
+                <div class="flex flex-col items-center gap-2 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center shadow-sm">
+                        <i class="@svc.Icon text-primary text-xl" aria-hidden="true"></i>
+                    </div>
+                    <span class="text-sm font-medium text-base-content leading-tight">@svc.Label</span>
+                </div>
+            }
         </div>
     </div>
 </section>
-<br />
 
-<section id="garden-jobs-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-7 col-md-7 col-sm-12">
-                <div class="garden-jobs-left">
-                    <div class="garden-jobs-left-text">
-                        <p class="index-paragraph">
-                            Katie's Garden, nestled in the heart of picturesque Milverton, is your trusted local partner for a wide array of garden services. Our team takes pride in enhancing the beauty and functionality of your outdoor space. With a passion for nature and a commitment to excellence, we offer comprehensive garden maintenance services that keep your garden in pristine condition throughout the seasons.
-                        </p>
-                        <div class="garden-jobs-list">
-                            <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
-                                <li><i class="fa fa-check" /> Grounds Maintenance</li>
-                                <li><i class="fa fa-check" /> Woodwork</li>
-                                <li><i class="fa fa-check" /> Weed Control</li>
-                            </ul>
-                            <ul class="history-left-list list-item-mobile w-50" style="margin-bottom: 1rem;">
-                                <li><i class="fa fa-check" /> Grass Cutting</li>
-                                <li><i class="fa fa-check" /> Grounds Clearance</li>
-                                <li><i class="fa fa-check" /> Planting Schemes</li>
-                            </ul>
+<!-- ════════════════════════════════════════ ABOUT SECTION ════════════════════════════════════════ -->
+<section class="py-16 bg-base-100">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            <!-- Text side -->
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-3 opacity-80">
+                    About us
+                </p>
+                <h2 class="font-serif text-3xl md:text-4xl text-base-content font-bold mb-5 leading-tight">
+                    Nurturing Green Spaces<br class="hidden md:block" /> in Somerset
+                </h2>
+                <p class="text-base-content/75 leading-relaxed mb-5 text-justify">
+                    Katie's Garden, nestled in the heart of picturesque Milverton, is your trusted local partner
+                    for a wide array of garden services. With a passion for nature and a commitment to excellence,
+                    we offer comprehensive garden maintenance services that keep your garden in pristine condition
+                    throughout the seasons.
+                </p>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 mb-6">
+                    @foreach (var item in _serviceList)
+                    {
+                        <div class="flex items-center gap-2 text-base-content/80 text-sm">
+                            <i class="fas fa-check-circle text-primary text-xs flex-shrink-0" aria-hidden="true"></i>
+                            <span>@item</span>
                         </div>
-                        <p class="index-paragraph">
-                            Our expertise extends far beyond maintenance. We're also your go-to destination for landscaping that transforms your garden into any desired form. Our design consultations allow us to understand your vision, creating tailored solutions that bring your dream garden to life. Additionally, our team prides itself on our stunning flower arrangements, and our handcrafted woodwork products add a touch of rustic elegance to your outdoor haven. At Katie's Garden, we're dedicated to making your garden dreams a reality, right here in the heart of Somerset.
-                        </p>
-                        <p class="index-paragraph">
-                            Katie's Garden showcases their versatility, commitment, and horticultural expertise, delivering exceptional results in both urban and rural settings, earning praise and trust from satisfied clients from Bristol to the surrounding Taunton area.
-                        </p>
-                    </div>
+                    }
+                </div>
+                <p class="text-base-content/75 leading-relaxed text-justify">
+                    Katie is an industrious and design-driven gardener with decades of experience. She offers
+                    a welcoming initial consultation at no cost, ensuring every garden reflects her client's
+                    unique vision.
+                </p>
+                <div class="mt-6">
+                    <a href="/contact" class="btn btn-primary">
+                        Book a Free Consultation
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-5 col-md-5 col-sm-12">
-                <div class="garden-jobs-right">
-                    <div class="tri-images">
-                        <img src="@(ImagePaths.BasePath + "flower_tall.jpg")" loading="lazy" alt="A canopy of climbing flowers over a pergola" />
-                        <img src="@(ImagePaths.BasePath + "dark_planter_tall.jpg")" loading="lazy" alt="Dark wood planter" />
-                        <img src="@(ImagePaths.BasePath + "flower_2_tall.jpg")" loading="lazy" alt="Pergola and garden path with climbing flowers" />
-                    </div>
-                    <div class="section-title2 garden-jobs-right-title pt-1">
-                        <h3 class="text-center pt-2"><span>Your Garden, Our Passion</span></h3>
-                    </div>
-                    <div class="garden-jobs-right-text">
-                        <p style="text-align: justify;">
-                            Katie is an industrious and design-driven gardener with decades experience tending to and nurturing green spaces, tends to numerous properties in the Taunton area. Her passion for crafting beautiful outdoor spaces is evident in her work. Katie offers a welcoming initial consultation at no cost, ensuring every garden reflects her client's unique vision.
-                        </p>
-                    </div>
-                    <div class="feature-image">
-                        <img sizes="(max-width: 1400px) 100vw"
-                             src="@(ImagePaths.BasePath + "pink_roses_and_chair.jpg")"
-                             srcset="@PinkRosesAndChairSrcSet"
-                             alt="Pink Roses and Chair Flower Arrangement"
-                             loading="lazy">
-                    </div>
+
+            <!-- Image side -->
+            <div class="relative">
+                <div class="rounded-2xl overflow-hidden shadow-xl">
+                    <img sizes="(max-width: 1400px) 100vw"
+                         src="@(ImagePaths.BasePath + "pink_roses_and_chair.jpg")"
+                         srcset="@PinkRosesAndChairSrcSet"
+                         alt="Pink roses and garden chair — a tranquil Somerset garden"
+                         class="w-full h-full object-cover"
+                         loading="lazy" />
+                </div>
+                <!-- Accent badge -->
+                <div class="absolute -bottom-4 -left-4 bg-secondary text-secondary-content rounded-2xl px-5 py-3 shadow-lg hidden sm:block">
+                    <p class="font-serif text-sm font-semibold leading-tight">Free initial</p>
+                    <p class="font-serif text-sm font-semibold leading-tight">consultation</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ═══════════════════════════════════════ GALLERY TEASER ════════════════════════════════════════ -->
+<section class="py-16 bg-base-200">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-10">
+            <p class="text-sm font-semibold uppercase tracking-widest text-primary mb-2 opacity-80">Our work</p>
+            <h2 class="font-serif text-3xl md:text-4xl text-base-content font-bold">Crafted with Care</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="/gallery" class="block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+                <img src="Images/Backgrounds/Carousel/bees_background.jpg"
+                     srcset="Images/Backgrounds/Carousel/bees_background/bees_background_w_200.jpg 200w,
+                             Images/Backgrounds/Carousel/bees_background/bees_background_w_551.jpg 551w,
+                             Images/Backgrounds/Carousel/bees_background/bees_background_w_900.jpg 900w"
+                     sizes="(max-width: 640px) 100vw, 33vw"
+                     alt="Garden flowers attracting pollinators"
+                     class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
+                     loading="lazy" />
+            </a>
+            <a href="/gallery" class="block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+                <img src="Images/Backgrounds/Carousel/planter_background.jpg"
+                     srcset="Images/Backgrounds/Carousel/planter_background/planter_background_w_200.jpg 200w,
+                             Images/Backgrounds/Carousel/planter_background/planter_background_w_694.jpg 694w,
+                             Images/Backgrounds/Carousel/planter_background/planter_background_w_1140.jpg 1140w"
+                     sizes="(max-width: 640px) 100vw, 33vw"
+                     alt="Seasonal planting in handcrafted planters"
+                     class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
+                     loading="lazy" />
+            </a>
+            <a href="/gallery" class="block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+                <img src="Images/Backgrounds/Carousel/hedge_arrangement_background.jpg"
+                     srcset="Images/Backgrounds/Carousel/hedge_arrangement_background/hedge_arrangement_background_w_200.jpg 200w,
+                             Images/Backgrounds/Carousel/hedge_arrangement_background/hedge_arrangement_background_w_772.jpg 772w,
+                             Images/Backgrounds/Carousel/hedge_arrangement_background/hedge_arrangement_background_w_1261.jpg 1261w"
+                     sizes="(max-width: 640px) 100vw, 33vw"
+                     alt="Professionally shaped hedge arrangement"
+                     class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
+                     loading="lazy" />
+            </a>
+        </div>
+        <div class="text-center mt-8">
+            <a href="/gallery" class="btn btn-outline btn-primary">
+                View Full Gallery <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════ NEWSLETTER ════════════════════════════════════════ -->
 <NewsletterSignUp />
 
-<ContactUsPrompt ShowGallery="true" />
+<!-- ══════════════════════════════════════════ CTA ════════════════════════════════════════════ -->
+<ContactUsPrompt />
 
 @code {
     private const string RosesBase = "Images/pink_roses_and_chair/pink_roses_and_chair";
@@ -98,4 +216,46 @@
         $"{RosesBase}_w_1385.jpg 1385w, " +
         $"{RosesBase}_w_1393.jpg 1393w, " +
         $"{RosesBase}_w_1400.jpg 1400w";
+
+    private int _currentSlide;
+    private System.Threading.Timer? _timer;
+
+    private static readonly (string Icon, string Label)[] _services =
+    [
+        ("fas fa-cut",       "Grounds Maintenance"),
+        ("fas fa-hammer",    "Woodwork"),
+        ("fas fa-leaf",      "Weed Control"),
+        ("fas fa-tractor",   "Grass Cutting"),
+        ("fas fa-trash-alt", "Grounds Clearance"),
+        ("fas fa-seedling",  "Planting Schemes"),
+    ];
+
+    private static readonly string[] _serviceList =
+    [
+        "Grounds Maintenance",
+        "Woodwork",
+        "Weed Control",
+        "Grass Cutting",
+        "Grounds Clearance",
+        "Planting Schemes",
+    ];
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Threading.Timer(_ =>
+            InvokeAsync(() =>
+            {
+                _currentSlide = (_currentSlide + 1) % Images.Slides.Count;
+                StateHasChanged();
+            }), null, 5000, 5000);
+    }
+
+    private void GoToSlide(int index)
+    {
+        _currentSlide = index;
+        // Reset timer so current slide gets a full 5 s
+        _timer?.Change(5000, 5000);
+    }
+
+    public void Dispose() => _timer?.Dispose();
 }

@@ -2,14 +2,26 @@
 
 <PageTitle>Order Confirmed — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="py-8 text-center">
-    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Style="font-size:5rem;" Class="mb-4" />
-    <MudText Typo="Typo.h4" Class="mb-4 font-weight-bold">Thank you for your order!</MudText>
-    <MudText Typo="Typo.body1" Class="mb-6">
+<div class="max-w-lg mx-auto px-6 py-20 text-center">
+    <div class="w-20 h-20 rounded-full bg-success/15 flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-check text-success text-4xl" aria-hidden="true"></i>
+    </div>
+
+    <h1 class="font-serif text-4xl font-bold text-base-content mb-4">
+        Thank you for your order!
+    </h1>
+
+    <p class="text-base-content/65 text-lg mb-8 leading-relaxed max-w-sm mx-auto">
         We've received your order and you'll get a confirmation email shortly.
         Katie will be in touch to arrange collection or delivery.
-    </MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/shop">
-        Continue Shopping
-    </MudButton>
-</MudContainer>
+    </p>
+
+    <div class="flex gap-3 justify-center flex-wrap">
+        <a href="/shop" class="btn btn-primary">
+            Continue Shopping
+        </a>
+        <a href="/" class="btn btn-ghost">
+            Return Home
+        </a>
+    </div>
+</div>

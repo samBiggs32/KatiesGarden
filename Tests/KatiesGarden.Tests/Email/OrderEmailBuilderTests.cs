@@ -83,7 +83,7 @@ public class OrderEmailBuilderTests
     public void AdminAlert_IncludesOrderLinkAndCustomerDetails()
     {
         var order = SampleOrder();
-        var email = OrderEmailBuilder.BuildAdminAlert(order, "team@katiesgarden.uk", "https://www.katiesgarden.uk");
+        var email = OrderEmailBuilder.BuildAdminAlert(order, "sales@katiesgarden.uk", "https://www.katiesgarden.uk");
 
         email.BodyText.Should().Contain("https://www.katiesgarden.uk/admin/orders/");
         email.BodyText.Should().Contain(order.Id.ToString());

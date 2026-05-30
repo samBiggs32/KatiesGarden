@@ -1,4 +1,6 @@
 @page "/admin/login"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
+@inject IWebAssemblyHostEnvironment Env
 
 <PageTitle>Admin Login — Katie's Garden</PageTitle>
 
@@ -9,21 +11,34 @@
         <MudText Typo="Typo.body2" Class="mt-1">Sign in to manage Katie's Garden</MudText>
     </div>
 
-    <MudStack Spacing="3">
-        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
-                   StartIcon="@Icons.Custom.Brands.GitHub"
-                   Href="/.auth/login/github?post_login_redirect_uri=/admin">
-            Continue with GitHub
+    @if (Env.IsDevelopment())
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            Running locally — auth is bypassed. Click below to enter the admin area directly.
+        </MudAlert>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Size="Size.Large"
+                   Href="/admin">
+            Enter Admin (Dev Mode)
         </MudButton>
-        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
-                   StartIcon="@Icons.Material.Filled.Email"
-                   Href="/.auth/login/google?post_login_redirect_uri=/admin">
-            Continue with Google
-        </MudButton>
-        <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
-                   StartIcon="@Icons.Custom.Brands.Microsoft"
-                   Href="/.auth/login/aad?post_login_redirect_uri=/admin">
-            Continue with Microsoft
-        </MudButton>
-    </MudStack>
+    }
+    else
+    {
+        <MudStack Spacing="3">
+            <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                       StartIcon="@Icons.Custom.Brands.GitHub"
+                       Href="/.auth/login/github?post_login_redirect_uri=/admin">
+                Continue with GitHub
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                       StartIcon="@Icons.Material.Filled.Email"
+                       Href="/.auth/login/google?post_login_redirect_uri=/admin">
+                Continue with Google
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" FullWidth="true" Size="Size.Large"
+                       StartIcon="@Icons.Custom.Brands.Microsoft"
+                       Href="/.auth/login/aad?post_login_redirect_uri=/admin">
+                Continue with Microsoft
+            </MudButton>
+        </MudStack>
+    }
 </MudContainer>

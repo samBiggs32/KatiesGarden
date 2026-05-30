@@ -5,92 +5,145 @@
 
 <PageTitle>Basket — Katie's Garden</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
-    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Your Basket</MudText>
+<div class="max-w-3xl mx-auto px-6 py-12">
+
+    <h1 class="font-serif text-4xl font-bold text-base-content mb-8">Your Basket</h1>
 
     @if (_items.Count == 0)
     {
-        <MudAlert Severity="Severity.Normal">Your basket is empty. <MudLink Href="/shop">Browse our shop</MudLink></MudAlert>
+        <div class="text-center py-20">
+            <i class="fas fa-basket-shopping text-5xl text-base-content/20 mb-4" aria-hidden="true"></i>
+            <p class="text-base-content/65 mb-4">Your basket is empty.</p>
+            <a href="/shop" class="btn btn-primary">Browse Our Shop</a>
+        </div>
     }
     else
     {
-        <MudList T="string" Class="mb-4">
+        <!-- Line items -->
+        <div class="flex flex-col divide-y divide-base-300 mb-8">
             @foreach (var item in _items)
             {
-                <MudListItem @key="item.ProductId">
-                    <div class="d-flex align-items-center gap-3 w-100">
-                        @if (item.ImageUrl is not null)
-                        {
-                            <img src="@item.ImageUrl" alt="@item.ProductName" style="width:60px; height:60px; object-fit:cover; border-radius:4px;" />
-                        }
-                        <div class="flex-grow-1">
-                            <MudText Typo="Typo.body1">@item.ProductName</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Primary">£@item.UnitPrice.ToString("F2") each</MudText>
-                        </div>
-                        <MudNumericField T="int" Value="@item.Quantity" Min="0" Max="99" Style="width:80px;"
-                                         ValueChanged="@(q => UpdateQuantityAsync(item.ProductId, q))" />
-                        <MudText Typo="Typo.body1" Style="min-width:60px; text-align:right;">£@item.LineTotal.ToString("F2")</MudText>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                       OnClick="@(() => RemoveAsync(item.ProductId))" />
-                    </div>
-                </MudListItem>
-                <MudDivider />
-            }
-        </MudList>
-
-        <!-- Delivery selection -->
-        <MudCard Elevation="2" Class="mb-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6" Class="mb-3">Delivery Method</MudText>
-                <MudRadioGroup T="string" @bind-Value="_deliveryType">
-                    <MudRadio T="string" Value="@("Collection")" Color="Color.Primary">
-                        Click & Collect — Free
-                        @if (_deliverySettings is not null)
-                        {
-                            <MudText Typo="Typo.caption" Class="d-block">@_deliverySettings.CollectionAddress</MudText>
-                        }
-                    </MudRadio>
-                    @if (_allCanDeliver)
+                <div @key="item.ProductId" class="flex items-center gap-3 py-4">
+                    @if (item.ImageUrl is not null)
                     {
-                        <MudRadio T="string" Value="@("LocalDelivery")" Color="Color.Primary">
-                            Local Delivery — @DeliveryFeeLabel
-                            @if (_deliverySettings is not null)
-                            {
-                                <MudText Typo="Typo.caption" Class="d-block">@_deliverySettings.DeliveryAreaDescription</MudText>
-                            }
-                        </MudRadio>
+                        <img src="@item.ImageUrl" alt="@item.ProductName"
+                             class="w-16 h-16 object-cover rounded-lg flex-shrink-0" loading="lazy" />
                     }
                     else
                     {
-                        <MudText Typo="Typo.body2" Color="Color.Warning" Class="mt-2">
-                            One or more items in your basket are collection-only.
-                        </MudText>
+                        <div class="w-16 h-16 bg-base-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-seedling text-primary/30" aria-hidden="true"></i>
+                        </div>
                     }
-                </MudRadioGroup>
-            </MudCardContent>
-        </MudCard>
+
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-base-content truncate">@item.ProductName</p>
+                        <p class="text-primary text-sm">£@item.UnitPrice.ToString("F2") each</p>
+                        <!-- Line total shown here on mobile (the standalone column is hidden < sm) -->
+                        <p class="text-base-content font-semibold text-sm sm:hidden mt-0.5">
+                            £@item.LineTotal.ToString("F2")
+                        </p>
+                    </div>
+
+                    <input type="number"
+                           class="input input-bordered input-sm w-16 text-center flex-shrink-0"
+                           value="@item.Quantity"
+                           min="0" max="99"
+                           @onchange="e => UpdateQuantityAsync(item.ProductId, int.TryParse(e.Value?.ToString(), out var q) ? q : item.Quantity)"
+                           aria-label="@($"Quantity for {item.ProductName}")" />
+
+                    <p class="hidden sm:block text-base-content font-semibold w-16 text-right flex-shrink-0">
+                        £@item.LineTotal.ToString("F2")
+                    </p>
+
+                    <button class="btn btn-ghost btn-sm btn-square text-error hover:bg-error/10 flex-shrink-0"
+                            @onclick="() => RemoveAsync(item.ProductId)"
+                            aria-label="@($"Remove {item.ProductName} from basket")">
+                        <i class="fas fa-trash text-sm" aria-hidden="true"></i>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <!-- Delivery method -->
+        <div class="card bg-base-200 rounded-2xl mb-6">
+            <div class="card-body p-5">
+                <h2 class="font-semibold text-base-content mb-3">Delivery Method</h2>
+
+                <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer hover:bg-base-300 transition-colors @(_deliveryType == "Collection" ? "bg-base-300" : "")">
+                    <input type="radio"
+                           class="radio radio-primary mt-0.5"
+                           name="delivery"
+                           checked="@(_deliveryType == "Collection")"
+                           @onchange="SelectCollection" />
+                    <div>
+                        <p class="font-medium text-base-content">Click &amp; Collect — Free</p>
+                        @if (_deliverySettings is not null)
+                        {
+                            <p class="text-sm text-base-content/60 mt-0.5">@_deliverySettings.CollectionAddress</p>
+                        }
+                    </div>
+                </label>
+
+                @if (_allCanDeliver)
+                {
+                    <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer hover:bg-base-300 transition-colors @(_deliveryType == "LocalDelivery" ? "bg-base-300" : "")">
+                        <input type="radio"
+                               class="radio radio-primary mt-0.5"
+                               name="delivery"
+                               checked="@(_deliveryType == "LocalDelivery")"
+                               @onchange="SelectLocalDelivery" />
+                        <div>
+                            <p class="font-medium text-base-content">Local Delivery — @DeliveryFeeLabel</p>
+                            @if (_deliverySettings is not null)
+                            {
+                                <p class="text-sm text-base-content/60 mt-0.5">@_deliverySettings.DeliveryAreaDescription</p>
+                            }
+                        </div>
+                    </label>
+                }
+                else
+                {
+                    <div class="alert alert-warning text-sm mt-2">
+                        <i class="fas fa-info-circle flex-shrink-0" aria-hidden="true"></i>
+                        <span>One or more items in your basket are collection-only.</span>
+                    </div>
+                }
+            </div>
+        </div>
 
         <!-- Order summary -->
-        <MudPaper Elevation="0" Class="pa-4 mb-4" Style="background:#f5f5f5;">
-            <div class="d-flex justify-space-between mb-2">
-                <MudText>Subtotal</MudText>
-                <MudText>£@_subtotal.ToString("F2")</MudText>
+        <div class="card bg-base-200 rounded-2xl mb-6">
+            <div class="card-body p-5">
+                <div class="flex justify-between text-base-content/70 mb-2 text-sm">
+                    <span>Subtotal</span>
+                    <span>£@_subtotal.ToString("F2")</span>
+                </div>
+                <div class="flex justify-between text-base-content/70 mb-3 text-sm">
+                    <span>Delivery</span>
+                    <span>£@_deliveryFee.ToString("F2")</span>
+                </div>
+                <div class="divider my-0"></div>
+                <div class="flex justify-between mt-3 font-bold text-lg">
+                    <span class="text-base-content">Total</span>
+                    <span class="text-primary">£@((_subtotal + _deliveryFee).ToString("F2"))</span>
+                </div>
             </div>
-            <div class="d-flex justify-space-between mb-2">
-                <MudText>Delivery</MudText>
-                <MudText>£@_deliveryFee.ToString("F2")</MudText>
-            </div>
-            <MudDivider Class="my-2" />
-            <div class="d-flex justify-space-between">
-                <MudText Typo="Typo.h6">Total</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Primary">£@(_subtotal + _deliveryFee).ToString("F2")</MudText>
-            </div>
-        </MudPaper>
+        </div>
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                   FullWidth="true" OnClick="ProceedToCheckoutAsync"
-                   Disabled="@_checkingOut">
-            @(_checkingOut ? "Redirecting to payment…" : "Proceed to Checkout")
-        </MudButton>
+        <button class="btn btn-primary btn-lg w-full"
+                @onclick="ProceedToCheckoutAsync"
+                disabled="@_checkingOut">
+            @if (_checkingOut)
+            {
+                <span class="loading loading-spinner loading-sm mr-2"></span>
+                <span>Redirecting to payment…</span>
+            }
+            else
+            {
+                <i class="fas fa-lock mr-2 text-sm" aria-hidden="true"></i>
+                <span>Proceed to Checkout</span>
+            }
+        </button>
     }
-</MudContainer>
+</div>

@@ -21,7 +21,7 @@ public class AdminProductFunction(
 
     [Function("AdminCreateProduct")]
     public async Task<HttpResponseData> CreateProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/products")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/products")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -65,7 +65,7 @@ public class AdminProductFunction(
 
     [Function("AdminUpdateProduct")]
     public async Task<HttpResponseData> UpdateProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "admin/products/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -100,7 +100,7 @@ public class AdminProductFunction(
 
     [Function("AdminDeleteProduct")]
     public async Task<HttpResponseData> DeleteProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "admin/products/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -119,7 +119,7 @@ public class AdminProductFunction(
 
     [Function("AdminGetProduct")]
     public async Task<HttpResponseData> GetProduct(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/products/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/products/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -156,7 +156,7 @@ public class AdminProductFunction(
 
     [Function("AdminGetCollection")]
     public async Task<HttpResponseData> GetCollection(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/collections/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -183,7 +183,8 @@ public class AdminProductFunction(
                 .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
                 .Select(p => new ProductSummaryDto(
                     p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-                    p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder))
+                    p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+                    p.ImageUrls.Length))
                 .ToList()
         };
 
@@ -194,7 +195,7 @@ public class AdminProductFunction(
 
     [Function("AdminGetCollections")]
     public async Task<HttpResponseData> GetAllCollections(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/collections")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/collections")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -213,7 +214,7 @@ public class AdminProductFunction(
 
     [Function("AdminGetProducts")]
     public async Task<HttpResponseData> GetAllProducts(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/products")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/products")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -222,7 +223,8 @@ public class AdminProductFunction(
             .OrderBy(p => p.DisplayOrder).ThenBy(p => p.Name)
             .Select(p => new ProductSummaryDto(
                 p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-                p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder))
+                p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+                p.ImageUrls.Length))
             .ToListAsync(ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
@@ -232,7 +234,7 @@ public class AdminProductFunction(
 
     [Function("AdminCreateCollection")]
     public async Task<HttpResponseData> CreateCollection(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/collections")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/collections")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -275,7 +277,7 @@ public class AdminProductFunction(
 
     [Function("AdminUpdateCollection")]
     public async Task<HttpResponseData> UpdateCollection(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "admin/collections/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -310,7 +312,7 @@ public class AdminProductFunction(
 
     [Function("AdminDeleteCollection")]
     public async Task<HttpResponseData> DeleteCollection(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "admin/collections/{id:guid}")] HttpRequestData req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "manage/collections/{id:guid}")] HttpRequestData req,
         Guid id)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -329,7 +331,7 @@ public class AdminProductFunction(
 
     [Function("AdminGetDeliverySettings")]
     public async Task<HttpResponseData> GetDeliverySettings(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/delivery-settings")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "manage/delivery-settings")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -345,7 +347,7 @@ public class AdminProductFunction(
 
     [Function("AdminUpdateDeliverySettings")]
     public async Task<HttpResponseData> UpdateDeliverySettings(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "admin/delivery-settings")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "manage/delivery-settings")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
 
@@ -375,7 +377,8 @@ public class AdminProductFunction(
 
     private static ProductSummaryDto ToSummary(Product p) => new(
         p.Id, p.Name, p.Slug, p.Description, p.Price, p.StockQuantity,
-        p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder);
+        p.IsAvailable, p.CanLocalDeliver, p.ImageUrls.FirstOrDefault(), p.DisplayOrder,
+        p.ImageUrls.Length);
 }
 
 internal record DeliverySettingsUpdateRequest(
