@@ -13,7 +13,7 @@ namespace KatiesGarden.Api.Functions;
 public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFunction> logger)
 {
     [Function("PushGetVapidPublicKey")]
-    public HttpResponseData GetVapidPublicKey(
+    public async Task<HttpResponseData> GetVapidPublicKey(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "push/vapid-public-key")] HttpRequestData req)
     {
         if (!SwaAuth.IsAdmin(req)) return req.CreateResponse(HttpStatusCode.Unauthorized);
@@ -21,7 +21,9 @@ public class PushFunction(AppDbContext db, IConfiguration config, ILogger<PushFu
         var key = config["VAPID_PUBLIC_KEY"] ?? string.Empty;
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "text/plain");
-        response.WriteString(key);
+        
+        await response.WriteStringAsync(key);
+
         return response;
     }
 
