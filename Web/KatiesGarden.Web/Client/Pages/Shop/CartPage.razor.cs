@@ -61,6 +61,9 @@ public partial class CartPage : ComponentBase, IDisposable
         await CartService.RemoveAsync(productId);
     }
 
+    private void SelectCollection(ChangeEventArgs _) => _deliveryType = "Collection";
+    private void SelectLocalDelivery(ChangeEventArgs _) => _deliveryType = "LocalDelivery";
+
     private async Task ProceedToCheckoutAsync()
     {
         if (_items.Count == 0) return;
@@ -69,9 +72,6 @@ public partial class CartPage : ComponentBase, IDisposable
         // For now, navigate to checkout detail page where customer enters their info
         Navigation.NavigateTo($"/checkout?delivery={_deliveryType}");
     }
-
-    private void SelectCollection(Microsoft.AspNetCore.Components.ChangeEventArgs _) => _deliveryType = "Collection";
-    private void SelectLocalDelivery(Microsoft.AspNetCore.Components.ChangeEventArgs _) => _deliveryType = "LocalDelivery";
 
     public void Dispose()
     {

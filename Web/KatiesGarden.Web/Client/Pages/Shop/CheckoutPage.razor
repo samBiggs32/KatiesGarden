@@ -2,147 +2,225 @@
 @using KatiesGarden.Models.Shop
 @using KatiesGarden.Web.Client.Models
 
-<PageTitle>Checkout — Katie's Garden</PageTitle>
+<PageTitle>Your Details — Katie's Garden</PageTitle>
 
-<div class="max-w-lg mx-auto px-6 py-12">
-
-    <!-- Progress indicator -->
-    <div class="flex items-center gap-2 mb-8 text-sm">
-        <span class="text-base-content/40">Basket</span>
-        <i class="fas fa-chevron-right text-xs text-base-content/30" aria-hidden="true"></i>
-        <span class="font-semibold text-primary">Your Details</span>
-        <i class="fas fa-chevron-right text-xs text-base-content/30" aria-hidden="true"></i>
-        <span class="text-base-content/40">Payment</span>
+<!-- Progress breadcrumb -->
+<div class="bg-base-200 border-b border-base-300">
+    <div class="max-w-4xl mx-auto px-4 py-3">
+        <ol class="flex items-center gap-2 text-sm">
+            <li class="flex items-center gap-1 text-base-content/50">
+                <span class="w-5 h-5 rounded-full bg-base-300 text-base-content/50 flex items-center justify-center text-xs font-medium">1</span>
+                <a href="/cart" class="hover:text-primary transition-colors">Basket</a>
+            </li>
+            <li class="text-base-content/30">›</li>
+            <li class="flex items-center gap-1 text-primary font-medium">
+                <span class="w-5 h-5 rounded-full bg-primary text-primary-content flex items-center justify-center text-xs font-medium">2</span>
+                Your Details
+            </li>
+            <li class="text-base-content/30">›</li>
+            <li class="flex items-center gap-1 text-base-content/40">
+                <span class="w-5 h-5 rounded-full bg-base-300 text-base-content/40 flex items-center justify-center text-xs font-medium">3</span>
+                Payment
+            </li>
+        </ol>
     </div>
+</div>
 
-    <h1 class="font-serif text-3xl font-bold text-base-content mb-6">Your Details</h1>
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="font-serif text-3xl font-semibold text-base-content mb-8">Your Details</h1>
 
-    <form @onsubmit="SubmitAsync" @onsubmit:preventDefault="true" novalidate class="flex flex-col gap-4">
+    <div class="flex flex-col lg:flex-row gap-8">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="form-control">
-                <label class="label pb-1" for="first-name">
-                    <span class="label-text font-medium">First Name <span class="text-error">*</span></span>
-                </label>
-                <input id="first-name" type="text"
-                       class="input input-bordered @(HasError("FirstName") ? "input-error" : "")"
-                       @bind="_request.FirstName"
-                       autocomplete="given-name"
-                       placeholder="Katie" />
-                @if (HasError("FirstName"))
-                {
-                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
-                }
+        <!-- ── Details form ─────────────────────────────────────────── -->
+        <div class="flex-1 min-w-0">
+
+            @if (_error is not null)
+            {
+                <div role="alert" class="alert alert-error mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>@_error</span>
+                </div>
+            }
+
+            <!-- Personal info -->
+            <div class="card bg-base-100 border border-base-300 shadow-sm mb-5">
+                <div class="card-body gap-4">
+                    <h2 class="card-title text-base font-semibold text-base-content/70 uppercase tracking-wide text-sm">Personal Information</h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label pb-1"><span class="label-text font-medium">First Name <span class="text-error">*</span></span></label>
+                            <input type="text" @bind="_request.FirstName" placeholder="Katie"
+                                   class="input input-bordered @(HasError("FirstName") ? "input-error" : "")" />
+                            @if (HasError("FirstName"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("FirstName")</span></label>
+                            }
+                        </div>
+                        <div class="form-control">
+                            <label class="label pb-1"><span class="label-text font-medium">Last Name <span class="text-error">*</span></span></label>
+                            <input type="text" @bind="_request.LastName" placeholder="Porter"
+                                   class="input input-bordered @(HasError("LastName") ? "input-error" : "")" />
+                            @if (HasError("LastName"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label pb-1"><span class="label-text font-medium">Email Address <span class="text-error">*</span></span></label>
+                        <input type="email" @bind="_request.Email" placeholder="katie@example.com"
+                               class="input input-bordered @(HasError("Email") ? "input-error" : "")" />
+                        @if (HasError("Email"))
+                        {
+                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Email")</span></label>
+                        }
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label pb-1"><span class="label-text font-medium">Phone Number <span class="text-error">*</span></span></label>
+                        <input type="tel" @bind="_request.Phone" placeholder="07700 900000"
+                               class="input input-bordered @(HasError("Phone") ? "input-error" : "")" />
+                        @if (HasError("Phone"))
+                        {
+                            <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Phone")</span></label>
+                        }
+                    </div>
+                </div>
             </div>
-            <div class="form-control">
-                <label class="label pb-1" for="last-name">
-                    <span class="label-text font-medium">Last Name <span class="text-error">*</span></span>
-                </label>
-                <input id="last-name" type="text"
-                       class="input input-bordered @(HasError("LastName") ? "input-error" : "")"
-                       @bind="_request.LastName"
-                       autocomplete="family-name"
-                       placeholder="Porter" />
-                @if (HasError("LastName"))
+
+            <!-- Delivery address (LocalDelivery only) -->
+            @if (_deliveryType == "LocalDelivery")
+            {
+                <div class="card bg-base-100 border border-base-300 shadow-sm mb-5">
+                    <div class="card-body gap-4">
+                        <h2 class="card-title text-base font-semibold text-base-content/70 uppercase tracking-wide text-sm">Delivery Address</h2>
+
+                        <div class="form-control">
+                            <label class="label pb-1"><span class="label-text font-medium">Street Address <span class="text-error">*</span></span></label>
+                            <textarea @bind="_request.DeliveryAddress" rows="2" placeholder="12 Rose Cottage Lane&#10;Milverton"
+                                      class="textarea textarea-bordered @(HasError("DeliveryAddress") ? "textarea-error" : "")"></textarea>
+                            @if (HasError("DeliveryAddress"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryAddress")</span></label>
+                            }
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label pb-1"><span class="label-text font-medium">Postcode <span class="text-error">*</span></span></label>
+                            <input type="text" @bind="_request.DeliveryPostcode" placeholder="TA4 1AA"
+                                   class="input input-bordered w-40 @(HasError("DeliveryPostcode") ? "input-error" : "")" />
+                            @if (HasError("DeliveryPostcode"))
+                            {
+                                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryPostcode")</span></label>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Order notes -->
+            <div class="card bg-base-100 border border-base-300 shadow-sm mb-6">
+                <div class="card-body gap-3">
+                    <h2 class="card-title text-base font-semibold text-base-content/70 uppercase tracking-wide text-sm">Order Notes <span class="font-normal normal-case text-base-content/40">(optional)</span></h2>
+                    <div class="form-control">
+                        <textarea @bind="_request.Notes" rows="3"
+                                  placeholder="Any special instructions, preferred collection time, or other notes…"
+                                  class="textarea textarea-bordered"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg w-full gap-2" @onclick="SubmitAsync" disabled="@_submitting">
+                @if (_submitting)
                 {
-                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("LastName")</span></label>
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span>Preparing payment…</span>
                 }
+                else
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span>Continue to Payment</span>
+                }
+            </button>
+
+            <p class="text-xs text-base-content/50 text-center mt-3">
+                You'll be taken to Stripe's secure payment page. We never store your card details.
+            </p>
+        </div>
+
+        <!-- ── Order summary ─────────────────────────────────────────── -->
+        <div class="w-full lg:w-80 shrink-0">
+            <div class="card bg-base-200 border border-base-300 shadow-sm sticky top-4">
+                <div class="card-body gap-4">
+                    <h2 class="card-title text-base font-semibold">Order Summary</h2>
+
+                    @if (_cartItems.Count == 0)
+                    {
+                        <p class="text-sm text-base-content/50">Loading…</p>
+                    }
+                    else
+                    {
+                        <ul class="divide-y divide-base-300 -mx-2">
+                            @foreach (var item in _cartItems)
+                            {
+                                <li class="flex items-center gap-3 py-3 px-2">
+                                    @if (item.ImageUrl is not null)
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.ProductName"
+                                             class="w-12 h-12 rounded-lg object-cover shrink-0" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-12 h-12 rounded-lg bg-base-300 shrink-0 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    }
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-base-content leading-tight truncate">@item.ProductName</p>
+                                        <p class="text-xs text-base-content/50">Qty @item.Quantity × £@item.UnitPrice.ToString("F2")</p>
+                                    </div>
+                                    <span class="text-sm font-medium text-base-content shrink-0">£@item.LineTotal.ToString("F2")</span>
+                                </li>
+                            }
+                        </ul>
+
+                        <div class="border-t border-base-300 pt-3 space-y-2">
+                            <div class="flex justify-between text-sm text-base-content/70">
+                                <span>Subtotal</span>
+                                <span>£@_subtotal.ToString("F2")</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-base-content/70">
+                                <span>Delivery</span>
+                                <span>@(_deliveryType == "LocalDelivery" ? $"£{_deliveryFee:F2}" : "Free (Click & Collect)")</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-base-300 pt-3 flex justify-between font-semibold text-base-content">
+                            <span>Total</span>
+                            <span class="text-primary text-lg">£@((_subtotal + _deliveryFee).ToString("F2"))</span>
+                        </div>
+
+                        <div class="badge badge-outline badge-sm self-start gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            @(_deliveryType == "LocalDelivery" ? "Local Delivery" : "Click & Collect — Milverton")
+                        </div>
+                    }
+
+                    <a href="/cart" class="btn btn-ghost btn-sm w-full mt-1">← Edit basket</a>
+                </div>
             </div>
         </div>
 
-        <div class="form-control">
-            <label class="label pb-1" for="email">
-                <span class="label-text font-medium">Email Address <span class="text-error">*</span></span>
-            </label>
-            <input id="email" type="email"
-                   class="input input-bordered @(HasError("Email") ? "input-error" : "")"
-                   @bind="_request.Email"
-                   autocomplete="email"
-                   placeholder="katie@example.com" />
-            @if (HasError("Email"))
-            {
-                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Email")</span></label>
-            }
-        </div>
-
-        <div class="form-control">
-            <label class="label pb-1" for="phone">
-                <span class="label-text font-medium">Phone Number <span class="text-error">*</span></span>
-            </label>
-            <input id="phone" type="tel"
-                   class="input input-bordered @(HasError("Phone") ? "input-error" : "")"
-                   @bind="_request.Phone"
-                   autocomplete="tel"
-                   placeholder="07800 000000" />
-            @if (HasError("Phone"))
-            {
-                <label class="label pt-1"><span class="label-text-alt text-error">@GetError("Phone")</span></label>
-            }
-        </div>
-
-        @if (_deliveryType == "LocalDelivery")
-        {
-            <div class="form-control">
-                <label class="label pb-1" for="address">
-                    <span class="label-text font-medium">Delivery Address <span class="text-error">*</span></span>
-                </label>
-                <textarea id="address"
-                          class="textarea textarea-bordered @(HasError("DeliveryAddress") ? "textarea-error" : "")"
-                          rows="2"
-                          @bind="_request.DeliveryAddress"
-                          autocomplete="street-address"
-                          placeholder="1 Garden Lane, Milverton"></textarea>
-                @if (HasError("DeliveryAddress"))
-                {
-                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryAddress")</span></label>
-                }
-            </div>
-            <div class="form-control">
-                <label class="label pb-1" for="postcode">
-                    <span class="label-text font-medium">Postcode <span class="text-error">*</span></span>
-                </label>
-                <input id="postcode" type="text"
-                       class="input input-bordered @(HasError("DeliveryPostcode") ? "input-error" : "")"
-                       @bind="_request.DeliveryPostcode"
-                       autocomplete="postal-code"
-                       placeholder="TA4 1AB" />
-                @if (HasError("DeliveryPostcode"))
-                {
-                    <label class="label pt-1"><span class="label-text-alt text-error">@GetError("DeliveryPostcode")</span></label>
-                }
-            </div>
-        }
-
-        <div class="form-control">
-            <label class="label pb-1" for="notes">
-                <span class="label-text font-medium">Order Notes <span class="text-base-content/40 font-normal">(optional)</span></span>
-            </label>
-            <textarea id="notes"
-                      class="textarea textarea-bordered"
-                      rows="3"
-                      @bind="_request.Notes"
-                      placeholder="Any special instructions…"></textarea>
-        </div>
-
-        @if (_error is not null)
-        {
-            <div class="alert alert-error" role="alert">
-                <i class="fas fa-exclamation-circle flex-shrink-0" aria-hidden="true"></i>
-                <span>@_error</span>
-            </div>
-        }
-
-        <button type="submit" class="btn btn-primary btn-lg w-full mt-2" disabled="@_submitting">
-            @if (_submitting)
-            {
-                <span class="loading loading-spinner loading-sm mr-2"></span>
-                <span>Preparing payment…</span>
-            }
-            else
-            {
-                <i class="fas fa-lock mr-2 text-sm" aria-hidden="true"></i>
-                <span>Continue to Payment</span>
-            }
-        </button>
-    </form>
+    </div>
 </div>

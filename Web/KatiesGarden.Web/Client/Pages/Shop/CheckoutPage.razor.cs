@@ -1,4 +1,6 @@
 using KatiesGarden.Models.Shop;
+using KatiesGarden.Models.Validators;
+using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -8,37 +10,52 @@ public partial class CheckoutPage : ComponentBase
 {
     [Inject] CartService CartService { get; set; } = null!;
     [Inject] CheckoutService CheckoutService { get; set; } = null!;
+    [Inject] ShopService ShopService { get; set; } = null!;
     [Inject] NavigationManager Navigation { get; set; } = null!;
+
+    private static readonly CheckoutRequestValidator Validator = new();
 
     [SupplyParameterFromQuery] public string? Delivery { get; set; }
 
-    private static readonly CheckoutRequestValidator _validator = new();
-
     private CheckoutRequest _request = new();
+    private List<CartItem> _cartItems = [];
+    private DeliverySettingsDto? _deliverySettings;
     private string _deliveryType = "Collection";
     private bool _submitting;
     private string? _error;
     private Dictionary<string, string> _fieldErrors = [];
+
+    private decimal _subtotal => _cartItems.Sum(i => i.LineTotal);
+    private decimal _deliveryFee => _deliveryType == "LocalDelivery" && _deliverySettings is not null
+        ? (_deliverySettings.FreeDeliveryThreshold.HasValue && _subtotal >= _deliverySettings.FreeDeliveryThreshold.Value
+            ? 0m
+            : _deliverySettings.LocalDeliveryFee)
+        : 0m;
 
     protected override async Task OnInitializedAsync()
     {
         _deliveryType = Delivery ?? "Collection";
         _request.DeliveryType = _deliveryType;
 
-        var items = await CartService.GetItemsAsync();
-        if (items.Count == 0) Navigation.NavigateTo("/cart");
+        _cartItems = (await CartService.GetItemsAsync()).ToList();
+        if (_cartItems.Count == 0) Navigation.NavigateTo("/cart");
+
+        _deliverySettings = await ShopService.GetDeliverySettingsAsync();
     }
+
+    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
+    private string GetError(string field) => _fieldErrors.TryGetValue(field, out var msg) ? msg : string.Empty;
 
     private async Task SubmitAsync()
     {
-        _error = null;
         _fieldErrors = [];
+        _error = null;
 
-        var items = await CartService.GetItemsAsync();
-        _request.Items = items.Select(i => new CartItemRequest { ProductId = i.ProductId, Quantity = i.Quantity }).ToList();
-        _request.DeliveryType = _deliveryType;
+        _request.Items = _cartItems
+            .Select(i => new CartItemRequest { ProductId = i.ProductId, Quantity = i.Quantity })
+            .ToList();
 
-        var result = _validator.Validate(_request);
+        var result = await Validator.ValidateAsync(_request);
         if (!result.IsValid)
         {
             _fieldErrors = result.Errors
@@ -60,7 +77,4 @@ public partial class CheckoutPage : ComponentBase
         await CartService.ClearAsync();
         Navigation.NavigateTo(url, forceLoad: true);
     }
-
-    private bool HasError(string field) => _fieldErrors.ContainsKey(field);
-    private string GetError(string field) => _fieldErrors.TryGetValue(field, out var msg) ? msg : string.Empty;
 }
