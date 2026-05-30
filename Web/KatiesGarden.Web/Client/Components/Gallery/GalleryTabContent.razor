@@ -19,22 +19,33 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
     @foreach (var image in Images)
     {
-        var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
-        var webpSrc = $"{ImagePaths.GalleryBasePath}{System.IO.Path.ChangeExtension(image.FileName, ".webp")}";
-        <figure class="rounded-2xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
-            <picture>
-                <source srcset="@webpSrc" type="image/webp" />
-                <img src="@jpegSrc"
-                     alt="@image.Alt"
-                     title="@image.Title"
-                     class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
-                     loading="lazy" />
-            </picture>
-            @if (!string.IsNullOrEmpty(image.Description))
-            {
-                <figcaption class="sr-only">@image.Description</figcaption>
-            }
-        </figure>
+        if (image.IsPlaceholder)
+        {
+            <div class="rounded-2xl aspect-video bg-base-200 border-2 border-dashed border-base-300 flex flex-col items-center justify-center text-center text-base-content/40 gap-2"
+                 title="@(string.IsNullOrEmpty(image.Title) ? "Photo coming soon" : image.Title)">
+                <i class="fas fa-camera text-3xl" aria-hidden="true"></i>
+                <span class="text-sm font-medium">Photo coming soon</span>
+            </div>
+        }
+        else
+        {
+            var jpegSrc = $"{ImagePaths.GalleryBasePath}{image.FileName}";
+            var webpSrc = $"{ImagePaths.GalleryBasePath}{System.IO.Path.ChangeExtension(image.FileName, ".webp")}";
+            <figure class="rounded-2xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-shadow">
+                <picture>
+                    <source srcset="@webpSrc" type="image/webp" />
+                    <img src="@jpegSrc"
+                         alt="@image.Alt"
+                         title="@image.Title"
+                         class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy" />
+                </picture>
+                @if (!string.IsNullOrEmpty(image.Description))
+                {
+                    <figcaption class="sr-only">@image.Description</figcaption>
+                }
+            </figure>
+        }
     }
 </div>
 
