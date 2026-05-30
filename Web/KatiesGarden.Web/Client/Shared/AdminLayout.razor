@@ -8,8 +8,10 @@
 @using KatiesGarden.Models.Shop
 @using KatiesGarden.Web.Client.Theme
 
-@* Mud providers live here (not in MainLayout) so they only apply to admin pages *@
+@* Mud providers live here (not in MainLayout) so they only apply to admin pages.
+   All four are required — MudPopoverProvider backs MudSelect/MudMenu/MudTooltip/pickers. *@
 <MudThemeProvider Theme="KatiesGardenTheme.Instance" />
+<MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
