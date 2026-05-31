@@ -12,13 +12,15 @@ terraform {
     }
   }
 
-  # Uncomment once you have created a storage account for remote state:
-  # backend "azurerm" {
-  #   resource_group_name  = "katiesgarden-tfstate-rg"
-  #   storage_account_name = "kgtfstate"
-  #   container_name       = "tfstate"
-  #   key                  = "katiesgarden.tfstate"
-  # }
+  # Remote state — encrypted Storage Account, versioning enabled.
+  # Run the runbook at docs/security/runbooks/terraform-remote-state.md before
+  # the first `terraform init -migrate-state` to create the storage account.
+  backend "azurerm" {
+    resource_group_name  = "katiesgarden-tfstate-rg"
+    storage_account_name = "kgtfstate"
+    container_name       = "tfstate"
+    key                  = "katiesgarden.tfstate"
+  }
 }
 
 provider "azurerm" {

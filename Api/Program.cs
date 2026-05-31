@@ -6,9 +6,11 @@ using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Entities;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Services;
+using KatiesGarden.Api.Telemetry;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Shop;
 using KatiesGarden.Models.Validators;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +37,8 @@ var host = new HostBuilder()
         // absent (local dev), live telemetry in production without any code change.
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
+        // Scrub PII (emails, search terms) from telemetry before it leaves the process.
+        services.AddSingleton<ITelemetryInitializer, PiiScrubbingInitializer>();
 
         // Database — AppDbContext is ALWAYS registered so every function that
         // depends on it can be constructed by the DI container. Most functions
@@ -166,6 +170,10 @@ using (var scope = host.Services.CreateScope())
     // __EFMigrationsHistory table created and the InitialSchema row inserted.
     // Bounded by a hard 30-second timeout: an unreachable database must never hang
     // the host long enough for the Functions launcher to kill the process.
+    //
+    // DATABASE_URL_MIGRATE, when set, is a least-privilege connection string for
+    // the kg_migrate role (DDL access). The runtime kg_app role in DATABASE_URL
+    // has DML-only access and cannot run schema changes. See infra/sql/roles.sql.
     var dbUrl = config["DATABASE_URL"];
     if (string.IsNullOrWhiteSpace(dbUrl))
     {
@@ -176,13 +184,33 @@ using (var scope = host.Services.CreateScope())
     {
         try
         {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            await db.Database.MigrateAsync(dbInitTimeout.Token);
-            log.LogInformation("Database schema up to date ({Migrations} migration(s) applied)",
-                (await db.Database.GetAppliedMigrationsAsync(dbInitTimeout.Token)).Count());
+            var migrateUrl = config["DATABASE_URL_MIGRATE"];
+            AppDbContext migrateDb;
+            if (!string.IsNullOrWhiteSpace(migrateUrl))
+            {
+                // Use the DDL-privileged role for schema migrations only
+                var migrateOpts = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseNpgsql(migrateUrl)
+                    .Options;
+                migrateDb = new AppDbContext(migrateOpts);
+                log.LogInformation("Database: using DATABASE_URL_MIGRATE role for schema migration");
+            }
+            else
+            {
+                migrateDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            }
 
+            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await migrateDb.Database.MigrateAsync(dbInitTimeout.Token);
+            log.LogInformation("Database schema up to date ({Migrations} migration(s) applied)",
+                (await migrateDb.Database.GetAppliedMigrationsAsync(dbInitTimeout.Token)).Count());
+
+            // Seed uses the runtime (kg_app) context from DI
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             await CollectionSeeder.SeedAsync(db, log, dbInitTimeout.Token);
+
+            if (!string.IsNullOrWhiteSpace(migrateUrl))
+                await migrateDb.DisposeAsync();
         }
         catch (Exception ex)
         {

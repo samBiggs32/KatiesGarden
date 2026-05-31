@@ -26,6 +26,13 @@ jobs:
       - name: Build Aspire AppHost
         run: dotnet build AppHost/KatiesGarden.AppHost.csproj --configuration Release
 
+      - name: CVE dependency gate
+        run: |
+          OUTPUT=$(dotnet list package --vulnerable --include-transitive 2>&1)
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep -q "has the following vulnerable packages" && echo "ERROR: Vulnerable packages found — fix before merging" && exit 1
+          echo "PASS: No known CVEs in dependency tree"
+
       - name: Run unit tests
         run: dotnet test Tests/KatiesGarden.Tests/KatiesGarden.Tests.csproj --configuration Release --filter "Category!=Integration" --logger "trx;LogFileName=unit-results.trx"
 

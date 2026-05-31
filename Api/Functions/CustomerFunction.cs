@@ -1,5 +1,6 @@
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Api.Helpers;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -66,17 +67,20 @@ public class CustomerFunction(AppDbContext db, ILogger<CustomerFunction> logger)
         var ct = req.FunctionContext.CancellationToken;
 
         var request = await req.ReadFromJsonAsync<LinkOrderRequest>();
-        if (request is null || string.IsNullOrWhiteSpace(request.OrderNumber) || string.IsNullOrWhiteSpace(request.Email))
-            return await Responses.BadRequest(req, "Order number and email are required.");
+        if (request is null || string.IsNullOrWhiteSpace(request.OrderNumber)
+            || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Total))
+            return await Responses.BadRequest(req, "Order number, email, and order total are required.");
 
         var order = await db.Orders.FirstOrDefaultAsync(
             o => o.OrderNumber == request.OrderNumber &&
                  o.CustomerEmail == request.Email.Trim().ToLowerInvariant(),
             ct);
 
-        if (order is null)
+        // Second factor: the caller must also know the order total. A single generic 404
+        // for any mismatch (missing order, wrong email, or wrong total) prevents using this
+        // endpoint to enumerate order numbers or confirm which emails placed orders.
+        if (order is null || !OrderVerification.TotalMatches(order.Total, request.Total))
         {
-            // Return 404 but don't reveal whether the order number or email is wrong
             logger.LogInformation("Guest order lookup failed for {OrderNumber}", request.OrderNumber);
             return req.CreateResponse(HttpStatusCode.NotFound);
         }
@@ -126,4 +130,4 @@ public class CustomerFunction(AppDbContext db, ILogger<CustomerFunction> logger)
         };
 }
 
-internal record LinkOrderRequest(string OrderNumber, string Email);
+internal record LinkOrderRequest(string OrderNumber, string Email, string? Total);

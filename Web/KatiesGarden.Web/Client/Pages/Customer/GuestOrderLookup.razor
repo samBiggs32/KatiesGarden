@@ -44,9 +44,18 @@
                            class="input input-bordered focus:input-primary" />
                 </div>
 
+                <div class="form-control gap-1">
+                    <label class="label pb-1" for="order-total">
+                        <span class="label-text font-medium">Order total</span>
+                    </label>
+                    <input id="order-total" type="text" @bind="_total" placeholder="£24.99"
+                           class="input input-bordered focus:input-primary" />
+                    <span class="label-text-alt text-base-content/50 pt-1">The total amount you paid, as shown on your confirmation.</span>
+                </div>
+
                 <button class="btn btn-primary w-full @(_searching ? "loading" : "")"
                         @onclick="LookupAsync"
-                        disabled="@(_searching || string.IsNullOrWhiteSpace(_orderNumber) || string.IsNullOrWhiteSpace(_email))">
+                        disabled="@(_searching || string.IsNullOrWhiteSpace(_orderNumber) || string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_total))">
                     @if (_searching)
                     {
                         <span>Searching…</span>
@@ -64,6 +73,7 @@
 @code {
     private string _orderNumber = string.Empty;
     private string _email = string.Empty;
+    private string _total = string.Empty;
     private bool _searching;
     private bool _notFound;
 
@@ -72,7 +82,7 @@
         _notFound = false;
         _searching = true;
 
-        var result = await OrderService.LookupOrderAsync(_orderNumber.Trim(), _email.Trim());
+        var result = await OrderService.LookupOrderAsync(_orderNumber.Trim(), _email.Trim(), _total.Trim());
 
         _searching = false;
 

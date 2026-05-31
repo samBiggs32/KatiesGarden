@@ -176,3 +176,26 @@ variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for katiesgarden.uk — found in the Cloudflare dashboard under the domain's Overview tab."
   type        = string
 }
+
+# ---------------------------------------------------------------------------
+# Key Vault
+# ---------------------------------------------------------------------------
+
+variable "key_vault_name" {
+  description = "Name of the Azure Key Vault (globally unique, 3-24 chars, alphanumeric + hyphens)."
+  type        = string
+  default     = "katiesgarden-kv"
+}
+
+variable "database_url_migrate" {
+  description = "Neon PostgreSQL connection string for the kg_migrate role (DDL only, used at startup for EF migrations)."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "dkim_record_value" {
+  description = "DKIM public key TXT record value provided by your email provider (Brevo). Set after generating a DKIM key in Brevo → Senders & Domains → Authenticate a domain."
+  type        = string
+  default     = ""
+}

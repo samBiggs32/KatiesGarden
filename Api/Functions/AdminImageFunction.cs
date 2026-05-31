@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Configuration;
+using KatiesGarden.Api.Helpers;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -59,6 +60,15 @@ public class AdminImageFunction(
             await buffer.WriteAsync(readBuffer.AsMemory(0, read), ct);
         }
         buffer.Position = 0;
+
+        // Verify the actual file bytes match the declared type — the Content-Type header
+        // is attacker-controlled, so this prevents e.g. a script renamed to .jpg.
+        if (!ImageSignature.Matches(buffer.GetBuffer().AsSpan(0, (int)buffer.Length), bareContentType.ToLowerInvariant()))
+        {
+            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+            await bad.WriteStringAsync("File content does not match a supported image format.");
+            return bad;
+        }
 
         var extension = bareContentType switch
         {

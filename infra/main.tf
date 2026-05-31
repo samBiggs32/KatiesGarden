@@ -10,34 +10,41 @@ resource "azurerm_static_web_app" "main" {
   sku_tier            = "Standard"
   sku_size            = "Standard"
 
+  # System-assigned identity required for Key Vault @Microsoft.KeyVault(...) references
+  identity {
+    type = "SystemAssigned"
+  }
+
   app_settings = {
     SMTP_HOST       = var.smtp_host
     SMTP_PORT       = var.smtp_port
     SMTP_USERNAME   = var.smtp_username
-    SMTP_PASSWORD   = var.smtp_password
     SENDER_EMAIL    = var.smtp_sender_email
     RECIPIENT_EMAIL = var.recipient_email
-    DATABASE_URL    = var.database_url
-    BREVO_API_KEY   = var.brevo_api_key
     BREVO_LIST_ID   = var.brevo_list_id
+    VAPID_PUBLIC_KEY = var.vapid_public_key
+    VAPID_SUBJECT    = var.vapid_subject
+    SITE_URL         = var.site_url
+    AZURE_STORAGE_CONTAINER = "product-images"
 
-    # Store
-    STRIPE_SECRET_KEY              = var.stripe_secret_key
-    STRIPE_WEBHOOK_SECRET          = var.stripe_webhook_secret
-    VAPID_PUBLIC_KEY               = var.vapid_public_key
-    VAPID_PRIVATE_KEY              = var.vapid_private_key
-    VAPID_SUBJECT                  = var.vapid_subject
-    SITE_URL                       = var.site_url
-    AZURE_STORAGE_CONNECTION_STRING = azurerm_storage_account.store.primary_connection_string
-    AZURE_STORAGE_CONTAINER        = "product-images"
+    # OAuth client IDs are not secret (public identifiers)
+    GITHUB_CLIENT_ID    = var.github_client_id
+    GOOGLE_CLIENT_ID    = var.google_client_id
+    MICROSOFT_CLIENT_ID = var.microsoft_client_id
 
-    # OAuth (SWA reads these by name from app settings for built-in auth)
-    GITHUB_CLIENT_ID        = var.github_client_id
-    GITHUB_CLIENT_SECRET    = var.github_client_secret
-    GOOGLE_CLIENT_ID        = var.google_client_id
-    GOOGLE_CLIENT_SECRET    = var.google_client_secret
-    MICROSOFT_CLIENT_ID     = var.microsoft_client_id
-    MICROSOFT_CLIENT_SECRET = var.microsoft_client_secret
+    # Secrets — resolved at runtime from Key Vault; never stored as plaintext.
+    # The SWA managed identity (above) must have Key Vault Secrets User on the vault.
+    DATABASE_URL                    = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url.versionless_id})"
+    DATABASE_URL_MIGRATE            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.database_url_migrate.versionless_id})"
+    SMTP_PASSWORD                   = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.smtp_password.versionless_id})"
+    STRIPE_SECRET_KEY               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.stripe_secret_key.versionless_id})"
+    STRIPE_WEBHOOK_SECRET           = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.stripe_webhook_secret.versionless_id})"
+    BREVO_API_KEY                   = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.brevo_api_key.versionless_id})"
+    VAPID_PRIVATE_KEY               = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.vapid_private_key.versionless_id})"
+    AZURE_STORAGE_CONNECTION_STRING = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.azure_storage_connection_string.versionless_id})"
+    GITHUB_CLIENT_SECRET            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.github_client_secret.versionless_id})"
+    GOOGLE_CLIENT_SECRET            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.google_client_secret.versionless_id})"
+    MICROSOFT_CLIENT_SECRET         = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.microsoft_client_secret.versionless_id})"
   }
 }
 

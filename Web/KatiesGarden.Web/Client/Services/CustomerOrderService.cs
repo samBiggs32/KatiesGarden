@@ -25,12 +25,12 @@ public class CustomerOrderService(HttpClient http)
         catch { return null; }
     }
 
-    public async Task<CustomerOrderDetailDto?> LookupOrderAsync(string orderNumber, string email)
+    public async Task<CustomerOrderDetailDto?> LookupOrderAsync(string orderNumber, string email, string total)
     {
         try
         {
             var response = await http.PostAsJsonAsync("api/customer/link-order",
-                new { orderNumber, email });
+                new { orderNumber, email, total });
 
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
             response.EnsureSuccessStatusCode();

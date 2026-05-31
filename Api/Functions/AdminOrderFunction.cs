@@ -154,6 +154,23 @@ public class AdminOrderFunction(
         return req.CreateResponse(HttpStatusCode.NoContent);
     }
 
+    [Function("AdminAnonymiseOrder")]
+    public async Task<HttpResponseData> Anonymise(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/anonymise")] HttpRequestData req,
+        Guid id)
+    {
+        if (req.RequireAdmin() is { } deny) return deny;
+
+        var ct = req.FunctionContext.CancellationToken;
+        var order = await db.Orders.FindAsync([id], ct);
+        if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.AnonymiseAsync(order, actor, ct);
+
+        return req.CreateResponse(HttpStatusCode.NoContent);
+    }
+
     [Function("AdminRefundOrder")]
     public async Task<HttpResponseData> RefundOrder(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/refund")] HttpRequestData req,

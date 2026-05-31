@@ -1,6 +1,7 @@
 using FluentValidation;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Api.Helpers;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Entities;
 using Microsoft.Azure.Functions.Worker;
@@ -54,7 +55,7 @@ public class SubscribeFunction(
         await SaveToDatabase(email, firstName, ct);
         await AddToBrevo(email, firstName, ct);
 
-        logger.LogInformation("Newsletter subscription: {Email}", email);
+        logger.LogInformation("Newsletter subscription: {EmailHash}", LogRedaction.Hash(email));
         return req.CreateResponse(HttpStatusCode.OK);
     }
 
@@ -69,11 +70,11 @@ public class SubscribeFunction(
         {
             // Idempotent: detach the conflicting entity so the tracker stays clean.
             db.ChangeTracker.Clear();
-            logger.LogInformation("Subscriber {Email} already exists; treated as success", email);
+            logger.LogInformation("Subscriber {EmailHash} already exists; treated as success", LogRedaction.Hash(email));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to save subscriber {Email} to database", email);
+            logger.LogError(ex, "Failed to save subscriber {EmailHash} to database", LogRedaction.Hash(email));
         }
     }
 
@@ -82,7 +83,7 @@ public class SubscribeFunction(
         var brevo = brevoOptions.Value;
         if (!brevo.IsConfigured)
         {
-            logger.LogDebug("Brevo not configured — skipping list sync for {Email}", email);
+            logger.LogDebug("Brevo not configured — skipping list sync for {EmailHash}", LogRedaction.Hash(email));
             return;
         }
 
@@ -105,13 +106,13 @@ public class SubscribeFunction(
             if (!response.IsSuccessStatusCode)
             {
                 var body = await response.Content.ReadAsStringAsync(ct);
-                logger.LogWarning("Brevo returned {Status} for {Email}: {Body}",
-                    (int)response.StatusCode, email, body);
+                logger.LogWarning("Brevo returned {Status} for {EmailHash}: {Body}",
+                    (int)response.StatusCode, LogRedaction.Hash(email), body);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to add {Email} to Brevo list {ListId}", email, brevo.ListId);
+            logger.LogError(ex, "Failed to add {EmailHash} to Brevo list {ListId}", LogRedaction.Hash(email), brevo.ListId);
         }
     }
 

@@ -1,6 +1,7 @@
 using FluentValidation;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Email;
+using KatiesGarden.Api.Helpers;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Email;
 using Microsoft.Azure.Functions.Worker;
@@ -48,12 +49,12 @@ public class ContactFormFunction(
             var message = ContactEmailBuilder.Build(request, smtp.EffectiveSenderEmail, smtp.RecipientEmail);
             await emailSender.SendAsync(message, ct);
 
-            logger.LogInformation("Contact form email sent from {FirstName} {LastName}", request.FirstName, request.LastName);
+            logger.LogInformation("Contact form email sent from {EmailHash}", LogRedaction.Hash(request.EmailAddress));
             return req.CreateResponse(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send contact form email from {EmailAddress}", request.EmailAddress);
+            logger.LogError(ex, "Failed to send contact form email from {EmailHash}", LogRedaction.Hash(request.EmailAddress));
             return await Responses.InternalError(req, "Failed to send message. Please try again later.");
         }
     }
