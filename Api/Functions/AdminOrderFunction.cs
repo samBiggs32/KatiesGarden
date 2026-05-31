@@ -10,6 +10,7 @@ using Microsoft.DurableTask.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Stripe;
+using System.Data;
 using System.Net;
 
 namespace KatiesGarden.Api.Functions;
@@ -190,8 +191,19 @@ public class AdminOrderFunction(
             OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection,
             OrderStatus.Dispatched, OrderStatus.Delivered
         };
+
+        // Open a RepeatableRead transaction and re-check order status inside it.
+        // This prevents two concurrent refund requests from both proceeding when
+        // the order is still showing Confirmed to both — the second SaveChanges
+        // will conflict and roll back.
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, ct);
+        await db.Entry(order).ReloadAsync(ct);
+
         if (!refundableStatuses.Contains(order.Status))
             return await Responses.BadRequest(req, $"Orders with status '{order.Status}' cannot be refunded.");
+
+        var previousStatus = order.Status;
+        bool alreadyRefunded = false;
 
         try
         {
@@ -200,17 +212,26 @@ public class AdminOrderFunction(
                 PaymentIntent = order.StripePaymentIntentId
             }, cancellationToken: ct);
         }
+        catch (StripeException ex) when (ex.StripeError?.Code == "charge_already_refunded")
+        {
+            // Payment was already refunded (e.g. a previous attempt succeeded in Stripe
+            // but the DB save failed). Treat as success so the DB can be reconciled.
+            alreadyRefunded = true;
+            logger.LogWarning("Stripe reports order {OrderNumber} was already refunded; reconciling DB", order.OrderNumber);
+        }
         catch (StripeException ex)
         {
+            await tx.RollbackAsync(ct);
             logger.LogError(ex, "Stripe refund failed for order {OrderNumber}", order.OrderNumber);
             return await Responses.BadRequest(req, $"Stripe refund failed: {ex.StripeError?.Message ?? ex.Message}");
         }
 
-        var previousStatus = order.Status;
         order.Status = OrderStatus.Refunded;
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
-        logger.LogInformation("Order {OrderNumber} refunded via Stripe", order.OrderNumber);
+        await tx.CommitAsync(ct);
+        logger.LogInformation("Order {OrderNumber} refunded via Stripe{Already}", order.OrderNumber,
+            alreadyRefunded ? " (already refunded — DB reconciled)" : "");
 
         var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         await orderService.RecordTransitionAsync(order, previousStatus, nameof(OrderStatus.Refunded),

@@ -93,7 +93,7 @@ public partial class ProductEditor
         _uploadError = string.Empty;
         _uploading = true;
 
-        const long maxSize = 5 * 1024 * 1024;
+        var maxSize = KatiesGarden.Models.Constants.MaxImageFileSizeBytes;
         var remaining = 6 - _imageUrls.Count;
         var files = e.GetMultipleFiles(remaining);
 
@@ -138,62 +138,66 @@ public partial class ProductEditor
         }
 
         _saving = true;
-
-        if (_isNew)
+        try
         {
-            var request = new CreateProductRequest
+            if (_isNew)
             {
-                Name = _name.Trim(),
-                Description = _description.Trim(),
-                Price = _price,
-                StockQuantity = _trackStock ? _stockQuantity : null,
-                IsAvailable = _isAvailable,
-                CanLocalDeliver = _canLocalDeliver,
-                ImageUrls = _imageUrls.ToArray(),
-                CollectionId = _collectionId,
-                HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
-                DisplayOrder = _displayOrder
-            };
+                var request = new CreateProductRequest
+                {
+                    Name = _name.Trim(),
+                    Description = _description.Trim(),
+                    Price = _price,
+                    StockQuantity = _trackStock ? _stockQuantity : null,
+                    IsAvailable = _isAvailable,
+                    CanLocalDeliver = _canLocalDeliver,
+                    ImageUrls = _imageUrls.ToArray(),
+                    CollectionId = _collectionId,
+                    HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
+                    DisplayOrder = _displayOrder
+                };
 
-            var result = await AdminProductService.CreateProductAsync(request);
-            if (result is not null)
-            {
-                Snackbar.Add("Product created", Severity.Success);
-                Navigation.NavigateTo("/admin/products");
+                var result = await AdminProductService.CreateProductAsync(request);
+                if (result is not null)
+                {
+                    Snackbar.Add("Product created", Severity.Success);
+                    Navigation.NavigateTo("/admin/products");
+                }
+                else
+                {
+                    _saveError = "Failed to create product. Please try again.";
+                }
             }
             else
             {
-                _saveError = "Failed to create product. Please try again.";
+                var request = new UpdateProductRequest
+                {
+                    Name = _name.Trim(),
+                    Description = _description.Trim(),
+                    Price = _price,
+                    StockQuantity = _trackStock ? _stockQuantity : null,
+                    IsAvailable = _isAvailable,
+                    CanLocalDeliver = _canLocalDeliver,
+                    ImageUrls = _imageUrls.ToArray(),
+                    CollectionId = _collectionId,
+                    HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
+                    DisplayOrder = _displayOrder
+                };
+
+                var result = await AdminProductService.UpdateProductAsync(Id!.Value, request);
+                if (result is not null)
+                {
+                    Snackbar.Add("Product saved", Severity.Success);
+                    Navigation.NavigateTo("/admin/products");
+                }
+                else
+                {
+                    _saveError = "Failed to save product. Please try again.";
+                }
             }
         }
-        else
+        finally
         {
-            var request = new UpdateProductRequest
-            {
-                Name = _name.Trim(),
-                Description = _description.Trim(),
-                Price = _price,
-                StockQuantity = _trackStock ? _stockQuantity : null,
-                IsAvailable = _isAvailable,
-                CanLocalDeliver = _canLocalDeliver,
-                ImageUrls = _imageUrls.ToArray(),
-                CollectionId = _collectionId,
-                HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
-                DisplayOrder = _displayOrder
-            };
-
-            var result = await AdminProductService.UpdateProductAsync(Id!.Value, request);
-            if (result is not null)
-            {
-                Snackbar.Add("Product saved", Severity.Success);
-                Navigation.NavigateTo("/admin/products");
-            }
-            else
-            {
-                _saveError = "Failed to save product. Please try again.";
-            }
+            _saving = false;
         }
-
-        _saving = false;
     }
 }

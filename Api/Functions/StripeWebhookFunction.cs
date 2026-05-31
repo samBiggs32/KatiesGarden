@@ -140,7 +140,7 @@ public class StripeWebhookFunction(
             db.StripeProcessedEvents.Add(new StripeProcessedEvent { EventId = stripeEvent.Id });
             await db.SaveChangesAsync(ct);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation })
         {
             logger.LogInformation("Stripe event {EventId} already recorded (concurrent delivery)", stripeEvent.Id);
         }

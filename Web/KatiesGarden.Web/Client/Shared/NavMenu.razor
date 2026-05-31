@@ -225,7 +225,7 @@
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
     private void CloseNavMenu() => collapseNavMenu = true;
 
-    private async void ToggleSearch()
+    private async Task ToggleSearch()
     {
         _searchOpen = !_searchOpen;
         if (_searchOpen)

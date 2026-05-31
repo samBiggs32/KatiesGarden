@@ -32,16 +32,11 @@ public class MigrationIntegrationTests(PostgresFixture fixture)
 
         await db.Database.MigrateAsync();
 
-        // Verify a cross-section of tables exist via EF queries (would throw on missing tables)
-        var subCount = await db.Subscribers.CountAsync();
-        var orderCount = await db.Orders.CountAsync();
-        var auditCount = await db.AuditLogs.CountAsync();
-        var stripeCount = await db.StripeProcessedEvents.CountAsync();
-
-        subCount.Should().BeGreaterThanOrEqualTo(0);
-        orderCount.Should().BeGreaterThanOrEqualTo(0);
-        auditCount.Should().BeGreaterThanOrEqualTo(0);
-        stripeCount.Should().BeGreaterThanOrEqualTo(0);
+        // Verify a cross-section of tables exist — each CountAsync throws if the table is missing
+        await db.Subscribers.CountAsync();
+        await db.Orders.CountAsync();
+        await db.AuditLogs.CountAsync();
+        await db.StripeProcessedEvents.CountAsync();
     }
 
     [Fact]

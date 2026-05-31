@@ -75,7 +75,7 @@ public partial class CollectionEditor
         _uploadError = string.Empty;
         _uploading = true;
 
-        const long maxSize = 5 * 1024 * 1024;
+        var maxSize = KatiesGarden.Models.Constants.MaxImageFileSizeBytes;
         var file = e.File;
 
         if (file.Size > maxSize)
@@ -117,55 +117,59 @@ public partial class CollectionEditor
         }
 
         _saving = true;
-
-        if (_isNew)
+        try
         {
-            var request = new CreateCollectionRequest
+            if (_isNew)
             {
-                Title = _title.Trim(),
-                Description = _description.Trim(),
-                CoverImageUrl = _coverImageUrl,
-                StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
-                EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
-                DisplayOrder = _displayOrder
-            };
+                var request = new CreateCollectionRequest
+                {
+                    Title = _title.Trim(),
+                    Description = _description.Trim(),
+                    CoverImageUrl = _coverImageUrl,
+                    StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
+                    EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
+                    DisplayOrder = _displayOrder
+                };
 
-            var result = await AdminProductService.CreateCollectionAsync(request);
-            if (result is not null)
-            {
-                Snackbar.Add("Collection created", Severity.Success);
-                Navigation.NavigateTo("/admin/collections");
+                var result = await AdminProductService.CreateCollectionAsync(request);
+                if (result is not null)
+                {
+                    Snackbar.Add("Collection created", Severity.Success);
+                    Navigation.NavigateTo("/admin/collections");
+                }
+                else
+                {
+                    _saveError = "Failed to create collection. Please try again.";
+                }
             }
             else
             {
-                _saveError = "Failed to create collection. Please try again.";
+                var request = new UpdateCollectionRequest
+                {
+                    Title = _title.Trim(),
+                    Description = _description.Trim(),
+                    CoverImageUrl = _coverImageUrl,
+                    IsActive = _isActive,
+                    StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
+                    EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
+                    DisplayOrder = _displayOrder
+                };
+
+                var result = await AdminProductService.UpdateCollectionAsync(Id!.Value, request);
+                if (result is not null)
+                {
+                    Snackbar.Add("Collection saved", Severity.Success);
+                    Navigation.NavigateTo("/admin/collections");
+                }
+                else
+                {
+                    _saveError = "Failed to save collection. Please try again.";
+                }
             }
         }
-        else
+        finally
         {
-            var request = new UpdateCollectionRequest
-            {
-                Title = _title.Trim(),
-                Description = _description.Trim(),
-                CoverImageUrl = _coverImageUrl,
-                IsActive = _isActive,
-                StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
-                EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
-                DisplayOrder = _displayOrder
-            };
-
-            var result = await AdminProductService.UpdateCollectionAsync(Id!.Value, request);
-            if (result is not null)
-            {
-                Snackbar.Add("Collection saved", Severity.Success);
-                Navigation.NavigateTo("/admin/collections");
-            }
-            else
-            {
-                _saveError = "Failed to save collection. Please try again.";
-            }
+            _saving = false;
         }
-
-        _saving = false;
     }
 }

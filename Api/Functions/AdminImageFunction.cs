@@ -3,6 +3,7 @@ using Azure.Storage.Blobs.Models;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Helpers;
+using KatiesGarden.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -18,14 +19,12 @@ public class AdminImageFunction(
 {
     private static readonly HashSet<string> AllowedContentTypes =
         ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
 
     [Function("UploadImage")]
     public async Task<HttpResponseData> Upload(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/images")] HttpRequestData req)
     {
-        if (!SwaAuth.IsAdmin(req))
-            return req.CreateResponse(HttpStatusCode.Unauthorized);
+        if (req.RequireAdmin() is { } deny) return deny;
 
         if (blobClient is null)
         {
@@ -51,7 +50,7 @@ public class AdminImageFunction(
         int read;
         while ((read = await req.Body.ReadAsync(readBuffer, ct)) > 0)
         {
-            if (buffer.Length + read > MaxFileSizeBytes)
+            if (buffer.Length + read > Constants.MaxImageFileSizeBytes)
             {
                 var bad = req.CreateResponse(HttpStatusCode.BadRequest);
                 await bad.WriteStringAsync("Image must be 5 MB or smaller.");

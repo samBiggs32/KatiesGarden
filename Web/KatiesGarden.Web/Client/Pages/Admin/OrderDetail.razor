@@ -161,25 +161,34 @@ else
     private async Task UpdateStatusAsync()
     {
         _updatingStatus = true;
-        var response = await AdminOrderService.UpdateStatusAsync(Id, _newStatus);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            _order = _order! with { Status = _newStatus };
-            Snackbar.Add("Status updated — customer notified by email", Severity.Success);
+            var response = await AdminOrderService.UpdateStatusAsync(Id, _newStatus);
+            if (response.IsSuccessStatusCode)
+            {
+                _order = _order! with { Status = _newStatus };
+                Snackbar.Add("Status updated — customer notified by email", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to update status", Severity.Error);
+            }
         }
-        else
-        {
-            Snackbar.Add("Failed to update status", Severity.Error);
-        }
-        _updatingStatus = false;
+        finally { _updatingStatus = false; }
     }
 
     private async Task SaveNotesAsync()
     {
         _savingNotes = true;
-        await AdminOrderService.UpdateNotesAsync(Id, _adminNotes);
-        Snackbar.Add("Notes saved", Severity.Success);
-        _savingNotes = false;
+        try
+        {
+            var response = await AdminOrderService.UpdateNotesAsync(Id, _adminNotes);
+            if (response.IsSuccessStatusCode)
+                Snackbar.Add("Notes saved", Severity.Success);
+            else
+                Snackbar.Add("Failed to save notes", Severity.Error);
+        }
+        finally { _savingNotes = false; }
     }
 
     private async Task RefundOrderAsync()
@@ -192,18 +201,21 @@ else
         if (confirmed is not true) return;
 
         _refunding = true;
-        var response = await AdminOrderService.RefundAsync(Id);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            _order = _order! with { Status = "Refunded" };
-            _newStatus = "Refunded";
-            Snackbar.Add("Refund issued successfully", Severity.Success);
+            var response = await AdminOrderService.RefundAsync(Id);
+            if (response.IsSuccessStatusCode)
+            {
+                _order = _order! with { Status = "Refunded" };
+                _newStatus = "Refunded";
+                Snackbar.Add("Refund issued successfully", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Failed to issue refund. Check Stripe dashboard.", Severity.Error);
+            }
         }
-        else
-        {
-            Snackbar.Add("Failed to issue refund. Check Stripe dashboard.", Severity.Error);
-        }
-        _refunding = false;
+        finally { _refunding = false; }
     }
 
     private static Color StatusColor(string status) => status switch

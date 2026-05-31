@@ -22,8 +22,6 @@ public class SubscribeFunction(
     IOptions<BrevoOptions> brevoOptions,
     ILogger<SubscribeFunction> logger)
 {
-    private const string PostgresUniqueViolation = "23505";
-
     [Function("Subscribe")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe")] HttpRequestData req)
@@ -117,5 +115,5 @@ public class SubscribeFunction(
     }
 
     private static bool IsUniqueViolation(DbUpdateException ex) =>
-        ex.InnerException is PostgresException pg && pg.SqlState == PostgresUniqueViolation;
+        ex.InnerException is PostgresException pg && pg.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation;
 }

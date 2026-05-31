@@ -15,6 +15,7 @@
     [Parameter] public EventCallback OnDismissed { get; set; }
 
     private Timer? _timer;
+    private bool _disposed;
 
     protected override void OnParametersSet()
     {
@@ -22,12 +23,18 @@
         _timer?.Dispose();
         _timer = new Timer(async _ =>
         {
+            if (_disposed) return;
             await InvokeAsync(async () =>
             {
+                if (_disposed) return;
                 await OnDismissed.InvokeAsync();
             });
         }, null, 3000, Timeout.Infinite);
     }
 
-    public void Dispose() => _timer?.Dispose();
+    public void Dispose()
+    {
+        _disposed = true;
+        _timer?.Dispose();
+    }
 }

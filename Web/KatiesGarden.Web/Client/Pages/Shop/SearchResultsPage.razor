@@ -78,7 +78,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var p in _results)
                 {
-                    <a href="/shop/product/@p.Slug"
+                    <a @key="p.Id" href="/shop/product/@p.Slug"
                        class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
                         <figure class="aspect-square overflow-hidden rounded-t-2xl bg-base-200">
                             @if (p.ImageUrl is not null)

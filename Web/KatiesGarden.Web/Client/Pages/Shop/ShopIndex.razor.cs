@@ -10,10 +10,21 @@ public partial class ShopIndex : ComponentBase
 
     private List<CollectionSummaryDto>? _collections;
     private bool _loading = true;
+    private bool _loadError;
 
     protected override async Task OnInitializedAsync()
     {
-        _collections = await ShopService.GetCollectionsAsync();
-        _loading = false;
+        try
+        {
+            _collections = await ShopService.GetCollectionsAsync();
+        }
+        catch
+        {
+            _loadError = true;
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -85,7 +86,7 @@ public class AdminCollectionFunction(
         var ct = req.FunctionContext.CancellationToken;
         CreateCollectionRequest? request;
         try { request = await req.ReadFromJsonAsync<CreateCollectionRequest>(); }
-        catch { return await Responses.BadRequest(req, "Invalid request body."); }
+        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var validation = await createValidator.ValidateAsync(request, ct);
@@ -132,7 +133,7 @@ public class AdminCollectionFunction(
 
         UpdateCollectionRequest? request;
         try { request = await req.ReadFromJsonAsync<UpdateCollectionRequest>(); }
-        catch { return await Responses.BadRequest(req, "Invalid request body."); }
+        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var validation = await updateValidator.ValidateAsync(request, ct);

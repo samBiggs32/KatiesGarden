@@ -66,6 +66,14 @@ public class CreateCollectionRequestValidatorTests
     }
 
     [Fact]
+    public async Task DescriptionExactly2000Chars_Passes()
+    {
+        var req = ValidRequest(); req.Description = new string('a', 2000);
+        var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CreateCollectionRequest.Description));
+    }
+
+    [Fact]
     public async Task EndDateBeforeStartDate_Fails()
     {
         var req = ValidRequest();

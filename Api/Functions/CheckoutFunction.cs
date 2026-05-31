@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -31,7 +32,7 @@ public class CheckoutFunction(
 
         CheckoutRequest? request;
         try { request = await req.ReadFromJsonAsync<CheckoutRequest>(); }
-        catch { return await Responses.BadRequest(req, "Invalid request body."); }
+        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var validation = await validator.ValidateAsync(request, ct);

@@ -10,6 +10,12 @@
 {
     <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
 }
+else if (_loadError)
+{
+    <MudAlert Severity="Severity.Error" role="alert">
+        Could not load delivery settings. Please refresh the page.
+    </MudAlert>
+}
 else if (_settings is not null)
 {
     <MudCard Elevation="2" Style="max-width:600px;">
@@ -58,21 +64,32 @@ else if (_settings is not null)
     private string _collectionAddress = string.Empty;
     private string _collectionInstructions = string.Empty;
     private bool _loading = true;
+    private bool _loadError;
     private bool _saving;
 
     protected override async Task OnInitializedAsync()
     {
-        _settings = await AdminProductService.GetDeliverySettingsAsync();
-        if (_settings is not null)
+        try
         {
-            _fee = _settings.LocalDeliveryFee;
-            _hasFreeThreshold = _settings.FreeDeliveryThreshold.HasValue;
-            _freeThreshold = _settings.FreeDeliveryThreshold ?? 0m;
-            _areaDescription = _settings.DeliveryAreaDescription;
-            _collectionAddress = _settings.CollectionAddress;
-            _collectionInstructions = _settings.CollectionInstructions;
+            _settings = await AdminProductService.GetDeliverySettingsAsync();
+            if (_settings is not null)
+            {
+                _fee = _settings.LocalDeliveryFee;
+                _hasFreeThreshold = _settings.FreeDeliveryThreshold.HasValue;
+                _freeThreshold = _settings.FreeDeliveryThreshold ?? 0m;
+                _areaDescription = _settings.DeliveryAreaDescription;
+                _collectionAddress = _settings.CollectionAddress;
+                _collectionInstructions = _settings.CollectionInstructions;
+            }
         }
-        _loading = false;
+        catch
+        {
+            _loadError = true;
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task SaveAsync()

@@ -9,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -84,7 +85,7 @@ public class AdminProductFunction(
         var ct = req.FunctionContext.CancellationToken;
         CreateProductRequest? request;
         try { request = await req.ReadFromJsonAsync<CreateProductRequest>(); }
-        catch { return await Responses.BadRequest(req, "Invalid request body."); }
+        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var validation = await createValidator.ValidateAsync(request, ct);
@@ -132,7 +133,7 @@ public class AdminProductFunction(
 
         UpdateProductRequest? request;
         try { request = await req.ReadFromJsonAsync<UpdateProductRequest>(); }
-        catch { return await Responses.BadRequest(req, "Invalid request body."); }
+        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var validation = await updateValidator.ValidateAsync(request, ct);
@@ -168,6 +169,9 @@ public class AdminProductFunction(
         var ct = req.FunctionContext.CancellationToken;
         var product = await db.Products.FindAsync([id], ct);
         if (product is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        if (await db.OrderLines.AnyAsync(l => l.ProductId == id, ct))
+            return await Responses.BadRequest(req, "Cannot delete a product that has been ordered. Deactivate it instead.");
 
         db.Products.Remove(product);
         await db.SaveChangesAsync(ct);

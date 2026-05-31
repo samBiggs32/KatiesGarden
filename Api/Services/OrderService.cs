@@ -25,7 +25,7 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
             {
                 await durableClient.RaiseEventAsync(
                     order.OrchestrationInstanceId,
-                    "StatusChanged",
+                    OrchestrationEvents.StatusChanged,
                     new OrderStatusChangedEvent(newStatus, note, actor),
                     ct);
             }
@@ -35,9 +35,11 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
             }
         }
 
+        // actorEmail is null because UserDetails is the OAuth display name/username, not an
+        // email address. Storing the same value in both columns was misleading audit data.
         await audit.LogAsync(
             "StatusChanged", "Order", order.Id.ToString(),
-            actor, actor,
+            actorEmail: null, actorName: actor,
             new { from = previousStatus.ToString(), to = newStatus, note },
             ct);
     }
@@ -46,8 +48,6 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
 
     public async Task AnonymiseAsync(Order order, string actor, CancellationToken ct = default)
     {
-        // Keep a one-way hash of the original email so the erasure can be evidenced in the
-        // audit log without storing the address itself.
         var emailHash = LogRedaction.Hash(order.CustomerEmail);
 
         order.CustomerFirstName = Erased;
@@ -57,18 +57,23 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
         if (order.DeliveryAddress is not null) order.DeliveryAddress = Erased;
         if (order.DeliveryPostcode is not null) order.DeliveryPostcode = Erased;
         if (order.CustomerNotes is not null) order.CustomerNotes = Erased;
-        // Unlink the OAuth identity so the order no longer surfaces in "My Orders".
         order.CustomerId = null;
         order.CustomerIdentityProvider = null;
         order.UpdatedAt = DateTime.UtcNow;
 
+        // Write the PII erasure and its audit record in a single transaction so there can be
+        // no outcome where customer data is gone but the GDPR evidence row is missing.
+        db.AuditLogs.Add(new Models.Entities.AuditLog
+        {
+            Action = "Anonymised",
+            EntityType = "Order",
+            EntityId = order.Id.ToString(),
+            ActorEmail = null,
+            ActorName = actor,
+            Details = System.Text.Json.JsonSerializer.Serialize(
+                new { emailHash, retained = "financial record + order lines" })
+        });
         await db.SaveChangesAsync(ct);
-
-        await audit.LogAsync(
-            "Anonymised", "Order", order.Id.ToString(),
-            actor, actor,
-            new { emailHash, retained = "financial record + order lines" },
-            ct);
 
         logger.LogInformation("Order {OrderNumber} anonymised (GDPR erasure) by {Actor}", order.OrderNumber, actor);
     }

@@ -49,8 +49,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control">
-                            <label class="label pb-1"><span class="label-text font-medium">First Name <span class="text-error">*</span></span></label>
-                            <input type="text" @bind="_request.FirstName" placeholder="Katie"
+                            <label for="checkout-first-name" class="label pb-1"><span class="label-text font-medium">First Name <span class="text-error">*</span></span></label>
+                            <input id="checkout-first-name" type="text" @bind="_request.FirstName" placeholder="Katie"
                                    class="input input-bordered @(HasError("FirstName") ? "input-error" : "")" />
                             @if (HasError("FirstName"))
                             {
@@ -58,8 +58,8 @@
                             }
                         </div>
                         <div class="form-control">
-                            <label class="label pb-1"><span class="label-text font-medium">Last Name <span class="text-error">*</span></span></label>
-                            <input type="text" @bind="_request.LastName" placeholder="Porter"
+                            <label for="checkout-last-name" class="label pb-1"><span class="label-text font-medium">Last Name <span class="text-error">*</span></span></label>
+                            <input id="checkout-last-name" type="text" @bind="_request.LastName" placeholder="Porter"
                                    class="input input-bordered @(HasError("LastName") ? "input-error" : "")" />
                             @if (HasError("LastName"))
                             {
@@ -69,8 +69,8 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label pb-1"><span class="label-text font-medium">Email Address <span class="text-error">*</span></span></label>
-                        <input type="email" @bind="_request.Email" placeholder="katie@example.com"
+                        <label for="checkout-email" class="label pb-1"><span class="label-text font-medium">Email Address <span class="text-error">*</span></span></label>
+                        <input id="checkout-email" type="email" @bind="_request.Email" placeholder="katie@example.com"
                                class="input input-bordered @(HasError("Email") ? "input-error" : "")" />
                         @if (HasError("Email"))
                         {
@@ -79,8 +79,8 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label pb-1"><span class="label-text font-medium">Phone Number <span class="text-error">*</span></span></label>
-                        <input type="tel" @bind="_request.Phone" placeholder="07700 900000"
+                        <label for="checkout-phone" class="label pb-1"><span class="label-text font-medium">Phone Number <span class="text-error">*</span></span></label>
+                        <input id="checkout-phone" type="tel" @bind="_request.Phone" placeholder="07700 900000"
                                class="input input-bordered @(HasError("Phone") ? "input-error" : "")" />
                         @if (HasError("Phone"))
                         {
@@ -98,8 +98,8 @@
                         <h2 class="card-title text-base font-semibold text-base-content/70 uppercase tracking-wide text-sm">Delivery Address</h2>
 
                         <div class="form-control">
-                            <label class="label pb-1"><span class="label-text font-medium">Street Address <span class="text-error">*</span></span></label>
-                            <textarea @bind="_request.DeliveryAddress" rows="2" placeholder="12 Rose Cottage Lane&#10;Milverton"
+                            <label for="checkout-address" class="label pb-1"><span class="label-text font-medium">Street Address <span class="text-error">*</span></span></label>
+                            <textarea id="checkout-address" @bind="_request.DeliveryAddress" rows="2" placeholder="12 Rose Cottage Lane&#10;Milverton"
                                       class="textarea textarea-bordered @(HasError("DeliveryAddress") ? "textarea-error" : "")"></textarea>
                             @if (HasError("DeliveryAddress"))
                             {
@@ -108,8 +108,8 @@
                         </div>
 
                         <div class="form-control">
-                            <label class="label pb-1"><span class="label-text font-medium">Postcode <span class="text-error">*</span></span></label>
-                            <input type="text" @bind="_request.DeliveryPostcode" placeholder="TA4 1AA"
+                            <label for="checkout-postcode" class="label pb-1"><span class="label-text font-medium">Postcode <span class="text-error">*</span></span></label>
+                            <input id="checkout-postcode" type="text" @bind="_request.DeliveryPostcode" placeholder="TA4 1AA"
                                    class="input input-bordered w-40 @(HasError("DeliveryPostcode") ? "input-error" : "")" />
                             @if (HasError("DeliveryPostcode"))
                             {

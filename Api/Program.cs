@@ -182,6 +182,7 @@ using (var scope = host.Services.CreateScope())
     }
     else
     {
+        AppDbContext? ownedMigrateDb = null;
         try
         {
             var migrateUrl = config["DATABASE_URL_MIGRATE"];
@@ -192,7 +193,8 @@ using (var scope = host.Services.CreateScope())
                 var migrateOpts = new DbContextOptionsBuilder<AppDbContext>()
                     .UseNpgsql(migrateUrl)
                     .Options;
-                migrateDb = new AppDbContext(migrateOpts);
+                ownedMigrateDb = new AppDbContext(migrateOpts);
+                migrateDb = ownedMigrateDb;
                 log.LogInformation("Database: using DATABASE_URL_MIGRATE role for schema migration");
             }
             else
@@ -208,13 +210,15 @@ using (var scope = host.Services.CreateScope())
             // Seed uses the runtime (kg_app) context from DI
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             await CollectionSeeder.SeedAsync(db, log, dbInitTimeout.Token);
-
-            if (!string.IsNullOrWhiteSpace(migrateUrl))
-                await migrateDb.DisposeAsync();
         }
         catch (Exception ex)
         {
             log.LogError(ex, "Database migration failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
+        }
+        finally
+        {
+            if (ownedMigrateDb is not null)
+                await ownedMigrateDb.DisposeAsync();
         }
     }
 

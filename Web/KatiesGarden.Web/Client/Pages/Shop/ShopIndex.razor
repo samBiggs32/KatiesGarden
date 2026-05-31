@@ -29,6 +29,12 @@
             }
         </div>
     }
+    else if (_loadError)
+    {
+        <div role="alert" class="alert alert-error max-w-lg mx-auto">
+            <p>Could not load collections. Please try refreshing the page.</p>
+        </div>
+    }
     else if (_collections?.Count > 0)
     {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

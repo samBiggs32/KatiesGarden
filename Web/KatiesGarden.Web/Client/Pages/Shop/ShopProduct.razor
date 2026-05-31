@@ -18,8 +18,8 @@
         {
           "@@context": "https://schema.org/",
           "@@type": "Product",
-          "name": "@_product.Name.Replace("\"", "\\\"")",
-          "description": "@_product.Description.Replace("\"", "\\\"").Replace("\n", " ")",
+          "name": "@_product.Name.Replace("\\", "\\\\").Replace("\"", "\\\"")",
+          "description": "@_product.Description.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", " ")",
           @if (_product.ImageUrls.Length > 0)
           {
               @:"image": "@_product.ImageUrls[0]",

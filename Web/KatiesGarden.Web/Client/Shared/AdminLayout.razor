@@ -8,6 +8,11 @@
 @using KatiesGarden.Models.Shop
 @using KatiesGarden.Web.Client.Theme
 
+<HeadContent>
+    @* MudBlazor CSS loaded here rather than index.html so it's only fetched for admin pages (584 KB). *@
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+</HeadContent>
+
 @* Mud providers live here (not in MainLayout) so they only apply to admin pages.
    All four are required — MudPopoverProvider backs MudSelect/MudMenu/MudTooltip/pickers. *@
 <MudThemeProvider Theme="KatiesGardenTheme.Instance" />

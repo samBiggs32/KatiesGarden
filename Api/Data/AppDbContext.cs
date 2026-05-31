@@ -87,6 +87,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(l => l.ProductName).HasMaxLength(200).IsRequired();
             e.Property(l => l.UnitPrice).HasPrecision(10, 2);
             e.Property(l => l.LineTotal).HasPrecision(10, 2);
+            // Restrict (not Cascade) so deleting a product doesn't silently wipe order history.
+            // The delete endpoint guards this explicitly; the DB constraint is a safety net.
+            e.HasOne<Product>()
+             .WithMany()
+             .HasForeignKey(l => l.ProductId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<DeliverySettings>(e =>

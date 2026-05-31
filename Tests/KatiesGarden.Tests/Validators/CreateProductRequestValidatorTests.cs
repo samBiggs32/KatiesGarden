@@ -124,4 +124,22 @@ public class CreateProductRequestValidatorTests
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
         result.Errors.Should().NotContain(e => e.PropertyName == nameof(CreateProductRequest.HowToBuyNote));
     }
+
+    [Fact]
+    public async Task SevenImages_Fails()
+    {
+        var req = ValidRequest();
+        req.ImageUrls = Enumerable.Range(1, 7).Select(i => $"https://example.com/{i}.jpg").ToArray();
+        var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductRequest.ImageUrls));
+    }
+
+    [Fact]
+    public async Task SixImages_Passes()
+    {
+        var req = ValidRequest();
+        req.ImageUrls = Enumerable.Range(1, 6).Select(i => $"https://example.com/{i}.jpg").ToArray();
+        var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CreateProductRequest.ImageUrls));
+    }
 }

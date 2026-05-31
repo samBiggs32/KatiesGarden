@@ -90,7 +90,8 @@
         <!-- Delivery selection -->
         <div class="card bg-base-100 border border-base-300 shadow-sm mb-5">
             <div class="card-body gap-3">
-                <h2 class="card-title text-base">Delivery Method</h2>
+                <fieldset>
+                <legend class="card-title text-base">Delivery Method</legend>
 
                 <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-colors @(_deliveryType == "Collection" ? "border-primary bg-primary/5" : "border-base-300 hover:border-base-content/20")">
                     <input type="radio" name="delivery" value="Collection" checked="@(_deliveryType == "Collection")"
@@ -127,6 +128,7 @@
                         One or more items are collection-only.
                     </div>
                 }
+                </fieldset>
             </div>
         </div>
 

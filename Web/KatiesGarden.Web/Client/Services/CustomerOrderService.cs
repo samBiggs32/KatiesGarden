@@ -11,13 +11,14 @@ public class CustomerOrderService(HttpClient http)
     public async Task<List<CustomerOrderSummaryDto>> GetMyOrdersAsync() =>
         await http.GetFromJsonAsync<List<CustomerOrderSummaryDto>>("api/customer/orders") ?? [];
 
+    // Returns null only for a genuine 404. Transient/server failures throw so the caller
+    // can distinguish "order not found" from "something went wrong, try again".
     public async Task<CustomerOrderDetailDto?> GetOrderAsync(string orderNumber)
     {
-        try
-        {
-            return await http.GetFromJsonAsync<CustomerOrderDetailDto>($"api/customer/orders/{orderNumber}");
-        }
-        catch { return null; }
+        var response = await http.GetAsync($"api/customer/orders/{orderNumber}");
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CustomerOrderDetailDto>();
     }
 
     // Returns null only for a genuine "not found" (404). Transient/server failures throw so
