@@ -86,7 +86,7 @@ else
                                     </div>
                                 </div>
                                 <div class="text-sm text-base-content/50 mt-1">
-                                    @(order.DeliveryType == "Collection" ? "Click & Collect" : "Local Delivery")
+                                    @(order.DeliveryType == DeliveryType.Collection ? "Click & Collect" : "Local Delivery")
                                 </div>
                             </div>
                         </a>

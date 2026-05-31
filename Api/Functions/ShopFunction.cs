@@ -150,7 +150,7 @@ public class ShopFunction(AppDbContext db, ILogger<ShopFunction> logger)
             order.OrderNumber,
             order.Total,
             order.DeliveryFee,
-            order.DeliveryType.ToString(),
+            order.DeliveryType,
             order.CreatedAt,
             order.Lines.Select(l => new OrderLookupLineDto(l.ProductName, l.Quantity, l.LineTotal)).ToList());
 

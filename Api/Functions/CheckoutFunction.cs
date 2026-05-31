@@ -58,8 +58,7 @@ public class CheckoutFunction(
         // Calculate totals
         var settings = await db.DeliverySettings.FindAsync([1], ct) ?? new DeliverySettings();
         var subtotal = request.Items.Sum(i => products[i.ProductId].Price * i.Quantity);
-        var deliveryType = Enum.Parse<DeliveryType>(request.DeliveryType);
-        var deliveryFee = deliveryType == DeliveryType.Collection
+        var deliveryFee = request.DeliveryType == DeliveryType.Collection
             ? 0m
             : (settings.FreeDeliveryThreshold.HasValue && subtotal >= settings.FreeDeliveryThreshold
                 ? 0m
@@ -82,7 +81,7 @@ public class CheckoutFunction(
             CustomerLastName = request.LastName,
             CustomerEmail = customerEmail,
             CustomerPhone = request.Phone,
-            DeliveryType = deliveryType,
+            DeliveryType = request.DeliveryType,
             DeliveryAddress = request.DeliveryAddress,
             DeliveryPostcode = request.DeliveryPostcode,
             CustomerNotes = request.Notes,

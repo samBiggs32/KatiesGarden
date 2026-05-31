@@ -105,7 +105,7 @@ public class CheckoutApiTests(AspireApiFixture fixture)
         LastName = "Customer",
         Email = $"checkout-{Guid.NewGuid():N}@example.com",
         Phone = "07700 900000",
-        DeliveryType = "Collection",
+        DeliveryType = DeliveryType.Collection,
         Items = []
     };
 }

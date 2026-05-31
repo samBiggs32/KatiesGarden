@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace KatiesGarden.Models.Entities;
 
 public class Order
@@ -28,12 +30,14 @@ public class Order
     public ICollection<OrderStatusHistory> StatusHistory { get; set; } = [];
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum DeliveryType
 {
     Collection,
     LocalDelivery
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OrderStatus
 {
     Pending,

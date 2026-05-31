@@ -1,4 +1,5 @@
 using FluentValidation;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Validators;
 
 namespace KatiesGarden.Models.Shop;
@@ -14,16 +15,13 @@ public class CheckoutRequestValidator : AbstractValidator<CheckoutRequest>
             .Matches(EmailRegex.Pattern).WithMessage("A valid email address is required.")
             .MaximumLength(254);
         RuleFor(x => x.Phone).NotEmpty().WithMessage("Phone number is required.").MaximumLength(30);
-        RuleFor(x => x.DeliveryType)
-            .NotEmpty()
-            .Must(t => t == "Collection" || t == "LocalDelivery")
-            .WithMessage("Delivery type must be Collection or LocalDelivery.");
+        RuleFor(x => x.DeliveryType).IsInEnum().WithMessage("Delivery type must be Collection or LocalDelivery.");
         RuleFor(x => x.DeliveryAddress)
             .NotEmpty().WithMessage("Delivery address is required for local delivery.")
-            .When(x => x.DeliveryType == "LocalDelivery");
+            .When(x => x.DeliveryType == DeliveryType.LocalDelivery);
         RuleFor(x => x.DeliveryPostcode)
             .NotEmpty().WithMessage("Postcode is required for local delivery.")
-            .When(x => x.DeliveryType == "LocalDelivery");
+            .When(x => x.DeliveryType == DeliveryType.LocalDelivery);
         RuleFor(x => x.Items)
             .NotEmpty().WithMessage("Cart cannot be empty.");
         RuleForEach(x => x.Items).ChildRules(item =>

@@ -134,7 +134,7 @@ else
                             <span class="text-primary">£@_order.Total.ToString("F2")</span>
                         </div>
                         <div class="text-sm text-base-content/60">
-                            @(_order.DeliveryType == "Collection"
+                            @(_order.DeliveryType == DeliveryType.Collection
                                 ? "Click & Collect from Milverton"
                                 : $"Delivery to {_order.DeliveryAddress}, {_order.DeliveryPostcode}")
                         </div>
@@ -160,8 +160,8 @@ else
     private Timer? _pollTimer;
     private bool _disposed;
 
-    private static readonly HashSet<string> TerminalStatuses =
-        ["Delivered", "Cancelled", "Refunded"];
+    private static readonly HashSet<OrderStatus> TerminalStatuses =
+        [OrderStatus.Delivered, OrderStatus.Cancelled, OrderStatus.Refunded];
 
     protected override async Task OnParametersSetAsync()
     {

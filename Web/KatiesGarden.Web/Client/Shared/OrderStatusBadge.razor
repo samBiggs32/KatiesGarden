@@ -3,24 +3,24 @@
 <span class="badge badge-sm @BadgeClass font-medium">@StatusLabel</span>
 
 @code {
-    [Parameter, EditorRequired] public string Status { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public OrderStatus Status { get; set; }
 
     private string BadgeClass => Status switch
     {
-        "Pending"              => "badge-ghost",
-        "Confirmed"            => "badge-info",
-        "Processing"           => "badge-warning",
-        "ReadyForCollection"   => "badge-success",
-        "Dispatched"           => "badge-primary",
-        "Delivered"            => "badge-success",
-        "Cancelled"            => "badge-error",
-        "Refunded"             => "badge-error badge-outline",
-        _                      => "badge-ghost"
+        OrderStatus.Pending              => "badge-ghost",
+        OrderStatus.Confirmed            => "badge-info",
+        OrderStatus.Processing           => "badge-warning",
+        OrderStatus.ReadyForCollection   => "badge-success",
+        OrderStatus.Dispatched           => "badge-primary",
+        OrderStatus.Delivered            => "badge-success",
+        OrderStatus.Cancelled            => "badge-error",
+        OrderStatus.Refunded             => "badge-error badge-outline",
+        _                                => "badge-ghost"
     };
 
     private string StatusLabel => Status switch
     {
-        "ReadyForCollection"   => "Ready to Collect",
-        _                      => System.Text.RegularExpressions.Regex.Replace(Status, @"(?<=[a-z])(?=[A-Z])", " ")
+        OrderStatus.ReadyForCollection   => "Ready to Collect",
+        _                                => System.Text.RegularExpressions.Regex.Replace(Status.ToString(), @"(?<=[a-z])(?=[A-Z])", " ")
     };
 }

@@ -26,7 +26,7 @@ public class CustomerFunction(AppDbContext db, ILogger<CustomerFunction> logger)
             .Where(o => o.CustomerId == customer.UserId)
             .OrderByDescending(o => o.CreatedAt)
             .Select(o => new CustomerOrderSummaryDto(
-                o.Id, o.OrderNumber, o.Total, o.Status.ToString(), o.DeliveryType.ToString(), o.CreatedAt))
+                o.Id, o.OrderNumber, o.Total, o.Status, o.DeliveryType, o.CreatedAt))
             .ToListAsync(ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
@@ -113,20 +113,20 @@ public class CustomerFunction(AppDbContext db, ILogger<CustomerFunction> logger)
             CustomerFirstName = order.CustomerFirstName,
             CustomerLastName = order.CustomerLastName,
             CustomerEmail = order.CustomerEmail,
-            DeliveryType = order.DeliveryType.ToString(),
+            DeliveryType = order.DeliveryType,
             DeliveryAddress = order.DeliveryAddress,
             DeliveryPostcode = order.DeliveryPostcode,
             Subtotal = order.Subtotal,
             DeliveryFee = order.DeliveryFee,
             Total = order.Total,
-            Status = order.Status.ToString(),
+            Status = order.Status,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
             Lines = order.Lines.Select(l => new OrderLineDto(
                 l.Id, l.ProductId, l.ProductName, l.ProductImageUrl,
                 l.UnitPrice, l.Quantity, l.LineTotal)).ToList(),
             StatusHistory = order.StatusHistory.Select(h => new OrderStatusHistoryDto(
-                h.Status.ToString(), h.Note, h.ChangedAt)).ToList()
+                h.Status, h.Note, h.ChangedAt)).ToList()
         };
 }
 

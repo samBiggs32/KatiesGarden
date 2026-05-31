@@ -1,6 +1,5 @@
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
-using KatiesGarden.Models.Validators;
-using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -20,13 +19,13 @@ public partial class CheckoutPage : ComponentBase
     private CheckoutRequest _request = new();
     private List<CartItem> _cartItems = [];
     private DeliverySettingsDto? _deliverySettings;
-    private string _deliveryType = "Collection";
+    private DeliveryType _deliveryType = DeliveryType.Collection;
     private bool _submitting;
     private string? _error;
     private Dictionary<string, string> _fieldErrors = [];
 
     private decimal _subtotal => _cartItems.Sum(i => i.LineTotal);
-    private decimal _deliveryFee => _deliveryType == "LocalDelivery" && _deliverySettings is not null
+    private decimal _deliveryFee => _deliveryType == DeliveryType.LocalDelivery && _deliverySettings is not null
         ? (_deliverySettings.FreeDeliveryThreshold.HasValue && _subtotal >= _deliverySettings.FreeDeliveryThreshold.Value
             ? 0m
             : _deliverySettings.LocalDeliveryFee)
@@ -34,7 +33,7 @@ public partial class CheckoutPage : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _deliveryType = Delivery ?? "Collection";
+        _deliveryType = Enum.TryParse<DeliveryType>(Delivery, out var dt) ? dt : DeliveryType.Collection;
         _request.DeliveryType = _deliveryType;
 
         _cartItems = (await CartService.GetItemsAsync()).ToList();

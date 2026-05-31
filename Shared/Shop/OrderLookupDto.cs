@@ -1,10 +1,12 @@
+using KatiesGarden.Models.Entities;
+
 namespace KatiesGarden.Models.Shop;
 
 public record OrderLookupDto(
     string OrderNumber,
     decimal Total,
     decimal DeliveryFee,
-    string DeliveryType,
+    DeliveryType DeliveryType,
     DateTime CreatedAt,
     List<OrderLookupLineDto> Lines);
 

@@ -75,7 +75,7 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
 
         var resp = await admin.PatchAsJsonAsync(
             $"/api/manage/orders/{order.Id}/status",
-            new UpdateOrderStatusRequest("Processing"), ct);
+            new UpdateOrderStatusRequest(OrderStatus.Processing), ct);
         resp.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         await using var db = fixture.CreateDbContext();
@@ -90,9 +90,12 @@ public class AdminOrderApiTests(AspireApiFixture fixture)
         using var admin = fixture.CreateAdminClient();
         var order = await SeedOrder(OrderStatus.Pending, ct: ct);
 
-        var resp = await admin.PatchAsJsonAsync(
-            $"/api/manage/orders/{order.Id}/status",
-            new UpdateOrderStatusRequest("NotARealStatus"), ct);
+        // Send a raw JSON body with an unrecognised status string so the
+        // JsonStringEnumConverter fails to bind and the endpoint returns 400.
+        using var body = new System.Net.Http.StringContent(
+            """{"status":"NotARealStatus"}""",
+            System.Text.Encoding.UTF8, "application/json");
+        var resp = await admin.PatchAsync($"/api/manage/orders/{order.Id}/status", body, ct);
 
         resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

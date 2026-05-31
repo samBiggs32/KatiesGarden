@@ -1,4 +1,5 @@
 using FluentAssertions;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
 using Xunit;
 
@@ -14,7 +15,7 @@ public class CheckoutRequestValidatorTests
         LastName = "Smith",
         Email = "jane.smith@example.com",
         Phone = "07800 123456",
-        DeliveryType = "Collection",
+        DeliveryType = DeliveryType.Collection,
         Items = [new CartItemRequest { ProductId = Guid.NewGuid(), Quantity = 1 }]
     };
 
@@ -24,7 +25,7 @@ public class CheckoutRequestValidatorTests
         LastName = "Smith",
         Email = "jane.smith@example.com",
         Phone = "07800 123456",
-        DeliveryType = "LocalDelivery",
+        DeliveryType = DeliveryType.LocalDelivery,
         DeliveryAddress = "12 High Street, Milverton",
         DeliveryPostcode = "TA4 1JN",
         Items = [new CartItemRequest { ProductId = Guid.NewGuid(), Quantity = 2 }]
@@ -144,7 +145,8 @@ public class CheckoutRequestValidatorTests
     [Fact]
     public async Task InvalidDeliveryType_Fails()
     {
-        var req = ValidCollectionRequest(); req.DeliveryType = "Drone";
+        var req = ValidCollectionRequest();
+        req.DeliveryType = (DeliveryType)99; // out-of-range enum value
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
         result.Errors.Should().Contain(e => e.PropertyName == nameof(CheckoutRequest.DeliveryType));
     }

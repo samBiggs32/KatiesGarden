@@ -1,5 +1,4 @@
 using KatiesGarden.Models.Shop;
-using KatiesGarden.Web.Client.Models;
 using Microsoft.JSInterop;
 using System.Text.Json;
 

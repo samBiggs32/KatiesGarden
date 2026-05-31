@@ -1,4 +1,4 @@
-using KatiesGarden.Web.Client.Models;
+using KatiesGarden.Models.UI;
 using Microsoft.AspNetCore.Components;
 
 namespace KatiesGarden.Web.Client.Pages

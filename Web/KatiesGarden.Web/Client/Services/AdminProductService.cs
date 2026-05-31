@@ -71,14 +71,7 @@ public class AdminProductService(HttpClient http)
 
     public async Task<DeliverySettingsDto?> UpdateDeliverySettingsAsync(DeliverySettingsDto settings)
     {
-        var response = await http.PutAsJsonAsync("api/manage/delivery-settings", new
-        {
-            settings.LocalDeliveryFee,
-            settings.FreeDeliveryThreshold,
-            settings.DeliveryAreaDescription,
-            settings.CollectionAddress,
-            settings.CollectionInstructions
-        });
+        var response = await http.PutAsJsonAsync("api/manage/delivery-settings", settings);
         return response.IsSuccessStatusCode
             ? await response.Content.ReadFromJsonAsync<DeliverySettingsDto>()
             : null;
@@ -93,6 +86,4 @@ public class AdminProductService(HttpClient http)
         var result = await response.Content.ReadFromJsonAsync<ImageUploadResponse>();
         return result?.Url;
     }
-
-    private record ImageUploadResponse(string Url);
 }

@@ -34,7 +34,7 @@ public class AdminDeliverySettingsFunction(AppDbContext db)
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        var request = await req.ReadFromJsonAsync<DeliverySettingsUpdateRequest>();
+        var request = await req.ReadFromJsonAsync<DeliverySettingsDto>();
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
         var settings = await db.DeliverySettings.FindAsync([1], ct);

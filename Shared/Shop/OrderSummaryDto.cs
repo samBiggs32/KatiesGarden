@@ -1,3 +1,5 @@
+using KatiesGarden.Models.Entities;
+
 namespace KatiesGarden.Models.Shop;
 
 public record OrderSummaryDto
@@ -7,8 +9,8 @@ public record OrderSummaryDto
     public string CustomerFirstName { get; init; } = string.Empty;
     public string CustomerLastName { get; init; } = string.Empty;
     public string CustomerEmail { get; init; } = string.Empty;
-    public string DeliveryType { get; init; } = string.Empty;
+    public DeliveryType DeliveryType { get; init; }
     public decimal Total { get; init; }
-    public string Status { get; init; } = string.Empty;
+    public OrderStatus Status { get; init; }
     public DateTime CreatedAt { get; init; }
 }

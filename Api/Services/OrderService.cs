@@ -13,7 +13,7 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
     public async Task RecordTransitionAsync(
         Order order,
         OrderStatus previousStatus,
-        string newStatus,
+        OrderStatus newStatus,
         string? note,
         string actor,
         DurableTaskClient durableClient,
@@ -26,7 +26,7 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
                 await durableClient.RaiseEventAsync(
                     order.OrchestrationInstanceId,
                     OrchestrationEvents.StatusChanged,
-                    new OrderStatusChangedEvent(newStatus, note, actor),
+                    new OrderStatusChangedEvent(newStatus.ToString(), note, actor),
                     ct);
             }
             catch (Exception ex)
@@ -40,7 +40,7 @@ public class OrderService(AppDbContext db, IAuditService audit, ILogger<OrderSer
         await audit.LogAsync(
             "StatusChanged", "Order", order.Id.ToString(),
             actorEmail: null, actorName: actor,
-            new { from = previousStatus.ToString(), to = newStatus, note },
+            new { from = previousStatus.ToString(), to = newStatus.ToString(), note },
             ct);
     }
 

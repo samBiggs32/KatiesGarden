@@ -4,6 +4,7 @@ using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Helpers;
 using KatiesGarden.Models;
+using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;

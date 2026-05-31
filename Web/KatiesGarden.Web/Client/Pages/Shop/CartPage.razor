@@ -93,8 +93,8 @@
                 <fieldset>
                 <legend class="card-title text-base">Delivery Method</legend>
 
-                <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-colors @(_deliveryType == "Collection" ? "border-primary bg-primary/5" : "border-base-300 hover:border-base-content/20")">
-                    <input type="radio" name="delivery" value="Collection" checked="@(_deliveryType == "Collection")"
+                <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-colors @(_deliveryType == DeliveryType.Collection ? "border-primary bg-primary/5" : "border-base-300 hover:border-base-content/20")">
+                    <input type="radio" name="delivery" value="Collection" checked="@(_deliveryType == DeliveryType.Collection)"
                            @onchange="SelectCollection" class="radio radio-primary mt-0.5 shrink-0" />
                     <div>
                         <p class="font-medium">Click &amp; Collect — Free</p>
@@ -107,8 +107,8 @@
 
                 @if (_allCanDeliver)
                 {
-                    <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-colors @(_deliveryType == "LocalDelivery" ? "border-primary bg-primary/5" : "border-base-300 hover:border-base-content/20")">
-                        <input type="radio" name="delivery" value="LocalDelivery" checked="@(_deliveryType == "LocalDelivery")"
+                    <label class="flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-colors @(_deliveryType == DeliveryType.LocalDelivery ? "border-primary bg-primary/5" : "border-base-300 hover:border-base-content/20")">
+                        <input type="radio" name="delivery" value="LocalDelivery" checked="@(_deliveryType == DeliveryType.LocalDelivery)"
                                @onchange="SelectLocalDelivery" class="radio radio-primary mt-0.5 shrink-0" />
                         <div>
                             <p class="font-medium">Local Delivery — @DeliveryFeeLabel</p>

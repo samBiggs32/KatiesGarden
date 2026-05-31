@@ -91,7 +91,7 @@
             </div>
 
             <!-- Delivery address (LocalDelivery only) -->
-            @if (_deliveryType == "LocalDelivery")
+            @if (_deliveryType == DeliveryType.LocalDelivery)
             {
                 <div class="card bg-base-100 border border-base-300 shadow-sm mb-5">
                     <div class="card-body gap-4">
@@ -197,7 +197,7 @@
                             </div>
                             <div class="flex justify-between text-sm text-base-content/70">
                                 <span>Delivery</span>
-                                <span>@(_deliveryType == "LocalDelivery" ? $"£{_deliveryFee:F2}" : "Free (Click & Collect)")</span>
+                                <span>@(_deliveryType == DeliveryType.LocalDelivery ? $"£{_deliveryFee:F2}" : "Free (Click & Collect)")</span>
                             </div>
                         </div>
 
@@ -211,7 +211,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            @(_deliveryType == "LocalDelivery" ? "Local Delivery" : "Click & Collect — Milverton")
+                            @(_deliveryType == DeliveryType.LocalDelivery ? "Local Delivery" : "Click & Collect — Milverton")
                         </div>
                     }
 

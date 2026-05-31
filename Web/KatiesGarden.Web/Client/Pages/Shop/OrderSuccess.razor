@@ -45,7 +45,7 @@
 
     <p class="text-base-content/65 text-lg mb-8 leading-relaxed max-w-sm mx-auto">
         A confirmation email is on its way.
-        Katie will be in touch to arrange @(_order?.DeliveryType == "LocalDelivery" ? "delivery" : "collection").
+        Katie will be in touch to arrange @(_order?.DeliveryType == DeliveryType.LocalDelivery ? "delivery" : "collection").
     </p>
 
     <div class="flex gap-3 justify-center flex-wrap">

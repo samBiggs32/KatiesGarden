@@ -13,7 +13,7 @@ public interface IOrderService
     Task RecordTransitionAsync(
         Order order,
         OrderStatus previousStatus,
-        string newStatus,
+        OrderStatus newStatus,
         string? note,
         string actor,
         DurableTaskClient durableClient,

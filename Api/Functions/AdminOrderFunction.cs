@@ -45,9 +45,9 @@ public class AdminOrderFunction(
                 CustomerFirstName = o.CustomerFirstName,
                 CustomerLastName = o.CustomerLastName,
                 CustomerEmail = o.CustomerEmail,
-                DeliveryType = o.DeliveryType.ToString(),
+                DeliveryType = o.DeliveryType,
                 Total = o.Total,
-                Status = o.Status.ToString(),
+                Status = o.Status,
                 CreatedAt = o.CreatedAt
             })
             .ToListAsync(ct);
@@ -80,14 +80,14 @@ public class AdminOrderFunction(
             CustomerLastName = order.CustomerLastName,
             CustomerEmail = order.CustomerEmail,
             CustomerPhone = order.CustomerPhone,
-            DeliveryType = order.DeliveryType.ToString(),
+            DeliveryType = order.DeliveryType,
             DeliveryAddress = order.DeliveryAddress,
             DeliveryPostcode = order.DeliveryPostcode,
             CustomerNotes = order.CustomerNotes,
             Subtotal = order.Subtotal,
             DeliveryFee = order.DeliveryFee,
             Total = order.Total,
-            Status = order.Status.ToString(),
+            Status = order.Status,
             AdminNotes = order.AdminNotes,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
@@ -116,15 +116,12 @@ public class AdminOrderFunction(
         var request = await req.ReadFromJsonAsync<UpdateOrderStatusRequest>();
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
-        if (!Enum.TryParse<OrderStatus>(request.Status, out var newStatus))
-            return await Responses.BadRequest(req, $"Unknown status: {request.Status}");
-
         var previousStatus = order.Status;
-        order.Status = newStatus;
+        order.Status = request.Status;
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Order {OrderNumber} status updated from {From} to {To}",
-            order.OrderNumber, previousStatus, newStatus);
+            order.OrderNumber, previousStatus, request.Status);
 
         var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         await orderService.RecordTransitionAsync(order, previousStatus, request.Status, request.Note, actor, durableClient, ct);
@@ -234,7 +231,7 @@ public class AdminOrderFunction(
             alreadyRefunded ? " (already refunded — DB reconciled)" : "");
 
         var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
-        await orderService.RecordTransitionAsync(order, previousStatus, nameof(OrderStatus.Refunded),
+        await orderService.RecordTransitionAsync(order, previousStatus, OrderStatus.Refunded,
             "Refunded via Stripe admin", actor, durableClient, ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);

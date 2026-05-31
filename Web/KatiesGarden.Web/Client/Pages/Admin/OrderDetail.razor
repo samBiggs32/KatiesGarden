@@ -17,7 +17,7 @@ else
     <div class="d-flex align-items-center mb-4">
         <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="/admin/orders" Variant="Variant.Text">Back</MudButton>
         <MudText Typo="Typo.h5" Class="ml-2 font-weight-bold">Order @_order.OrderNumber</MudText>
-        <MudChip T="string" Color="@StatusColor(_order.Status)" Class="ml-3">@_order.Status</MudChip>
+        <MudChip T="OrderStatus" Color="@StatusColor(_order.Status)" Class="ml-3">@_order.Status</MudChip>
     </div>
 
     <MudGrid>
@@ -79,14 +79,14 @@ else
             <MudCard Elevation="2" Class="mb-4">
                 <MudCardHeader><MudText Typo="Typo.h6">Update Status</MudText></MudCardHeader>
                 <MudCardContent>
-                    <MudSelect T="string" @bind-Value="_newStatus" Variant="Variant.Outlined" Label="New Status" Class="mb-3">
-                        <MudSelectItem Value="@("Confirmed")">Confirmed</MudSelectItem>
-                        <MudSelectItem Value="@("Processing")">Processing</MudSelectItem>
-                        <MudSelectItem Value="@("ReadyForCollection")">Ready for Collection</MudSelectItem>
-                        <MudSelectItem Value="@("Dispatched")">Dispatched</MudSelectItem>
-                        <MudSelectItem Value="@("Delivered")">Delivered</MudSelectItem>
-                        <MudSelectItem Value="@("Cancelled")">Cancelled</MudSelectItem>
-                        <MudSelectItem Value="@("Refunded")">Refunded</MudSelectItem>
+                    <MudSelect T="OrderStatus" @bind-Value="_newStatus" Variant="Variant.Outlined" Label="New Status" Class="mb-3">
+                        <MudSelectItem Value="OrderStatus.Confirmed">Confirmed</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.Processing">Processing</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.ReadyForCollection">Ready for Collection</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.Dispatched">Dispatched</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.Delivered">Delivered</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.Cancelled">Cancelled</MudSelectItem>
+                        <MudSelectItem Value="OrderStatus.Refunded">Refunded</MudSelectItem>
                     </MudSelect>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateStatusAsync"
                                Disabled="@_updatingStatus">
@@ -110,7 +110,7 @@ else
         </MudItem>
     </MudGrid>
 
-    @if (_order.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" or "Delivered")
+    @if (_order.Status is OrderStatus.Confirmed or OrderStatus.Processing or OrderStatus.ReadyForCollection or OrderStatus.Dispatched or OrderStatus.Delivered)
     {
         <MudCard Elevation="1" Class="mb-4 border border-error">
             <MudCardHeader>
@@ -143,7 +143,7 @@ else
 
     private OrderDetailDto? _order;
     private bool _loading = true;
-    private string _newStatus = string.Empty;
+    private OrderStatus _newStatus;
     private string? _adminNotes;
     private bool _updatingStatus, _savingNotes, _refunding;
 
@@ -206,8 +206,8 @@ else
             var response = await AdminOrderService.RefundAsync(Id);
             if (response.IsSuccessStatusCode)
             {
-                _order = _order! with { Status = "Refunded" };
-                _newStatus = "Refunded";
+                _order = _order! with { Status = OrderStatus.Refunded };
+                _newStatus = OrderStatus.Refunded;
                 Snackbar.Add("Refund issued successfully", Severity.Success);
             }
             else
@@ -218,11 +218,11 @@ else
         finally { _refunding = false; }
     }
 
-    private static Color StatusColor(string status) => status switch
+    private static Color StatusColor(OrderStatus status) => status switch
     {
-        "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" => Color.Success,
-        "Pending" => Color.Warning,
-        "Cancelled" or "Refunded" => Color.Error,
+        OrderStatus.Confirmed or OrderStatus.Processing or OrderStatus.ReadyForCollection or OrderStatus.Dispatched => Color.Success,
+        OrderStatus.Pending => Color.Warning,
+        OrderStatus.Cancelled or OrderStatus.Refunded => Color.Error,
         _ => Color.Default
     };
 }

@@ -1,5 +1,4 @@
 using KatiesGarden.Models.Auth;
-using KatiesGarden.Web.Client.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Net.Http.Json;
 

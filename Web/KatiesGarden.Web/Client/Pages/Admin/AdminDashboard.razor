@@ -77,7 +77,7 @@ else
                         <MudTd>@context.OrderNumber</MudTd>
                         <MudTd>@context.CustomerFirstName @context.CustomerLastName</MudTd>
                         <MudTd>£@context.Total.ToString("F2")</MudTd>
-                        <MudTd><MudChip T="string" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
+                        <MudTd><MudChip T="OrderStatus" Color="@StatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip></MudTd>
                         <MudTd>@context.CreatedAt.ToString("dd MMM")</MudTd>
                         <MudTd><MudButton Size="Size.Small" Href="@($"/admin/orders/{context.Id}")">View</MudButton></MudTd>
                     </RowTemplate>
@@ -160,11 +160,11 @@ else
             var products = productsTask.Result ?? [];
 
             var cutoff = DateTime.UtcNow.AddDays(-30);
-            _pendingCount = orders.Count(o => o.Status == "Pending");
-            _confirmedCount = orders.Count(o => o.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched");
+            _pendingCount = orders.Count(o => o.Status == OrderStatus.Pending);
+            _confirmedCount = orders.Count(o => o.Status is OrderStatus.Confirmed or OrderStatus.Processing or OrderStatus.ReadyForCollection or OrderStatus.Dispatched);
             _productCount = products.Count(p => p.IsAvailable);
             _revenue30d = orders
-                .Where(o => o.CreatedAt >= cutoff && o.Status is "Confirmed" or "Processing" or "ReadyForCollection" or "Dispatched" or "Delivered")
+                .Where(o => o.CreatedAt >= cutoff && o.Status is OrderStatus.Confirmed or OrderStatus.Processing or OrderStatus.ReadyForCollection or OrderStatus.Dispatched or OrderStatus.Delivered)
                 .Sum(o => o.Total);
 
             _recentOrders = orders.Take(5).ToList();
@@ -184,11 +184,11 @@ else
         }
     }
 
-    private static Color StatusColor(string status) => status switch
+    private static Color StatusColor(OrderStatus status) => status switch
     {
-        "Confirmed" or "Processing" => Color.Success,
-        "Pending" => Color.Warning,
-        "Cancelled" or "Refunded" => Color.Error,
+        OrderStatus.Confirmed or OrderStatus.Processing => Color.Success,
+        OrderStatus.Pending => Color.Warning,
+        OrderStatus.Cancelled or OrderStatus.Refunded => Color.Error,
         _ => Color.Default
     };
 }

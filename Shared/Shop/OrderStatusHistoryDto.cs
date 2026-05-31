@@ -1,6 +1,8 @@
+using KatiesGarden.Models.Entities;
+
 namespace KatiesGarden.Models.Shop;
 
 public record OrderStatusHistoryDto(
-    string Status,
+    OrderStatus Status,
     string? Note,
     DateTime ChangedAt);
