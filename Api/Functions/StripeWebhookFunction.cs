@@ -62,6 +62,16 @@ public class StripeWebhookFunction(
         if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
             return req.CreateResponse(HttpStatusCode.OK);
 
+        // Replay guard: if we've already recorded this event, it has been fully processed
+        // (the row is written last, after confirmation + orchestration succeed). Return early
+        // so a Stripe redelivery does no further work. The order-status check below is a second
+        // line of defence; this one also covers events that legitimately repeat.
+        if (await db.StripeProcessedEvents.AnyAsync(e => e.EventId == stripeEvent.Id, ct))
+        {
+            logger.LogInformation("Stripe event {EventId} already processed — skipping", stripeEvent.Id);
+            return req.CreateResponse(HttpStatusCode.OK);
+        }
+
         var session = (Session)stripeEvent.Data.Object;
         if (!session.Metadata.TryGetValue("orderId", out var orderIdStr) || !Guid.TryParse(orderIdStr, out var orderId))
         {

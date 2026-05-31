@@ -117,6 +117,33 @@ public sealed class AspireApiFixture : IAsyncLifetime
         return client;
     }
 
+    /// <summary>
+    /// Returns an HttpClient for an authenticated user who is NOT an admin
+    /// (roles <c>["authenticated"]</c> only). Used to assert that admin endpoints
+    /// reject a logged-in non-admin, not just anonymous requests.
+    /// </summary>
+    public HttpClient CreateNonAdminClient()
+    {
+        var principal = new ClientPrincipal(
+            IdentityProvider: "github",
+            UserId: "test-user",
+            UserDetails: "user@katiesgarden.test",
+            UserRoles: ["authenticated"]);
+
+        var json = JsonSerializer.Serialize(principal);
+        var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+
+        var client = new HttpClient(new AddHeaderHandler("x-ms-client-principal", encoded)
+        {
+            InnerHandler = new HttpClientHandler()
+        })
+        {
+            BaseAddress = HttpClient.BaseAddress,
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+        return client;
+    }
+
     private async Task WaitForHealth(CancellationToken ct)
     {
         for (var i = 0; i < 30; i++)

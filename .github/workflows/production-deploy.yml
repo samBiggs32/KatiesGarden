@@ -27,9 +27,17 @@ jobs:
 
       - name: CVE dependency gate
         run: |
-          OUTPUT=$(dotnet list package --vulnerable --include-transitive 2>&1)
+          set -euo pipefail
+          # Restore first: `dotnet list package --vulnerable` needs restored assets, and
+          # passing the solution explicitly avoids the "no project found" ambiguity that
+          # would otherwise let the grep miss and the step exit 0 (fail-open).
+          dotnet restore KatiesGarden_Wasm.sln
+          OUTPUT=$(dotnet list KatiesGarden_Wasm.sln package --vulnerable --include-transitive)
           echo "$OUTPUT"
-          echo "$OUTPUT" | grep -q "has the following vulnerable packages" && echo "ERROR: Vulnerable packages found — fix before merging" && exit 1
+          if echo "$OUTPUT" | grep -q "has the following vulnerable"; then
+            echo "ERROR: Vulnerable packages found — fix before merging"
+            exit 1
+          fi
           echo "PASS: No known CVEs in dependency tree"
 
       - name: Run unit tests

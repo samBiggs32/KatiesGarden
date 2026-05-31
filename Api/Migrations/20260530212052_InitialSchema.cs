@@ -95,7 +95,7 @@ namespace KatiesGarden.Api.Migrations
                 CREATE TABLE IF NOT EXISTS order_lines (
                     "Id"              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
                     "OrderId"         uuid NOT NULL REFERENCES orders("Id") ON DELETE CASCADE,
-                    "ProductId"       uuid NOT NULL,
+                    "ProductId"       uuid NOT NULL REFERENCES products("Id") ON DELETE RESTRICT,
                     "ProductName"     varchar(200) NOT NULL,
                     "ProductImageUrl" text,
                     "UnitPrice"       numeric(10,2) NOT NULL DEFAULT 0,
@@ -103,6 +103,7 @@ namespace KatiesGarden.Api.Migrations
                     "LineTotal"       numeric(10,2) NOT NULL DEFAULT 0
                 );
                 CREATE INDEX IF NOT EXISTS "IX_order_lines_OrderId" ON order_lines ("OrderId");
+                CREATE INDEX IF NOT EXISTS "IX_order_lines_ProductId" ON order_lines ("ProductId");
 
                 CREATE TABLE IF NOT EXISTS delivery_settings (
                     "Id"                      integer PRIMARY KEY DEFAULT 1,
