@@ -152,16 +152,13 @@
         finally { _loading = false; }
     }
 
-    private async Task Search()
+    private void Search()
     {
         var q = _inputQuery.Trim();
         if (string.IsNullOrWhiteSpace(q)) return;
+        // Navigating updates the `q` query parameter, which triggers OnParametersSetAsync to
+        // run the search. Fetching here as well would issue the same query a second time.
         Navigation.NavigateTo($"/shop/search?q={Uri.EscapeDataString(q)}");
-        _query = q;
-        _loading = true;
-        StateHasChanged();
-        try { _results = await ShopService.SearchAsync(q, _sort); }
-        finally { _loading = false; }
     }
 
     private async Task OnSortChanged(ChangeEventArgs e)

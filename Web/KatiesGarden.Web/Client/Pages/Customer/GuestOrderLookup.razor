@@ -22,9 +22,16 @@
 
                 @if (_notFound)
                 {
-                    <div class="alert alert-error text-sm">
+                    <div role="alert" class="alert alert-error text-sm">
                         <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
                         We couldn't find an order matching those details. Please check and try again.
+                    </div>
+                }
+                else if (_error)
+                {
+                    <div role="alert" class="alert alert-warning text-sm">
+                        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                        Something went wrong looking up your order. Please try again in a moment.
                     </div>
                 }
 
@@ -76,23 +83,29 @@
     private string _total = string.Empty;
     private bool _searching;
     private bool _notFound;
+    private bool _error;
 
     private async Task LookupAsync()
     {
         _notFound = false;
+        _error = false;
         _searching = true;
 
-        var result = await OrderService.LookupOrderAsync(_orderNumber.Trim(), _email.Trim(), _total.Trim());
-
-        _searching = false;
-
-        if (result is null)
+        try
         {
-            _notFound = true;
+            var result = await OrderService.LookupOrderAsync(_orderNumber.Trim(), _email.Trim(), _total.Trim());
+            if (result is null)
+                _notFound = true;
+            else
+                Navigation.NavigateTo($"/my-orders/{result.OrderNumber}");
         }
-        else
+        catch
         {
-            Navigation.NavigateTo($"/my-orders/{result.OrderNumber}");
+            _error = true;
+        }
+        finally
+        {
+            _searching = false;
         }
     }
 }

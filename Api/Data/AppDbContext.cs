@@ -92,6 +92,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<DeliverySettings>(e =>
         {
             e.ToTable("delivery_settings");
+            // Singleton config row with a fixed primary key (Id = 1). EF must insert the
+            // explicit key rather than defer to the identity sequence, otherwise the first
+            // save creates a row with a generated Id that the hard-coded Find([1]) can't read.
+            e.Property(d => d.Id).ValueGeneratedNever();
             e.Property(d => d.LocalDeliveryFee).HasPrecision(10, 2);
             e.Property(d => d.FreeDeliveryThreshold).HasPrecision(10, 2);
             e.Property(d => d.DeliveryAreaDescription).HasMaxLength(500);

@@ -1,4 +1,5 @@
 using FluentValidation;
+using KatiesGarden.Models.Validators;
 
 namespace KatiesGarden.Models.Shop;
 
@@ -10,7 +11,7 @@ public class CheckoutRequestValidator : AbstractValidator<CheckoutRequest>
         RuleFor(x => x.LastName).NotEmpty().WithMessage("Last name is required.").MaximumLength(100);
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email address is required.")
-            .EmailAddress().WithMessage("A valid email address is required.")
+            .Matches(EmailRegex.Pattern).WithMessage("A valid email address is required.")
             .MaximumLength(254);
         RuleFor(x => x.Phone).NotEmpty().WithMessage("Phone number is required.").MaximumLength(30);
         RuleFor(x => x.DeliveryType)

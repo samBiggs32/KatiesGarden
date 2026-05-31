@@ -37,7 +37,16 @@ public class AdminDeliverySettingsFunction(AppDbContext db)
         var request = await req.ReadFromJsonAsync<DeliverySettingsUpdateRequest>();
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
-        var settings = await db.DeliverySettings.FindAsync([1], ct) ?? new DeliverySettings();
+        var settings = await db.DeliverySettings.FindAsync([1], ct);
+        if (settings is null)
+        {
+            // First save on a fresh database: the singleton row (Id = 1) doesn't exist yet,
+            // so create and track it. The previous `?? new DeliverySettings()` left the new
+            // instance untracked, so SaveChanges silently persisted nothing and the admin's
+            // delivery fees were lost while checkout kept using the hard-coded defaults.
+            settings = new DeliverySettings();
+            db.DeliverySettings.Add(settings);
+        }
 
         settings.LocalDeliveryFee = request.LocalDeliveryFee;
         settings.FreeDeliveryThreshold = request.FreeDeliveryThreshold;

@@ -49,7 +49,14 @@ else
         </section>
 
         <div class="max-w-4xl mx-auto px-4 py-10">
-            @if (_orders.Count == 0)
+            @if (_loadError)
+            {
+                <div role="alert" class="alert alert-error">
+                    <span>We couldn't load your orders just now. Please try again.</span>
+                    <button class="btn btn-sm" @onclick="LoadAsync">Retry</button>
+                </div>
+            }
+            else if (_orders.Count == 0)
             {
                 <div class="card bg-base-200 shadow-sm text-center py-16">
                     <div class="card-body items-center gap-4">
@@ -99,13 +106,21 @@ else
 @code {
     private bool _loading = true;
     private bool _isAuthenticated;
+    private bool _loadError;
     private List<CustomerOrderSummaryDto> _orders = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
     {
+        _loading = true;
+        _loadError = false;
         _isAuthenticated = await AuthService.IsAuthenticatedAsync();
         if (_isAuthenticated)
-            _orders = await OrderService.GetMyOrdersAsync();
+        {
+            try { _orders = await OrderService.GetMyOrdersAsync(); }
+            catch { _loadError = true; }
+        }
         _loading = false;
     }
 }

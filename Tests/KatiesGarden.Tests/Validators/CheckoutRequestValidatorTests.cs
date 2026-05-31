@@ -68,6 +68,8 @@ public class CheckoutRequestValidatorTests
     [InlineData("")]
     [InlineData("notanemail")]
     [InlineData("two@@signs.com")]
+    [InlineData("user@tld")]              // no dot in domain — passed the old .EmailAddress() check
+    [InlineData("first name@example.com")] // whitespace in local part
     public async Task InvalidEmail_Fails(string email)
     {
         var req = ValidCollectionRequest(); req.Email = email;

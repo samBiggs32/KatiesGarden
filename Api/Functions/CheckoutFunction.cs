@@ -68,6 +68,10 @@ public class CheckoutFunction(
         // Capture authenticated customer identity so the order appears in "My Orders"
         var authenticatedUser = SwaAuth.GetAuthenticatedUser(req);
 
+        // Store the email normalised (trimmed, lower-cased) so guest order lookup — which
+        // matches on a normalised email — finds the order regardless of how it was typed.
+        var customerEmail = request.Email.Trim().ToLowerInvariant();
+
         // Create pending order record
         var orderNumber = OrderNumberHelper.Generate();
         var order = new Order
@@ -75,7 +79,7 @@ public class CheckoutFunction(
             OrderNumber = orderNumber,
             CustomerFirstName = request.FirstName,
             CustomerLastName = request.LastName,
-            CustomerEmail = request.Email,
+            CustomerEmail = customerEmail,
             CustomerPhone = request.Phone,
             DeliveryType = deliveryType,
             DeliveryAddress = request.DeliveryAddress,
@@ -142,7 +146,7 @@ public class CheckoutFunction(
             Mode = "payment",
             SuccessUrl = $"{siteUrl}/order/success?session_id={{CHECKOUT_SESSION_ID}}",
             CancelUrl = $"{siteUrl}/cart",
-            CustomerEmail = request.Email,
+            CustomerEmail = customerEmail,
             Metadata = new Dictionary<string, string> { ["orderId"] = order.Id.ToString() }
         };
 

@@ -29,6 +29,15 @@ public class StripeWebhookFunction(
         var ct = req.FunctionContext.CancellationToken;
         var webhookSecret = stripeOptions.Value.WebhookSecret;
 
+        // Without a configured signing secret we cannot verify authenticity, and an empty
+        // secret is attacker-knowable (they could compute a matching signature). Refuse to
+        // process rather than trust a forgeable event. 500 so Stripe retries once configured.
+        if (string.IsNullOrWhiteSpace(webhookSecret))
+        {
+            logger.LogError("STRIPE_WEBHOOK_SECRET is not configured — rejecting webhook");
+            return req.CreateResponse(HttpStatusCode.InternalServerError);
+        }
+
         string json;
         using (var reader = new StreamReader(req.Body))
             json = await reader.ReadToEndAsync(ct);
@@ -50,20 +59,6 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
-        // Event-level idempotency: record this event ID before doing any work.
-        // A unique constraint violation means Stripe is replaying an event we already
-        // handled — acknowledge it and return immediately so we never double-process.
-        try
-        {
-            db.StripeProcessedEvents.Add(new StripeProcessedEvent { EventId = stripeEvent.Id });
-            await db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
-        {
-            logger.LogInformation("Stripe event {EventId} already processed — skipping", stripeEvent.Id);
-            return req.CreateResponse(HttpStatusCode.OK);
-        }
-
         if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
             return req.CreateResponse(HttpStatusCode.OK);
 
@@ -82,6 +77,16 @@ public class StripeWebhookFunction(
         {
             logger.LogError("Order {OrderId} not found for Stripe session {SessionId}", orderId, session.Id);
             return req.CreateResponse(HttpStatusCode.OK);
+        }
+
+        // Defence-in-depth: the amount Stripe captured must match the total we computed
+        // server-side when the order was created. Rejects a forged or mismatched session
+        // before we confirm anything.
+        if (session.AmountTotal.HasValue && session.AmountTotal.Value != (long)(order.Total * 100))
+        {
+            logger.LogError("Stripe session {SessionId} amount {Captured} does not match order {OrderId} total {Expected} — refusing to confirm",
+                session.Id, session.AmountTotal.Value, orderId, (long)(order.Total * 100));
+            return req.CreateResponse(HttpStatusCode.BadRequest);
         }
 
         if (order.Status != OrderStatus.Pending)
@@ -123,6 +128,21 @@ public class StripeWebhookFunction(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Could not start orchestration for order {OrderNumber} — may already exist", order.OrderNumber);
+        }
+
+        // Record the event as processed only now that the order is confirmed and the
+        // orchestration scheduled. If any step above failed, this row is absent and Stripe's
+        // retry reprocesses cleanly — the order-status check above keeps that idempotent.
+        // (Recording this first, as the code previously did, meant a transient fault during
+        // processing permanently skipped a paid order.)
+        try
+        {
+            db.StripeProcessedEvents.Add(new StripeProcessedEvent { EventId = stripeEvent.Id });
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+        {
+            logger.LogInformation("Stripe event {EventId} already recorded (concurrent delivery)", stripeEvent.Id);
         }
 
         return req.CreateResponse(HttpStatusCode.OK);
