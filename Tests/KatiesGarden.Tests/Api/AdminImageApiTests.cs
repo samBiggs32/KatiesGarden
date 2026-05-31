@@ -19,10 +19,11 @@ public class AdminImageApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task UploadImage_Unauthenticated_Returns401()
     {
+        var ct = TestContext.Current.CancellationToken;
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-        var response = await fixture.HttpClient.PostAsync("/api/manage/images", content);
+        var response = await fixture.HttpClient.PostAsync("/api/manage/images", content, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -30,11 +31,12 @@ public class AdminImageApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task UploadImage_Admin_NoStorageConfigured_Returns503()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
 
-        var response = await admin.PostAsync("/api/manage/images", content);
+        var response = await admin.PostAsync("/api/manage/images", content, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
     }
@@ -42,11 +44,12 @@ public class AdminImageApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task UploadImage_Admin_InvalidContentType_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
         var content = new ByteArrayContent([0x00, 0x01]);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
 
-        var response = await admin.PostAsync("/api/manage/images", content);
+        var response = await admin.PostAsync("/api/manage/images", content, ct);
 
         // Content-type check runs BEFORE the storage null-check, so this returns 400
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

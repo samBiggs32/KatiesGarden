@@ -25,7 +25,10 @@
   "routes": [
     { "route": "/admin/login", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/admin", "allowedRoles": ["admin"] },
-    { "route": "/admin/*", "allowedRoles": ["admin"] }
+    { "route": "/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/my-orders/lookup", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/my-orders", "allowedRoles": ["authenticated"] },
+    { "route": "/my-orders/*", "allowedRoles": ["authenticated"] }
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
@@ -65,7 +68,7 @@
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com js.stripe.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob: katiesgardenstore.blob.core.windows.net *.stripe.com; connect-src 'self' katiesgardenstore.blob.core.windows.net api.stripe.com; worker-src 'self' blob:; frame-src js.stripe.com; frame-ancestors 'none'"
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com js.stripe.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.googleapis.com; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: blob: katiesgardenstore.blob.core.windows.net *.stripe.com; connect-src 'self' katiesgardenstore.blob.core.windows.net api.stripe.com; worker-src 'self' blob:; frame-src js.stripe.com; frame-ancestors 'none'"
   },
   "mimeTypes": {
     ".json": "application/json",

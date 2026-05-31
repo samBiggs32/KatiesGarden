@@ -1,14 +1,14 @@
+using KatiesGarden.Api.Auditing;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Api.Services;
 using KatiesGarden.Models.Entities;
-using KatiesGarden.Api.Email;
-using KatiesGarden.Api.Configuration;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.DurableTask.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Stripe;
 using System.Net;
 
@@ -16,8 +16,8 @@ namespace KatiesGarden.Api.Functions;
 
 public class AdminOrderFunction(
     AppDbContext db,
-    IEmailSender emailSender,
-    IOptions<SmtpOptions> smtpOptions,
+    IAuditService audit,
+    IOrderService orderService,
     RefundService refundService,
     ILogger<AdminOrderFunction> logger)
 {
@@ -28,8 +28,7 @@ public class AdminOrderFunction(
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-        var statusFilter = query["status"];
+        var statusFilter = req.GetQueryParam("status");
 
         var ordersQuery = db.Orders.AsQueryable();
         if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<OrderStatus>(statusFilter, out var status))
@@ -67,6 +66,7 @@ public class AdminOrderFunction(
         var ct = req.FunctionContext.CancellationToken;
         var order = await db.Orders
             .Include(o => o.Lines)
+            .Include(o => o.StatusHistory.OrderBy(h => h.ChangedAt))
             .FirstOrDefaultAsync(o => o.Id == id, ct);
 
         if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
@@ -103,7 +103,8 @@ public class AdminOrderFunction(
     [Function("AdminUpdateOrderStatus")]
     public async Task<HttpResponseData> UpdateStatus(
         [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "manage/orders/{id:guid}/status")] HttpRequestData req,
-        Guid id)
+        Guid id,
+        [DurableClient] DurableTaskClient durableClient)
     {
         if (req.RequireAdmin() is { } deny) return deny;
 
@@ -117,30 +118,15 @@ public class AdminOrderFunction(
         if (!Enum.TryParse<OrderStatus>(request.Status, out var newStatus))
             return await Responses.BadRequest(req, $"Unknown status: {request.Status}");
 
+        var previousStatus = order.Status;
         order.Status = newStatus;
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
-        logger.LogInformation("Order {OrderNumber} status updated to {Status}", order.OrderNumber, newStatus);
+        logger.LogInformation("Order {OrderNumber} status updated from {From} to {To}",
+            order.OrderNumber, previousStatus, newStatus);
 
-        // Send status update email to customer for relevant transitions
-        var notifyStatuses = new[] {
-            OrderStatus.Confirmed, OrderStatus.ReadyForCollection,
-            OrderStatus.Dispatched, OrderStatus.Delivered, OrderStatus.Cancelled
-        };
-
-        if (notifyStatuses.Contains(newStatus))
-        {
-            try
-            {
-                var smtp = smtpOptions.Value;
-                var email = OrderEmailBuilder.BuildStatusUpdate(order, smtp.EffectiveSenderEmail, "Katie's Garden");
-                await emailSender.SendAsync(email, ct);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to send status update email for order {OrderNumber}", order.OrderNumber);
-            }
-        }
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.RecordTransitionAsync(order, previousStatus, request.Status, request.Note, actor, durableClient, ct);
 
         return req.CreateResponse(HttpStatusCode.NoContent);
     }
@@ -161,13 +147,35 @@ public class AdminOrderFunction(
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
 
+        var principal = SwaAuth.GetPrincipal(req);
+        await audit.LogAsync("NotesUpdated", "Order", order.Id.ToString(),
+            principal?.UserDetails, principal?.UserDetails, null, ct);
+
+        return req.CreateResponse(HttpStatusCode.NoContent);
+    }
+
+    [Function("AdminAnonymiseOrder")]
+    public async Task<HttpResponseData> Anonymise(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/anonymise")] HttpRequestData req,
+        Guid id)
+    {
+        if (req.RequireAdmin() is { } deny) return deny;
+
+        var ct = req.FunctionContext.CancellationToken;
+        var order = await db.Orders.FindAsync([id], ct);
+        if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
+
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.AnonymiseAsync(order, actor, ct);
+
         return req.CreateResponse(HttpStatusCode.NoContent);
     }
 
     [Function("AdminRefundOrder")]
     public async Task<HttpResponseData> RefundOrder(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "manage/orders/{id:guid}/refund")] HttpRequestData req,
-        Guid id)
+        Guid id,
+        [DurableClient] DurableTaskClient durableClient)
     {
         if (req.RequireAdmin() is { } deny) return deny;
 
@@ -178,7 +186,10 @@ public class AdminOrderFunction(
         if (string.IsNullOrWhiteSpace(order.StripePaymentIntentId))
             return await Responses.BadRequest(req, "This order has no payment intent — it cannot be refunded via Stripe.");
 
-        var refundableStatuses = new[] { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection, OrderStatus.Dispatched, OrderStatus.Delivered };
+        var refundableStatuses = new[] {
+            OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.ReadyForCollection,
+            OrderStatus.Dispatched, OrderStatus.Delivered
+        };
         if (!refundableStatuses.Contains(order.Status))
             return await Responses.BadRequest(req, $"Orders with status '{order.Status}' cannot be refunded.");
 
@@ -195,26 +206,18 @@ public class AdminOrderFunction(
             return await Responses.BadRequest(req, $"Stripe refund failed: {ex.StripeError?.Message ?? ex.Message}");
         }
 
+        var previousStatus = order.Status;
         order.Status = OrderStatus.Refunded;
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Order {OrderNumber} refunded via Stripe", order.OrderNumber);
 
-        try
-        {
-            var smtp = smtpOptions.Value;
-            var email = OrderEmailBuilder.BuildStatusUpdate(order, smtp.EffectiveSenderEmail, "Katie's Garden");
-            await emailSender.SendAsync(email, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to send refund confirmation email for order {OrderNumber}", order.OrderNumber);
-        }
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        await orderService.RecordTransitionAsync(order, previousStatus, nameof(OrderStatus.Refunded),
+            "Refunded via Stripe admin", actor, durableClient, ct);
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new { status = "Refunded", orderNumber = order.OrderNumber });
         return response;
     }
 }
-
-internal record AdminNotesRequest(string? Notes);

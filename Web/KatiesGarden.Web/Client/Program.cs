@@ -24,5 +24,6 @@ builder.Services.AddScoped<ShopService>();
 builder.Services.AddScoped<CheckoutService>();
 builder.Services.AddScoped<AdminProductService>();
 builder.Services.AddScoped<AdminOrderService>();
+builder.Services.AddScoped<CustomerOrderService>();
 
 await builder.Build().RunAsync();

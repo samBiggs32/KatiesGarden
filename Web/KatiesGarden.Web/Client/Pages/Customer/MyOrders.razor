@@ -1,0 +1,111 @@
+@page "/my-orders"
+@using KatiesGarden.Models.Shop
+@inject CustomerOrderService OrderService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>My Orders — Katie's Garden</PageTitle>
+
+@if (_loading)
+{
+    <div class="min-h-screen bg-base-100 flex items-center justify-center">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+}
+else if (!_isAuthenticated)
+{
+    <div class="min-h-screen bg-base-100 flex items-center justify-center px-4">
+        <div class="card bg-base-200 shadow-sm max-w-md w-full">
+            <div class="card-body text-center gap-4">
+                <div class="text-5xl">🌿</div>
+                <h1 class="font-serif text-2xl text-base-content">Sign in to view your orders</h1>
+                <p class="text-base-content/70">Sign in with your account to see your order history and track progress.</p>
+                <div class="flex flex-col gap-2">
+                    <a href="/.auth/login/github?post_login_redirect_uri=/my-orders" class="btn btn-neutral gap-2">
+                        <i class="fab fa-github" aria-hidden="true"></i> Continue with GitHub
+                    </a>
+                    <a href="/.auth/login/google?post_login_redirect_uri=/my-orders" class="btn btn-neutral gap-2">
+                        <i class="fab fa-google" aria-hidden="true"></i> Continue with Google
+                    </a>
+                    <a href="/.auth/login/aad?post_login_redirect_uri=/my-orders" class="btn btn-neutral gap-2">
+                        <i class="fab fa-microsoft" aria-hidden="true"></i> Continue with Microsoft
+                    </a>
+                </div>
+                <div class="divider text-xs text-base-content/40">or</div>
+                <a href="/my-orders/lookup" class="btn btn-ghost btn-sm">Look up a guest order</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="min-h-screen bg-base-100">
+        <!-- Hero strip -->
+        <section class="bg-secondary py-10 px-4">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="font-serif text-3xl md:text-4xl text-secondary-content mb-2">My Orders</h1>
+                <p class="text-secondary-content/70">Track your purchases from Katie's Garden.</p>
+            </div>
+        </section>
+
+        <div class="max-w-4xl mx-auto px-4 py-10">
+            @if (_orders.Count == 0)
+            {
+                <div class="card bg-base-200 shadow-sm text-center py-16">
+                    <div class="card-body items-center gap-4">
+                        <div class="text-5xl">🌱</div>
+                        <h2 class="font-serif text-xl">No orders yet</h2>
+                        <p class="text-base-content/60">When you place an order, it will appear here.</p>
+                        <a href="/shop" class="btn btn-primary mt-2">Explore the Shop</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="flex flex-col gap-4">
+                    @foreach (var order in _orders)
+                    {
+                        <a href="/my-orders/@order.OrderNumber"
+                           class="card bg-base-100 border border-base-300 hover:border-primary hover:shadow-md transition-all">
+                            <div class="card-body p-5">
+                                <div class="flex items-center justify-between flex-wrap gap-3">
+                                    <div>
+                                        <p class="font-semibold text-base-content">@order.OrderNumber</p>
+                                        <p class="text-sm text-base-content/60">@order.CreatedAt.ToString("d MMM yyyy")</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-bold text-primary text-lg">£@order.Total.ToString("F2")</span>
+                                        <OrderStatusBadge Status="@order.Status" />
+                                    </div>
+                                </div>
+                                <div class="text-sm text-base-content/50 mt-1">
+                                    @(order.DeliveryType == "Collection" ? "Click & Collect" : "Local Delivery")
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+
+            <div class="mt-8 text-center">
+                <a href="/my-orders/lookup" class="btn btn-ghost btn-sm text-base-content/50">
+                    Look up a guest order by email
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _loading = true;
+    private bool _isAuthenticated;
+    private List<CustomerOrderSummaryDto> _orders = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (_isAuthenticated)
+            _orders = await OrderService.GetMyOrdersAsync();
+        _loading = false;
+    }
+}

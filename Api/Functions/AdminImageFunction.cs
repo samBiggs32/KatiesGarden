@@ -1,15 +1,20 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using KatiesGarden.Api.Auth;
+using KatiesGarden.Api.Configuration;
+using KatiesGarden.Api.Helpers;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace KatiesGarden.Api.Functions;
 
-public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration config, ILogger<AdminImageFunction> logger)
+public class AdminImageFunction(
+    BlobServiceClient? blobClient,
+    IOptions<BlobOptions> blobOptions,
+    ILogger<AdminImageFunction> logger)
 {
     private static readonly HashSet<string> AllowedContentTypes =
         ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -28,8 +33,9 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
             return req.CreateResponse(HttpStatusCode.ServiceUnavailable);
         }
 
-        var contentType = req.Headers.TryGetValues("Content-Type", out var ctHeaders) ? ctHeaders.First() : string.Empty;
-        // Normalise: strip any charset/boundary parameters
+        var contentType = req.Headers.TryGetValues("Content-Type", out var ctHeaders)
+            ? ctHeaders.First()
+            : string.Empty;
         var bareContentType = contentType.Split(';', 2)[0].Trim();
 
         if (!AllowedContentTypes.Contains(bareContentType.ToLowerInvariant()))
@@ -39,7 +45,6 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
             return bad;
         }
 
-        // Buffer the upload so we can enforce the size limit before sending to blob storage
         var ct = req.FunctionContext.CancellationToken;
         using var buffer = new MemoryStream();
         var readBuffer = new byte[8192];
@@ -56,18 +61,26 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
         }
         buffer.Position = 0;
 
+        // Verify the actual file bytes match the declared type — the Content-Type header
+        // is attacker-controlled, so this prevents e.g. a script renamed to .jpg.
+        if (!ImageSignature.Matches(buffer.GetBuffer().AsSpan(0, (int)buffer.Length), bareContentType.ToLowerInvariant()))
+        {
+            var bad = req.CreateResponse(HttpStatusCode.BadRequest);
+            await bad.WriteStringAsync("File content does not match a supported image format.");
+            return bad;
+        }
+
         var extension = bareContentType switch
         {
             "image/jpeg" => ".jpg",
-            "image/png" => ".png",
+            "image/png"  => ".png",
             "image/webp" => ".webp",
-            "image/gif" => ".gif",
-            _ => ".jpg"
+            "image/gif"  => ".gif",
+            _            => ".jpg"
         };
         var blobName = $"{Guid.NewGuid()}{extension}";
-        var containerName = config["AZURE_STORAGE_CONTAINER"] ?? "product-images";
 
-        var container = blobClient.GetBlobContainerClient(containerName);
+        var container = blobClient.GetBlobContainerClient(blobOptions.Value.Container);
         var blob = container.GetBlobClient(blobName);
 
         await blob.UploadAsync(
@@ -81,6 +94,4 @@ public class AdminImageFunction(BlobServiceClient? blobClient, IConfiguration co
         await response.WriteAsJsonAsync(new ImageUploadResponse(blob.Uri.ToString()));
         return response;
     }
-
-    public record ImageUploadResponse(string Url);
 }

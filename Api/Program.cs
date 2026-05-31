@@ -1,13 +1,16 @@
 using Azure.Storage.Blobs;
 using FluentValidation;
+using KatiesGarden.Api.Auditing;
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Models.Entities;
 using KatiesGarden.Api.Email;
 using KatiesGarden.Api.Services;
+using KatiesGarden.Api.Telemetry;
 using KatiesGarden.Models;
 using KatiesGarden.Models.Shop;
 using KatiesGarden.Models.Validators;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +32,13 @@ var host = new HostBuilder()
     .ConfigureServices((context, services) =>
     {
         var config = context.Configuration;
+
+        // Application Insights — no-op when APPLICATIONINSIGHTS_CONNECTION_STRING is
+        // absent (local dev), live telemetry in production without any code change.
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.ConfigureFunctionsApplicationInsights();
+        // Scrub PII (emails, search terms) from telemetry before it leaves the process.
+        services.AddSingleton<ITelemetryInitializer, PiiScrubbingInitializer>();
 
         // Database — AppDbContext is ALWAYS registered so every function that
         // depends on it can be constructed by the DI container. Most functions
@@ -93,8 +103,22 @@ var host = new HostBuilder()
         if (!string.IsNullOrWhiteSpace(storageConn))
             services.AddSingleton(new BlobServiceClient(storageConn));
 
-        // Push notifications
+        // VAPID / push notifications
+        services.Configure<PushOptions>(opts =>
+        {
+            opts.PublicKey = config["VAPID_PUBLIC_KEY"];
+            opts.PrivateKey = config["VAPID_PRIVATE_KEY"];
+            opts.Subject = config["VAPID_SUBJECT"] ?? "mailto:sales@katiesgarden.uk";
+        });
         services.AddScoped<IPushNotificationService, PushNotificationService>();
+        services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IOrderService, OrderService>();
+
+        // Azure Blob Storage container config
+        services.Configure<BlobOptions>(opts =>
+        {
+            opts.Container = config["AZURE_STORAGE_CONTAINER"] ?? "product-images";
+        });
     })
     .Build();
 
@@ -140,10 +164,16 @@ using (var scope = host.Services.CreateScope())
         log.LogInformation("SMTP: {Host} / {User}", smtpHost, smtpUser);
 
     // ── Database ────────────────────────────────────────────────────────────
-    // Schema init is bounded by a hard timeout: an unreachable/slow database must
-    // never hang the host so long that the Functions launcher gives up and kills
-    // the process. On timeout/failure we log and continue — the host still starts
-    // and /api/diagnostics will report the database as down.
+    // MigrateAsync runs all pending EF Core migrations on startup. The initial
+    // migration uses IF NOT EXISTS guards, so it is safe on pre-existing databases
+    // that were created before migrations were introduced — they just get the
+    // __EFMigrationsHistory table created and the InitialSchema row inserted.
+    // Bounded by a hard 30-second timeout: an unreachable database must never hang
+    // the host long enough for the Functions launcher to kill the process.
+    //
+    // DATABASE_URL_MIGRATE, when set, is a least-privilege connection string for
+    // the kg_migrate role (DDL access). The runtime kg_app role in DATABASE_URL
+    // has DML-only access and cannot run schema changes. See infra/sql/roles.sql.
     var dbUrl = config["DATABASE_URL"];
     if (string.IsNullOrWhiteSpace(dbUrl))
     {
@@ -154,17 +184,37 @@ using (var scope = host.Services.CreateScope())
     {
         try
         {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            await db.Database.EnsureCreatedAsync(dbInitTimeout.Token);
-            await db.Database.ExecuteSqlRawAsync(SqlMigrations.EnsureNewTablesExist, dbInitTimeout.Token);
-            log.LogInformation("Database schema ready");
+            var migrateUrl = config["DATABASE_URL_MIGRATE"];
+            AppDbContext migrateDb;
+            if (!string.IsNullOrWhiteSpace(migrateUrl))
+            {
+                // Use the DDL-privileged role for schema migrations only
+                var migrateOpts = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseNpgsql(migrateUrl)
+                    .Options;
+                migrateDb = new AppDbContext(migrateOpts);
+                log.LogInformation("Database: using DATABASE_URL_MIGRATE role for schema migration");
+            }
+            else
+            {
+                migrateDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            }
 
+            using var dbInitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await migrateDb.Database.MigrateAsync(dbInitTimeout.Token);
+            log.LogInformation("Database schema up to date ({Migrations} migration(s) applied)",
+                (await migrateDb.Database.GetAppliedMigrationsAsync(dbInitTimeout.Token)).Count());
+
+            // Seed uses the runtime (kg_app) context from DI
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             await CollectionSeeder.SeedAsync(db, log, dbInitTimeout.Token);
+
+            if (!string.IsNullOrWhiteSpace(migrateUrl))
+                await migrateDb.DisposeAsync();
         }
         catch (Exception ex)
         {
-            log.LogError(ex, "Database initialisation failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
+            log.LogError(ex, "Database migration failed or timed out — host will still start; DB-backed endpoints will return 500 until the database is reachable");
         }
     }
 

@@ -18,14 +18,15 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Subscribe_ValidEmail_PersistsSubscriber()
     {
+        var ct = TestContext.Current.CancellationToken;
         var email = $"alice-{Guid.NewGuid():N}@example.com";
         var body = new SubscribeRequest(email, "Alice");
 
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         await using var db = fixture.CreateDbContext();
-        var saved = await db.Subscribers.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email.ToLowerInvariant());
+        var saved = await db.Subscribers.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email.ToLowerInvariant(), ct);
         saved.Should().NotBeNull();
         saved!.FirstName.Should().Be("Alice");
     }
@@ -33,26 +34,28 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Subscribe_DuplicateEmail_StillReturnsOk()
     {
+        var ct = TestContext.Current.CancellationToken;
         var email = $"dup-{Guid.NewGuid():N}@example.com";
         var body = new SubscribeRequest(email, null);
 
-        var first = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body);
-        var second = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body);
+        var first = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body, ct);
+        var second = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body, ct);
 
         first.StatusCode.Should().Be(HttpStatusCode.OK);
         second.StatusCode.Should().Be(HttpStatusCode.OK, "duplicate subscriptions are idempotent");
 
         await using var db = fixture.CreateDbContext();
-        var count = await db.Subscribers.CountAsync(s => s.Email == email.ToLowerInvariant());
+        var count = await db.Subscribers.CountAsync(s => s.Email == email.ToLowerInvariant(), ct);
         count.Should().Be(1);
     }
 
     [Fact]
     public async Task Subscribe_InvalidEmail_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         var body = new SubscribeRequest("not-an-email", null);
 
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/subscribe", body, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -60,7 +63,8 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Subscribe_MissingBody_ReturnsBadRequest()
     {
-        var response = await fixture.HttpClient.PostAsync("/api/subscribe", new StringContent(""));
+        var ct = TestContext.Current.CancellationToken;
+        var response = await fixture.HttpClient.PostAsync("/api/subscribe", new StringContent(""), ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -74,6 +78,7 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Contact_InvalidPayload_ReturnsBadRequestBeforeSmtp()
     {
+        var ct = TestContext.Current.CancellationToken;
         var body = new ContactUsForm
         {
             FirstName = "",
@@ -84,7 +89,7 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
             EmailSubject = ""
         };
 
-        var response = await fixture.HttpClient.PostAsJsonAsync("/api/contact", body);
+        var response = await fixture.HttpClient.PostAsJsonAsync("/api/contact", body, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -92,7 +97,8 @@ public class SubscribeAndContactApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Contact_MissingBody_ReturnsBadRequest()
     {
-        var response = await fixture.HttpClient.PostAsync("/api/contact", new StringContent(""));
+        var ct = TestContext.Current.CancellationToken;
+        var response = await fixture.HttpClient.PostAsync("/api/contact", new StringContent(""), ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

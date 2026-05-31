@@ -62,7 +62,7 @@ namespace KatiesGarden.Web.Client.Pages
             new() { Title = "Garden Maintenance", Description = "Professional garden care services to keep your outdoor space looking beautiful all year round.",   ImageFile = "large_arrangement.jpg" },
         ];
 
-        private void NavigateToContact(string subject = null)
+        private void NavigateToContact(string? subject = null)
         {
             if (string.IsNullOrEmpty(subject))
             {

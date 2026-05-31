@@ -24,13 +24,35 @@ resource "cloudflare_record" "www" {
   proxied = true
 }
 
-# DMARC — "monitor only" (p=none) to start; tighten to p=quarantine once you
-# have confirmed all legitimate mail sources appear in rua reports.
+# SPF — authorises Brevo's mail servers to send on behalf of katiesgarden.uk.
+# ~all (softfail) allows monitoring before tightening to -all.
+resource "cloudflare_record" "spf" {
+  zone_id = var.cloudflare_zone_id
+  name    = "katiesgarden.uk"
+  type    = "TXT"
+  content = "v=spf1 include:spf.brevo.com ~all"
+  proxied = false
+}
+
+# DKIM — set var.dkim_record_value from Brevo → Senders & Domains → Authenticate.
+# The record name (mail._domainkey) and selector prefix (mail) are Brevo defaults;
+# adjust if your provider uses a different selector.
+resource "cloudflare_record" "dkim" {
+  count   = var.dkim_record_value != "" ? 1 : 0
+  zone_id = var.cloudflare_zone_id
+  name    = "mail._domainkey"
+  type    = "TXT"
+  content = var.dkim_record_value
+  proxied = false
+}
+
+# DMARC — p=quarantine: unauthenticated mail goes to spam rather than inbox.
+# Advance to p=reject once SPF+DKIM pass reliably (check rua reports after 2 weeks).
 resource "cloudflare_record" "dmarc" {
   zone_id = var.cloudflare_zone_id
   name    = "_dmarc"
   type    = "TXT"
-  content = "v=DMARC1; p=none; rua=mailto:team@katiesgarden.uk"
+  content = "v=DMARC1; p=quarantine; pct=100; rua=mailto:team@katiesgarden.uk; ruf=mailto:team@katiesgarden.uk; adkim=s; aspf=s"
   proxied = false
 }
 
@@ -219,5 +241,55 @@ resource "cloudflare_ruleset" "rate_limit_api" {
     }
 
     expression = "(http.request.uri.path matches \"^/api/push/\")"
+  }
+
+  # Guest order lookup — 10 req/min closes the order-number enumeration vector
+  # (order-number space is 65,536/day; brute-force without rate limit is feasible).
+  # Defence-in-depth with the email+total second factor in CustomerFunction.cs (A5).
+  rules {
+    action      = "block"
+    description = "Rate limit /api/customer/* at 10 req/min per IP"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 10
+      mitigation_timeout  = 300
+    }
+
+    expression = "(http.request.uri.path matches \"^/api/customer/\")"
+  }
+
+  # Product search — 30 req/min prevents automated scraping of the catalogue
+  rules {
+    action      = "block"
+    description = "Rate limit /api/shop/search at 30 req/min per IP"
+    enabled     = true
+
+    action_parameters {
+      response {
+        status_code  = 429
+        content_type = "text/plain"
+        content      = "Too many requests."
+      }
+    }
+
+    ratelimit {
+      characteristics     = ["ip.src"]
+      period              = 60
+      requests_per_period = 30
+      mitigation_timeout  = 60
+    }
+
+    expression = "(http.request.uri.path eq \"/api/shop/search\")"
   }
 }

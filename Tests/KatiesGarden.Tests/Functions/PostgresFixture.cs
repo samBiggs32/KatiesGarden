@@ -31,9 +31,10 @@ public sealed class PostgresFixture : IAsyncLifetime
     {
         await _container.StartAsync();
 
-        // Create schema once — same path Program.cs uses on cold start.
+        // Run EF migrations — same path Program.cs uses on cold start.
+        // All IF NOT EXISTS guards make this safe on both fresh and pre-existing DBs.
         using var db = CreateDbContext();
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
     }
 
     public async ValueTask DisposeAsync() => await _container.DisposeAsync();

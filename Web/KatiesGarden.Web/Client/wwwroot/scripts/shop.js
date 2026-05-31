@@ -69,3 +69,53 @@ window.KgPush = {
         }
     }
 };
+
+window.KgMap = {
+    init: function (elementId, lat, lng, radiusMetres) {
+        if (!window._kgMapInstances) window._kgMapInstances = {};
+        const existing = window._kgMapInstances[elementId];
+        if (existing) {
+            existing.remove();
+            delete window._kgMapInstances[elementId];
+        }
+
+        const map = L.map(elementId, { zoomControl: true, scrollWheelZoom: false })
+            .setView([lat, lng], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        L.circle([lat, lng], {
+            radius: radiusMetres,
+            color: '#4A7C59',
+            fillColor: '#4A7C59',
+            fillOpacity: 0.12,
+            weight: 2,
+            dashArray: '6, 4'
+        }).addTo(map);
+
+        const icon = L.divIcon({
+            className: '',
+            html: '<div style="width:16px;height:16px;border-radius:50% 50% 50% 0;background:#4A7C59;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.35)"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 16],
+            popupAnchor: [0, -20]
+        });
+
+        L.marker([lat, lng], { icon })
+            .bindPopup("<div style='text-align:center;padding:4px 2px;font-family:serif'><strong>Katie's Garden</strong><br><small style='color:#666'>Milverton, TA4 1PZ</small></div>", { maxWidth: 180 })
+            .addTo(map)
+            .openPopup();
+
+        window._kgMapInstances[elementId] = map;
+    },
+
+    dispose: function (elementId) {
+        if (window._kgMapInstances?.[elementId]) {
+            window._kgMapInstances[elementId].remove();
+            delete window._kgMapInstances[elementId];
+        }
+    }
+};

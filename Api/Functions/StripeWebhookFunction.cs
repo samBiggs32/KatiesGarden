@@ -1,13 +1,15 @@
 using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
+using KatiesGarden.Api.Functions.Orchestration;
 using KatiesGarden.Models.Entities;
-using KatiesGarden.Api.Email;
-using KatiesGarden.Api.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.DurableTask;
+using Microsoft.DurableTask.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Npgsql;
 using Stripe;
 using Stripe.Checkout;
 using System.Net;
@@ -16,15 +18,13 @@ namespace KatiesGarden.Api.Functions;
 
 public class StripeWebhookFunction(
     AppDbContext db,
-    IEmailSender emailSender,
-    IPushNotificationService pushService,
-    IOptions<SmtpOptions> smtpOptions,
     IOptions<StripeOptions> stripeOptions,
     ILogger<StripeWebhookFunction> logger)
 {
     [Function("StripeWebhook")]
     public async Task<HttpResponseData> Handle(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhooks/stripe")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhooks/stripe")] HttpRequestData req,
+        [DurableClient] DurableTaskClient durableClient)
     {
         var ct = req.FunctionContext.CancellationToken;
         var webhookSecret = stripeOptions.Value.WebhookSecret;
@@ -50,6 +50,20 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
+        // Event-level idempotency: record this event ID before doing any work.
+        // A unique constraint violation means Stripe is replaying an event we already
+        // handled — acknowledge it and return immediately so we never double-process.
+        try
+        {
+            db.StripeProcessedEvents.Add(new StripeProcessedEvent { EventId = stripeEvent.Id });
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: "23505" })
+        {
+            logger.LogInformation("Stripe event {EventId} already processed — skipping", stripeEvent.Id);
+            return req.CreateResponse(HttpStatusCode.OK);
+        }
+
         if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted)
             return req.CreateResponse(HttpStatusCode.OK);
 
@@ -70,10 +84,9 @@ public class StripeWebhookFunction(
             return req.CreateResponse(HttpStatusCode.OK);
         }
 
-        // Idempotency guard
         if (order.Status != OrderStatus.Pending)
         {
-            logger.LogInformation("Order {OrderId} already processed (status: {Status})", orderId, order.Status);
+            logger.LogInformation("Order {OrderId} already confirmed (status: {Status})", orderId, order.Status);
             return req.CreateResponse(HttpStatusCode.OK);
         }
 
@@ -81,69 +94,35 @@ public class StripeWebhookFunction(
         order.StripePaymentIntentId = session.PaymentIntentId;
         order.UpdatedAt = DateTime.UtcNow;
 
-        // Decrement stock atomically to prevent oversell under concurrent load
-        foreach (var line in order.Lines)
-        {
-            var rowsUpdated = await db.Products
-                .Where(p => p.Id == line.ProductId && p.StockQuantity != null && p.StockQuantity >= line.Quantity)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(p => p.StockQuantity, p => p.StockQuantity! - line.Quantity), ct);
+        // Deterministic instance ID prevents duplicate orchestrations on Stripe retries
+        var instanceId = $"order-{order.Id}";
+        var orchestratorInput = new OrderOrchestratorInput(
+            order.Id,
+            order.OrderNumber,
+            order.CustomerFirstName,
+            order.CustomerLastName,
+            order.CustomerEmail,
+            order.Total,
+            order.DeliveryType.ToString(),
+            null);
 
-            if (rowsUpdated == 0)
-            {
-                logger.LogWarning(
-                    "Stock exhausted for product {ProductId} in order {OrderNumber} — payment taken, requires manual review",
-                    line.ProductId, order.OrderNumber);
-            }
-            else
-            {
-                await db.Products
-                    .Where(p => p.Id == line.ProductId && p.StockQuantity == 0)
-                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsAvailable, false), ct);
-            }
-        }
-
+        order.OrchestrationInstanceId = instanceId;
         await db.SaveChangesAsync(ct);
-        logger.LogInformation("Order {OrderNumber} confirmed (Stripe session {SessionId})", order.OrderNumber, session.Id);
 
-        var smtp = smtpOptions.Value;
-        var siteUrl = stripeOptions.Value.SiteUrl;
-
-        // Customer confirmation email
         try
         {
-            var settings = await db.DeliverySettings.FindAsync([1], ct);
-            var customerEmail = OrderEmailBuilder.BuildCustomerConfirmation(
-                order, smtp.EffectiveSenderEmail, "Katie's Garden", settings?.CollectionAddress);
-            await emailSender.SendAsync(customerEmail, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to send customer confirmation email for order {OrderNumber}", order.OrderNumber);
-        }
-
-        // Admin alert email
-        try
-        {
-            var adminEmail = OrderEmailBuilder.BuildAdminAlert(order, smtp.RecipientEmail, siteUrl);
-            await emailSender.SendAsync(adminEmail, ct);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to send admin alert email for order {OrderNumber}", order.OrderNumber);
-        }
-
-        // Push notification to Katie's devices
-        try
-        {
-            await pushService.SendAsync(
-                $"New Order {order.OrderNumber}",
-                $"£{order.Total:F2} from {order.CustomerFirstName} {order.CustomerLastName}",
+            await durableClient.ScheduleNewOrchestrationInstanceAsync(
+                nameof(OrderOrchestrationFunction.OrderLifecycleOrchestrator),
+                orchestratorInput,
+                new StartOrchestrationOptions { InstanceId = instanceId },
                 ct);
+
+            logger.LogInformation("Order {OrderNumber} confirmed — orchestration {InstanceId} started",
+                order.OrderNumber, instanceId);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send push notification for order {OrderNumber}", order.OrderNumber);
+            logger.LogWarning(ex, "Could not start orchestration for order {OrderNumber} — may already exist", order.OrderNumber);
         }
 
         return req.CreateResponse(HttpStatusCode.OK);

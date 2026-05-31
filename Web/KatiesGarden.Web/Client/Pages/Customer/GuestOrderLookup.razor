@@ -1,0 +1,98 @@
+@page "/my-orders/lookup"
+@using KatiesGarden.Models.Shop
+@inject CustomerOrderService OrderService
+@inject NavigationManager Navigation
+
+<PageTitle>Look Up Your Order — Katie's Garden</PageTitle>
+
+<div class="min-h-screen bg-base-100 py-16 px-4">
+    <div class="max-w-md mx-auto">
+
+        <a href="/my-orders" class="text-sm text-base-content/50 hover:text-base-content flex items-center gap-1 mb-6">
+            <i class="fas fa-arrow-left text-xs" aria-hidden="true"></i> Back
+        </a>
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body p-6 gap-5">
+                <div class="text-center">
+                    <div class="text-4xl mb-3">🔍</div>
+                    <h1 class="font-serif text-2xl text-base-content">Find Your Order</h1>
+                    <p class="text-sm text-base-content/60 mt-1">Enter your order number and email address to look up your order.</p>
+                </div>
+
+                @if (_notFound)
+                {
+                    <div class="alert alert-error text-sm">
+                        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        We couldn't find an order matching those details. Please check and try again.
+                    </div>
+                }
+
+                <div class="form-control gap-1">
+                    <label class="label pb-1" for="order-number">
+                        <span class="label-text font-medium">Order number</span>
+                    </label>
+                    <input id="order-number" type="text" @bind="_orderNumber" placeholder="KG-20250601-A1B2"
+                           class="input input-bordered focus:input-primary" />
+                </div>
+
+                <div class="form-control gap-1">
+                    <label class="label pb-1" for="email">
+                        <span class="label-text font-medium">Email address</span>
+                    </label>
+                    <input id="email" type="email" @bind="_email" placeholder="you@example.com"
+                           class="input input-bordered focus:input-primary" />
+                </div>
+
+                <div class="form-control gap-1">
+                    <label class="label pb-1" for="order-total">
+                        <span class="label-text font-medium">Order total</span>
+                    </label>
+                    <input id="order-total" type="text" @bind="_total" placeholder="£24.99"
+                           class="input input-bordered focus:input-primary" />
+                    <span class="label-text-alt text-base-content/50 pt-1">The total amount you paid, as shown on your confirmation.</span>
+                </div>
+
+                <button class="btn btn-primary w-full @(_searching ? "loading" : "")"
+                        @onclick="LookupAsync"
+                        disabled="@(_searching || string.IsNullOrWhiteSpace(_orderNumber) || string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_total))">
+                    @if (_searching)
+                    {
+                        <span>Searching…</span>
+                    }
+                    else
+                    {
+                        <span>Find Order</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _orderNumber = string.Empty;
+    private string _email = string.Empty;
+    private string _total = string.Empty;
+    private bool _searching;
+    private bool _notFound;
+
+    private async Task LookupAsync()
+    {
+        _notFound = false;
+        _searching = true;
+
+        var result = await OrderService.LookupOrderAsync(_orderNumber.Trim(), _email.Trim(), _total.Trim());
+
+        _searching = false;
+
+        if (result is null)
+        {
+            _notFound = true;
+        }
+        else
+        {
+            Navigation.NavigateTo($"/my-orders/{result.OrderNumber}");
+        }
+    }
+}

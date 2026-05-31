@@ -19,9 +19,10 @@ public class StripeWebhookApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Post_NoSignature_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         var content = new StringContent("{}", Encoding.UTF8, "application/json");
 
-        var response = await fixture.HttpClient.PostAsync("/api/webhooks/stripe", content);
+        var response = await fixture.HttpClient.PostAsync("/api/webhooks/stripe", content, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -29,13 +30,14 @@ public class StripeWebhookApiTests(AspireApiFixture fixture)
     [Fact]
     public async Task Post_InvalidSignature_ReturnsBadRequest()
     {
+        var ct = TestContext.Current.CancellationToken;
         var request = new HttpRequestMessage(HttpMethod.Post, "/api/webhooks/stripe")
         {
             Content = new StringContent("{}", Encoding.UTF8, "application/json")
         };
         request.Headers.Add("Stripe-Signature", "t=1234567890,v1=not-a-real-signature");
 
-        var response = await fixture.HttpClient.SendAsync(request);
+        var response = await fixture.HttpClient.SendAsync(request, ct);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

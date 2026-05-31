@@ -1,23 +1,21 @@
+using KatiesGarden.Api.Configuration;
 using KatiesGarden.Api.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using WebPush;
 
 namespace KatiesGarden.Api.Services;
 
 public class PushNotificationService(
     AppDbContext db,
-    IConfiguration config,
+    IOptions<PushOptions> pushOptions,
     ILogger<PushNotificationService> logger) : IPushNotificationService
 {
     public async Task SendAsync(string title, string body, CancellationToken ct = default)
     {
-        var vapidPublicKey = config["VAPID_PUBLIC_KEY"];
-        var vapidPrivateKey = config["VAPID_PRIVATE_KEY"];
-        var vapidSubject = config["VAPID_SUBJECT"];
-
-        if (string.IsNullOrWhiteSpace(vapidPublicKey) || string.IsNullOrWhiteSpace(vapidPrivateKey))
+        var push = pushOptions.Value;
+        if (!push.IsConfigured)
         {
             logger.LogDebug("VAPID keys not configured — skipping push notifications");
             return;
@@ -27,7 +25,7 @@ public class PushNotificationService(
         if (subscriptions.Count == 0) return;
 
         var client = new WebPushClient();
-        var vapidDetails = new VapidDetails(vapidSubject ?? "mailto:sales@katiesgarden.uk", vapidPublicKey, vapidPrivateKey);
+        var vapidDetails = new VapidDetails(push.Subject, push.PublicKey!, push.PrivateKey!);
         var payload = System.Text.Json.JsonSerializer.Serialize(new { title, body });
 
         var staleEndpoints = new List<string>();
@@ -41,7 +39,6 @@ public class PushNotificationService(
             }
             catch (WebPushException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Gone or System.Net.HttpStatusCode.NotFound)
             {
-                // Subscription expired or unregistered — remove it
                 staleEndpoints.Add(sub.Endpoint);
             }
             catch (Exception ex)
