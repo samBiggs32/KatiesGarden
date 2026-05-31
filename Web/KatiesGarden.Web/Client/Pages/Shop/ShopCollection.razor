@@ -110,18 +110,7 @@
                             }
 
                             <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                @if (!product.IsAvailable)
-                                {
-                                    <span class="badge badge-error badge-sm">Sold out</span>
-                                }
-                                else if (product.StockQuantity is > 0 and <= 3)
-                                {
-                                    <span class="badge badge-warning badge-sm">Only @product.StockQuantity left</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-success badge-sm">In stock</span>
-                                }
+                                <StockBadge IsAvailable="@product.IsAvailable" StockQuantity="@product.StockQuantity" />
                             </div>
 
                             <div class="card-actions mt-3 gap-2">

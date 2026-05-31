@@ -1,0 +1,22 @@
+@* Reusable stock availability badge — used in product cards and detail view *@
+
+@if (!IsAvailable)
+{
+    <span class="badge badge-error @SizeClass">Sold out</span>
+}
+else if (StockQuantity is > 0 and <= 3)
+{
+    <span class="badge badge-warning @SizeClass">Only @StockQuantity left</span>
+}
+else
+{
+    <span class="badge badge-success @SizeClass">In stock</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public bool IsAvailable { get; set; }
+    [Parameter] public int? StockQuantity { get; set; }
+    [Parameter] public bool Small { get; set; } = true;
+
+    private string SizeClass => Small ? "badge-sm" : string.Empty;
+}

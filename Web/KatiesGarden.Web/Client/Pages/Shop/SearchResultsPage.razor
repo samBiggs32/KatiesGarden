@@ -102,18 +102,7 @@
                             <h2 class="font-serif font-semibold text-base-content leading-tight">@p.Name</h2>
                             <p class="text-primary font-semibold">£@p.Price.ToString("F2")</p>
                             <div class="flex gap-1 flex-wrap mt-1">
-                                @if (!p.IsAvailable)
-                                {
-                                    <span class="badge badge-error badge-sm">Sold out</span>
-                                }
-                                else if (p.StockQuantity is > 0 and <= 3)
-                                {
-                                    <span class="badge badge-warning badge-sm">Only @p.StockQuantity left</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-success badge-sm">In stock</span>
-                                }
+                                <StockBadge IsAvailable="@p.IsAvailable" StockQuantity="@p.StockQuantity" />
                                 @if (!p.CanLocalDeliver)
                                 {
                                     <span class="badge badge-outline badge-sm">Collection only</span>

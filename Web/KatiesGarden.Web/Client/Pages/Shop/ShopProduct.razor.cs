@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using KatiesGarden.Models.Shop;
 using KatiesGarden.Web.Client.Models;
 using KatiesGarden.Web.Client.Services;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace KatiesGarden.Web.Client.Pages.Shop;
 
-public partial class ShopProduct : ComponentBase, IDisposable
+public partial class ShopProduct : ComponentBase
 {
     [Inject] ShopService ShopService { get; set; } = null!;
     [Inject] CartService CartService { get; set; } = null!;
@@ -13,11 +14,11 @@ public partial class ShopProduct : ComponentBase, IDisposable
     [Parameter] public string Slug { get; set; } = string.Empty;
 
     private ProductDetailDto? _product;
+    private string? _jsonLd;
     private bool _loading = true;
     private int _activeImage;
     private int _quantity = 1;
     private string? _toast;
-    private Timer? _toastTimer;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -25,6 +26,7 @@ public partial class ShopProduct : ComponentBase, IDisposable
         _activeImage = 0;
         _quantity = 1;
         _product = await ShopService.GetProductAsync(Slug);
+        _jsonLd = _product is null ? null : BuildJsonLd(_product);
         _loading = false;
     }
 
@@ -51,23 +53,36 @@ public partial class ShopProduct : ComponentBase, IDisposable
             ImageUrl = _product.ImageUrls.FirstOrDefault(),
             CanLocalDeliver = _product.CanLocalDeliver
         });
-        ShowToast(_quantity > 1
+        _toast = _quantity > 1
             ? $"{_quantity}× {_product.Name} added to basket"
-            : $"{_product.Name} added to basket");
+            : $"{_product.Name} added to basket";
         _quantity = 1;
     }
 
-    private void ShowToast(string message)
+    private static string BuildJsonLd(ProductDetailDto p)
     {
-        _toast = message;
-        _toastTimer?.Dispose();
-        _toastTimer = new Timer(_ =>
+        var obj = new JsonObject
         {
-            _toast = null;
-            _ = InvokeAsync(StateHasChanged);
-        }, null, 3000, Timeout.Infinite);
-        StateHasChanged();
+            ["@context"] = "https://schema.org/",
+            ["@type"] = "Product",
+            ["name"] = p.Name,
+            ["description"] = p.Description,
+            ["offers"] = new JsonObject
+            {
+                ["@type"] = "Offer",
+                ["priceCurrency"] = "GBP",
+                ["price"] = p.Price.ToString("F2"),
+                ["availability"] = p.IsAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                ["url"] = $"https://www.katiesgarden.uk/shop/product/{p.Slug}"
+            },
+            ["brand"] = new JsonObject
+            {
+                ["@type"] = "Brand",
+                ["name"] = "Katie's Garden"
+            }
+        };
+        if (p.ImageUrls.Length > 0)
+            obj["image"] = p.ImageUrls[0];
+        return obj.ToJsonString();
     }
-
-    public void Dispose() => _toastTimer?.Dispose();
 }

@@ -95,16 +95,22 @@ else if (_settings is not null)
     private async Task SaveAsync()
     {
         _saving = true;
-        var updated = new DeliverySettingsDto(
-            _fee,
-            _hasFreeThreshold ? _freeThreshold : null,
-            _areaDescription,
-            _collectionAddress,
-            _collectionInstructions);
+        try
+        {
+            var updated = new DeliverySettingsDto(
+                _fee,
+                _hasFreeThreshold ? _freeThreshold : null,
+                _areaDescription,
+                _collectionAddress,
+                _collectionInstructions);
 
-        var result = await AdminProductService.UpdateDeliverySettingsAsync(updated);
-        Snackbar.Add(result is not null ? "Settings saved" : "Failed to save settings",
-            result is not null ? Severity.Success : Severity.Error);
-        _saving = false;
+            var result = await AdminProductService.UpdateDeliverySettingsAsync(updated);
+            Snackbar.Add(result is not null ? "Settings saved" : "Failed to save settings",
+                result is not null ? Severity.Success : Severity.Error);
+        }
+        finally
+        {
+            _saving = false;
+        }
     }
 }

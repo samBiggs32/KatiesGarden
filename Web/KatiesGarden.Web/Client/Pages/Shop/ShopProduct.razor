@@ -1,9 +1,10 @@
 @page "/shop/product/{Slug}"
-@implements IDisposable
 
 <PageTitle>@(_product?.Name ?? "Product") — Katie's Garden</PageTitle>
 
-@if (_product is not null)
+<ToastNotification Message="@_toast" OnDismissed="@(() => _toast = null)" />
+
+@if (_product is not null && _jsonLd is not null)
 {
     <HeadContent>
         <meta property="og:type" content="product" />
@@ -14,29 +15,7 @@
             <meta property="og:image" content="@_product.ImageUrls[0]" />
         }
         <meta property="og:url" content="https://www.katiesgarden.uk/shop/product/@_product.Slug" />
-        <script type="application/ld+json">
-        {
-          "@@context": "https://schema.org/",
-          "@@type": "Product",
-          "name": "@_product.Name.Replace("\\", "\\\\").Replace("\"", "\\\"")",
-          "description": "@_product.Description.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", " ")",
-          @if (_product.ImageUrls.Length > 0)
-          {
-              @:"image": "@_product.ImageUrls[0]",
-          }
-          "offers": {
-            "@@type": "Offer",
-            "priceCurrency": "GBP",
-            "price": "@_product.Price.ToString("F2")",
-            "availability": "@(_product.IsAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock")",
-            "url": "https://www.katiesgarden.uk/shop/product/@_product.Slug"
-          },
-          "brand": {
-            "@@type": "Brand",
-            "name": "Katie's Garden"
-          }
-        }
-        </script>
+        <script type="application/ld+json">@((MarkupString)_jsonLd)</script>
     </HeadContent>
 }
 
@@ -116,18 +95,7 @@
                 <p class="text-2xl font-semibold text-primary mb-4">£@_product.Price.ToString("F2")</p>
 
                 <div class="flex flex-wrap gap-2 mb-5">
-                    @if (!_product.IsAvailable)
-                    {
-                        <span class="badge badge-error">Sold out</span>
-                    }
-                    else if (_product.StockQuantity is > 0 and <= 3)
-                    {
-                        <span class="badge badge-warning">Only @_product.StockQuantity left</span>
-                    }
-                    else
-                    {
-                        <span class="badge badge-success">In stock</span>
-                    }
+                    <StockBadge IsAvailable="@_product.IsAvailable" StockQuantity="@_product.StockQuantity" Small="false" />
                     @if (_product.CanLocalDeliver)
                     {
                         <span class="badge badge-outline">Local delivery available</span>
@@ -183,16 +151,6 @@
                         Enquire Instead
                     </a>
                 </div>
-
-                @if (_toast is not null)
-                {
-                    <div role="status" class="mt-4 alert alert-success text-sm py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        @_toast
-                    </div>
-                }
             </div>
         </div>
     }
