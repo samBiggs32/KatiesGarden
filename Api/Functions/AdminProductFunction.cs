@@ -9,7 +9,6 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -82,16 +81,10 @@ public class AdminProductFunction(
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        ProductRequest? request;
-        try { request = await req.ReadFromJsonAsync<ProductRequest>(); }
-        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
-        if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+        var (request, error) = await Responses.ReadValidatedAsync(req, validator, ct);
+        if (error is not null) return error;
 
-        var validation = await validator.ValidateAsync(request, ct);
-        if (!validation.IsValid)
-            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
-
-        var slug = SlugHelper.Generate(request.Name);
+        var slug = SlugHelper.Generate(request!.Name);
         if (await db.Products.AnyAsync(p => p.Slug == slug, ct))
             slug = $"{slug}-{Guid.NewGuid().ToString()[..8]}";
 
@@ -130,16 +123,10 @@ public class AdminProductFunction(
         var product = await db.Products.FindAsync([id], ct);
         if (product is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
-        ProductRequest? request;
-        try { request = await req.ReadFromJsonAsync<ProductRequest>(); }
-        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
-        if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+        var (request, error) = await Responses.ReadValidatedAsync(req, validator, ct);
+        if (error is not null) return error;
 
-        var validation = await validator.ValidateAsync(request, ct);
-        if (!validation.IsValid)
-            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
-
-        product.Name = request.Name;
+        product.Name = request!.Name;
         product.Description = request.Description;
         product.Price = request.Price;
         product.StockQuantity = request.StockQuantity;

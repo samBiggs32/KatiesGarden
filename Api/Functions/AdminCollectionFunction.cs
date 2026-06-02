@@ -9,7 +9,6 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -83,16 +82,10 @@ public class AdminCollectionFunction(
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        CollectionRequest? request;
-        try { request = await req.ReadFromJsonAsync<CollectionRequest>(); }
-        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
-        if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+        var (request, error) = await Responses.ReadValidatedAsync(req, validator, ct);
+        if (error is not null) return error;
 
-        var validation = await validator.ValidateAsync(request, ct);
-        if (!validation.IsValid)
-            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
-
-        var slug = SlugHelper.Generate(request.Title);
+        var slug = SlugHelper.Generate(request!.Title);
         if (await db.Collections.AnyAsync(c => c.Slug == slug, ct))
             slug = $"{slug}-{Guid.NewGuid().ToString()[..8]}";
 
@@ -130,16 +123,10 @@ public class AdminCollectionFunction(
         var collection = await db.Collections.FindAsync([id], ct);
         if (collection is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
-        CollectionRequest? request;
-        try { request = await req.ReadFromJsonAsync<CollectionRequest>(); }
-        catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
-        if (request is null) return await Responses.BadRequest(req, "Request body is required.");
+        var (request, error) = await Responses.ReadValidatedAsync(req, validator, ct);
+        if (error is not null) return error;
 
-        var validation = await validator.ValidateAsync(request, ct);
-        if (!validation.IsValid)
-            return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
-
-        collection.Title = request.Title;
+        collection.Title = request!.Title;
         collection.Description = request.Description;
         collection.CoverImageUrl = request.CoverImageUrl;
         collection.IsActive = request.IsActive;
