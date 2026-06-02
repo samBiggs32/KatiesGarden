@@ -52,7 +52,7 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
         detail!.Id.Should().Be(created.Id);
 
         // Update — change title and toggle inactive
-        var update = new UpdateCollectionRequest
+        var update = new CollectionRequest
         {
             Title = $"Updated {Guid.NewGuid():N}",
             Description = "Updated body",
@@ -75,7 +75,7 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
     {
         var ct = TestContext.Current.CancellationToken;
         using var admin = fixture.CreateAdminClient();
-        var body = new CreateCollectionRequest { Title = "", Description = "" };
+        var body = new CollectionRequest { Title = "", Description = "" };
 
         var resp = await admin.PostAsJsonAsync("/api/manage/collections", body, ct);
 
@@ -84,7 +84,7 @@ public class AdminCollectionApiTests(AspireApiFixture fixture)
 
     private async Task<CollectionSummaryDto> CreateCollection(HttpClient admin, CancellationToken ct)
     {
-        var body = new CreateCollectionRequest
+        var body = new CollectionRequest
         {
             Title = $"Test collection {Guid.NewGuid():N}",
             Description = "Seeded",

@@ -119,18 +119,19 @@ public partial class CollectionEditor
         _saving = true;
         try
         {
+            var request = new CollectionRequest
+            {
+                Title = _title.Trim(),
+                Description = _description.Trim(),
+                CoverImageUrl = _coverImageUrl,
+                IsActive = _isActive,
+                StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
+                EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
+                DisplayOrder = _displayOrder
+            };
+
             if (_isNew)
             {
-                var request = new CreateCollectionRequest
-                {
-                    Title = _title.Trim(),
-                    Description = _description.Trim(),
-                    CoverImageUrl = _coverImageUrl,
-                    StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
-                    EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
-                    DisplayOrder = _displayOrder
-                };
-
                 var result = await AdminProductService.CreateCollectionAsync(request);
                 if (result is not null)
                 {
@@ -144,17 +145,6 @@ public partial class CollectionEditor
             }
             else
             {
-                var request = new UpdateCollectionRequest
-                {
-                    Title = _title.Trim(),
-                    Description = _description.Trim(),
-                    CoverImageUrl = _coverImageUrl,
-                    IsActive = _isActive,
-                    StartDate = _startDate?.ToUniversalTime() ?? DateTime.UtcNow,
-                    EndDate = _hasEndDate ? _endDate?.ToUniversalTime() : null,
-                    DisplayOrder = _displayOrder
-                };
-
                 var result = await AdminProductService.UpdateCollectionAsync(Id!.Value, request);
                 if (result is not null)
                 {

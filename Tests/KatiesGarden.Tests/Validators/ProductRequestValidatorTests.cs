@@ -4,18 +4,17 @@ using Xunit;
 
 namespace KatiesGarden.Tests.Validators;
 
-public class UpdateProductRequestValidatorTests
+public class ProductRequestValidatorTests
 {
-    private readonly UpdateProductRequestValidator _validator = new();
+    private readonly ProductRequestValidator _validator = new();
 
-    private static UpdateProductRequest ValidRequest() => new()
+    private static ProductRequest ValidRequest() => new()
     {
         Name = "Summer Wreath",
         Description = "A beautiful seasonal wreath.",
         Price = 25.00m,
         IsAvailable = true,
-        CanLocalDeliver = true,
-        ImageUrls = []
+        CanLocalDeliver = true
     };
 
     [Fact]
@@ -32,7 +31,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Name = value;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.Name));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.Name));
     }
 
     [Fact]
@@ -40,7 +39,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Name = new string('a', 201);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.Name));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.Name));
     }
 
     [Fact]
@@ -48,7 +47,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Name = new string('a', 200);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.Name));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.Name));
     }
 
     [Theory]
@@ -59,7 +58,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Price = (decimal)price;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.Price));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.Price));
     }
 
     [Fact]
@@ -67,7 +66,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Price = 0.01m;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.Price));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.Price));
     }
 
     [Fact]
@@ -75,7 +74,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Description = new string('a', 2001);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.Description));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.Description));
     }
 
     [Fact]
@@ -83,7 +82,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.Description = new string('a', 2000);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.Description));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.Description));
     }
 
     [Fact]
@@ -91,7 +90,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.StockQuantity = null;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.StockQuantity));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.StockQuantity));
     }
 
     [Fact]
@@ -99,7 +98,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.StockQuantity = 0;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.StockQuantity));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.StockQuantity));
     }
 
     [Fact]
@@ -107,7 +106,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.StockQuantity = -1;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.StockQuantity));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.StockQuantity));
     }
 
     [Fact]
@@ -115,7 +114,7 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.HowToBuyNote = new string('a', 501);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.HowToBuyNote));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.HowToBuyNote));
     }
 
     [Fact]
@@ -123,22 +122,24 @@ public class UpdateProductRequestValidatorTests
     {
         var req = ValidRequest(); req.HowToBuyNote = null;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.HowToBuyNote));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.HowToBuyNote));
     }
 
     [Fact]
     public async Task SevenImages_Fails()
     {
-        var req = ValidRequest(); req.ImageUrls = Enumerable.Repeat("https://example.com/img.jpg", 7).ToArray();
+        var req = ValidRequest();
+        req.ImageUrls = Enumerable.Range(1, 7).Select(i => $"https://example.com/{i}.jpg").ToArray();
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateProductRequest.ImageUrls));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(ProductRequest.ImageUrls));
     }
 
     [Fact]
     public async Task SixImages_Passes()
     {
-        var req = ValidRequest(); req.ImageUrls = Enumerable.Repeat("https://example.com/img.jpg", 6).ToArray();
+        var req = ValidRequest();
+        req.ImageUrls = Enumerable.Range(1, 6).Select(i => $"https://example.com/{i}.jpg").ToArray();
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateProductRequest.ImageUrls));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(ProductRequest.ImageUrls));
     }
 }

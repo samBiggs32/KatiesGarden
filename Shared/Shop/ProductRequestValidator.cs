@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace KatiesGarden.Models.Shop;
 
-public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
+public class ProductRequestValidator : AbstractValidator<ProductRequest>
 {
-    public CreateProductRequestValidator()
+    public ProductRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Product name is required.")

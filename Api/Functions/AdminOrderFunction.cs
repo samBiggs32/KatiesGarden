@@ -140,7 +140,7 @@ public class AdminOrderFunction(
         var order = await db.Orders.FindAsync([id], ct);
         if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
-        var request = await req.ReadFromJsonAsync<AdminNotesRequest>();
+        var request = await req.ReadFromJsonAsync<NotesRequest>();
         order.AdminNotes = request?.Notes;
         order.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);
@@ -239,3 +239,5 @@ public class AdminOrderFunction(
         return response;
     }
 }
+
+file record NotesRequest(string? Notes);

@@ -22,7 +22,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
     {
         using var admin = fixture.CreateAdminClient();
         var name = $"Bug House {Guid.NewGuid():N}";
-        var body = new CreateProductRequest
+        var body = new ProductRequest
         {
             Name = name,
             Description = "Solid oak bug house",
@@ -44,7 +44,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
     public async Task CreateProduct_Admin_InvalidPayload_ReturnsBadRequest()
     {
         using var admin = fixture.CreateAdminClient();
-        var body = new CreateProductRequest { Name = "", Price = -1m };
+        var body = new ProductRequest { Name = "", Price = -1m };
 
         var response = await admin.PostAsJsonAsync("/api/manage/products", body);
 
@@ -57,7 +57,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
         using var admin = fixture.CreateAdminClient();
 
         // Create
-        var create = new CreateProductRequest
+        var create = new ProductRequest
         {
             Name = $"Plant {Guid.NewGuid():N}",
             Description = "Initial description",
@@ -76,7 +76,7 @@ public class AdminProductApiTests(AspireApiFixture fixture)
         detail!.DisplayOrder.Should().Be(7);
 
         // Update
-        var update = new UpdateProductRequest
+        var update = new ProductRequest
         {
             Name = create.Name,
             Description = "Updated description",

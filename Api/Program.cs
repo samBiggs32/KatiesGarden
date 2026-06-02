@@ -59,10 +59,8 @@ var host = new HostBuilder()
         // Validators
         services.AddSingleton<IValidator<ContactUsForm>, ContactUsFormValidator>();
         services.AddSingleton<IValidator<SubscribeRequest>, SubscribeRequestValidator>();
-        services.AddSingleton<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
-        services.AddSingleton<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
-        services.AddSingleton<IValidator<CreateCollectionRequest>, CreateCollectionRequestValidator>();
-        services.AddSingleton<IValidator<UpdateCollectionRequest>, UpdateCollectionRequestValidator>();
+        services.AddSingleton<IValidator<ProductRequest>, ProductRequestValidator>();
+        services.AddSingleton<IValidator<CollectionRequest>, CollectionRequestValidator>();
         services.AddSingleton<IValidator<CheckoutRequest>, CheckoutRequestValidator>();
 
         // SMTP — bound from env vars; send failures are caught and logged at call time,

@@ -28,7 +28,7 @@ public class AdminProductService(HttpClient http)
             : null;
     }
 
-    public async Task<ProductSummaryDto?> CreateProductAsync(CreateProductRequest request)
+    public async Task<ProductSummaryDto?> CreateProductAsync(ProductRequest request)
     {
         var response = await http.PostAsJsonAsync("api/manage/products", request);
         return response.IsSuccessStatusCode
@@ -36,7 +36,7 @@ public class AdminProductService(HttpClient http)
             : null;
     }
 
-    public async Task<ProductSummaryDto?> UpdateProductAsync(Guid id, UpdateProductRequest request)
+    public async Task<ProductSummaryDto?> UpdateProductAsync(Guid id, ProductRequest request)
     {
         var response = await http.PutAsJsonAsync($"api/manage/products/{id}", request);
         return response.IsSuccessStatusCode
@@ -47,7 +47,7 @@ public class AdminProductService(HttpClient http)
     public Task<HttpResponseMessage> DeleteProductAsync(Guid id)
         => http.DeleteAsync($"api/manage/products/{id}");
 
-    public async Task<CollectionSummaryDto?> CreateCollectionAsync(CreateCollectionRequest request)
+    public async Task<CollectionSummaryDto?> CreateCollectionAsync(CollectionRequest request)
     {
         var response = await http.PostAsJsonAsync("api/manage/collections", request);
         return response.IsSuccessStatusCode
@@ -55,7 +55,7 @@ public class AdminProductService(HttpClient http)
             : null;
     }
 
-    public async Task<CollectionSummaryDto?> UpdateCollectionAsync(Guid id, UpdateCollectionRequest request)
+    public async Task<CollectionSummaryDto?> UpdateCollectionAsync(Guid id, CollectionRequest request)
     {
         var response = await http.PutAsJsonAsync($"api/manage/collections/{id}", request);
         return response.IsSuccessStatusCode

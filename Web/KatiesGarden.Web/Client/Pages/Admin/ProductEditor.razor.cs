@@ -140,22 +140,22 @@ public partial class ProductEditor
         _saving = true;
         try
         {
+            var request = new ProductRequest
+            {
+                Name = _name.Trim(),
+                Description = _description.Trim(),
+                Price = _price,
+                StockQuantity = _trackStock ? _stockQuantity : null,
+                IsAvailable = _isAvailable,
+                CanLocalDeliver = _canLocalDeliver,
+                ImageUrls = _imageUrls.ToArray(),
+                CollectionId = _collectionId,
+                HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
+                DisplayOrder = _displayOrder
+            };
+
             if (_isNew)
             {
-                var request = new CreateProductRequest
-                {
-                    Name = _name.Trim(),
-                    Description = _description.Trim(),
-                    Price = _price,
-                    StockQuantity = _trackStock ? _stockQuantity : null,
-                    IsAvailable = _isAvailable,
-                    CanLocalDeliver = _canLocalDeliver,
-                    ImageUrls = _imageUrls.ToArray(),
-                    CollectionId = _collectionId,
-                    HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
-                    DisplayOrder = _displayOrder
-                };
-
                 var result = await AdminProductService.CreateProductAsync(request);
                 if (result is not null)
                 {
@@ -169,20 +169,6 @@ public partial class ProductEditor
             }
             else
             {
-                var request = new UpdateProductRequest
-                {
-                    Name = _name.Trim(),
-                    Description = _description.Trim(),
-                    Price = _price,
-                    StockQuantity = _trackStock ? _stockQuantity : null,
-                    IsAvailable = _isAvailable,
-                    CanLocalDeliver = _canLocalDeliver,
-                    ImageUrls = _imageUrls.ToArray(),
-                    CollectionId = _collectionId,
-                    HowToBuyNote = string.IsNullOrWhiteSpace(_howToBuyNote) ? null : _howToBuyNote.Trim(),
-                    DisplayOrder = _displayOrder
-                };
-
                 var result = await AdminProductService.UpdateProductAsync(Id!.Value, request);
                 if (result is not null)
                 {

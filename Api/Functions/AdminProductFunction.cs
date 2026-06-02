@@ -15,8 +15,7 @@ namespace KatiesGarden.Api.Functions;
 
 public class AdminProductFunction(
     AppDbContext db,
-    IValidator<CreateProductRequest> createValidator,
-    IValidator<UpdateProductRequest> updateValidator,
+    IValidator<ProductRequest> validator,
     ILogger<AdminProductFunction> logger)
 {
     [Function("AdminGetProducts")]
@@ -83,12 +82,12 @@ public class AdminProductFunction(
         if (req.RequireAdmin() is { } deny) return deny;
 
         var ct = req.FunctionContext.CancellationToken;
-        CreateProductRequest? request;
-        try { request = await req.ReadFromJsonAsync<CreateProductRequest>(); }
+        ProductRequest? request;
+        try { request = await req.ReadFromJsonAsync<ProductRequest>(); }
         catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
-        var validation = await createValidator.ValidateAsync(request, ct);
+        var validation = await validator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
 
@@ -131,12 +130,12 @@ public class AdminProductFunction(
         var product = await db.Products.FindAsync([id], ct);
         if (product is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
-        UpdateProductRequest? request;
-        try { request = await req.ReadFromJsonAsync<UpdateProductRequest>(); }
+        ProductRequest? request;
+        try { request = await req.ReadFromJsonAsync<ProductRequest>(); }
         catch (JsonException) { return await Responses.BadRequest(req, "Invalid request body."); }
         if (request is null) return await Responses.BadRequest(req, "Request body is required.");
 
-        var validation = await updateValidator.ValidateAsync(request, ct);
+        var validation = await validator.ValidateAsync(request, ct);
         if (!validation.IsValid)
             return await Responses.BadRequest(req, validation.Errors.First().ErrorMessage);
 

@@ -4,24 +4,31 @@ using Xunit;
 
 namespace KatiesGarden.Tests.Validators;
 
-public class UpdateCollectionRequestValidatorTests
+public class CollectionRequestValidatorTests
 {
-    private readonly UpdateCollectionRequestValidator _validator = new();
+    private readonly CollectionRequestValidator _validator = new();
 
-    private static UpdateCollectionRequest ValidRequest() => new()
+    private static CollectionRequest ValidRequest() => new()
     {
-        Title = "Summer Collection",
-        Description = "Seasonal summer picks.",
+        Title = "Spring Sale 2025",
+        Description = "Our spring collection of seasonal plants and wreaths.",
         IsActive = true,
-        StartDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-        EndDate = null,
-        DisplayOrder = 0
+        StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+        EndDate = new DateTime(2025, 5, 31, 0, 0, 0, DateTimeKind.Utc)
     };
 
     [Fact]
     public async Task AllValid_Passes()
     {
         var result = await _validator.ValidateAsync(ValidRequest(), TestContext.Current.CancellationToken);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task NoEndDate_Passes()
+    {
+        var req = ValidRequest(); req.EndDate = null;
+        var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
         result.IsValid.Should().BeTrue();
     }
 
@@ -32,7 +39,7 @@ public class UpdateCollectionRequestValidatorTests
     {
         var req = ValidRequest(); req.Title = value;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateCollectionRequest.Title));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CollectionRequest.Title));
     }
 
     [Fact]
@@ -40,7 +47,7 @@ public class UpdateCollectionRequestValidatorTests
     {
         var req = ValidRequest(); req.Title = new string('a', 201);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateCollectionRequest.Title));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CollectionRequest.Title));
     }
 
     [Fact]
@@ -48,7 +55,7 @@ public class UpdateCollectionRequestValidatorTests
     {
         var req = ValidRequest(); req.Title = new string('a', 200);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateCollectionRequest.Title));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CollectionRequest.Title));
     }
 
     [Fact]
@@ -56,7 +63,7 @@ public class UpdateCollectionRequestValidatorTests
     {
         var req = ValidRequest(); req.Description = new string('a', 2001);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateCollectionRequest.Description));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CollectionRequest.Description));
     }
 
     [Fact]
@@ -64,44 +71,36 @@ public class UpdateCollectionRequestValidatorTests
     {
         var req = ValidRequest(); req.Description = new string('a', 2000);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateCollectionRequest.Description));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CollectionRequest.Description));
     }
 
     [Fact]
     public async Task EndDateBeforeStartDate_Fails()
     {
         var req = ValidRequest();
-        req.StartDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
-        req.EndDate = new DateTime(2025, 5, 31, 0, 0, 0, DateTimeKind.Utc);
+        req.StartDate = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc);
+        req.EndDate = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Utc);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateCollectionRequest.EndDate));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CollectionRequest.EndDate));
     }
 
     [Fact]
-    public async Task EndDateEqualToStartDate_Fails()
+    public async Task EndDateSameAsStartDate_Fails()
     {
         var req = ValidRequest();
-        req.StartDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
-        req.EndDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
+        req.StartDate = new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc);
+        req.EndDate = req.StartDate;
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(UpdateCollectionRequest.EndDate));
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CollectionRequest.EndDate));
     }
 
     [Fact]
     public async Task EndDateAfterStartDate_Passes()
     {
         var req = ValidRequest();
-        req.StartDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
-        req.EndDate = new DateTime(2025, 9, 1, 0, 0, 0, DateTimeKind.Utc);
+        req.StartDate = new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+        req.EndDate = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
         var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateCollectionRequest.EndDate));
-    }
-
-    [Fact]
-    public async Task NullEndDate_Passes()
-    {
-        var req = ValidRequest(); req.EndDate = null;
-        var result = await _validator.ValidateAsync(req, TestContext.Current.CancellationToken);
-        result.Errors.Should().NotContain(e => e.PropertyName == nameof(UpdateCollectionRequest.EndDate));
+        result.Errors.Should().NotContain(e => e.PropertyName == nameof(CollectionRequest.EndDate));
     }
 }

@@ -2,9 +2,9 @@ using FluentValidation;
 
 namespace KatiesGarden.Models.Shop;
 
-public class CreateCollectionRequestValidator : AbstractValidator<CreateCollectionRequest>
+public class CollectionRequestValidator : AbstractValidator<CollectionRequest>
 {
-    public CreateCollectionRequestValidator()
+    public CollectionRequestValidator()
     {
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Collection title is required.")
