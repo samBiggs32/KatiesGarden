@@ -8,15 +8,14 @@ internal static class OrchestrationEvents
     internal const string StatusChanged = "StatusChanged";
 }
 
+// Only the fields the orchestrator and its activities actually use. Activities that
+// need more (address, email, etc.) reload the order from the database by OrderId.
 public record OrderOrchestratorInput(
     Guid OrderId,
     string OrderNumber,
     string CustomerFirstName,
     string CustomerLastName,
-    string CustomerEmail,
-    decimal Total,
-    string DeliveryType,
-    string? CollectionAddress);
+    decimal Total);
 
 public record OrderStatusChangedEvent(
     string NewStatus,

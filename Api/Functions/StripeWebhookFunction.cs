@@ -116,10 +116,7 @@ public class StripeWebhookFunction(
             order.OrderNumber,
             order.CustomerFirstName,
             order.CustomerLastName,
-            order.CustomerEmail,
-            order.Total,
-            order.DeliveryType.ToString(),
-            null);
+            order.Total);
 
         order.OrchestrationInstanceId = instanceId;
         await db.SaveChangesAsync(ct);

@@ -56,7 +56,7 @@ public class OrderOrchestrationFunction
         while (context.CurrentUtcDateTime < timeout)
         {
             using var cts = new CancellationTokenSource();
-            var statusChanged = context.WaitForExternalEvent<OrderStatusChangedEvent>("StatusChanged", cts.Token);
+            var statusChanged = context.WaitForExternalEvent<OrderStatusChangedEvent>(OrchestrationEvents.StatusChanged, cts.Token);
             var deadline = context.CreateTimer(timeout, cts.Token);
 
             var winner = await Task.WhenAny(statusChanged, deadline);
