@@ -16,6 +16,4 @@ public class Product
     public string? HowToBuyNote { get; set; }
     public int DisplayOrder { get; set; } = 0;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public string? StripeProductId { get; set; }
-    public string? StripePriceId { get; set; }
 }
