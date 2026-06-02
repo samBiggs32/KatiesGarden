@@ -1,6 +1,7 @@
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Helpers;
+using KatiesGarden.Models.Entities;
 using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -91,6 +92,13 @@ public class CustomerFunction(AppDbContext db, ILogger<CustomerFunction> logger)
         {
             order.CustomerId = customer.UserId;
             order.CustomerIdentityProvider = customer.IdentityProvider;
+            db.AuditLogs.Add(new AuditLog
+            {
+                Action = "OrderLinkedToCustomer",
+                EntityType = "Order",
+                EntityId = order.Id.ToString(),
+                ActorName = customer.UserDetails
+            });
             await db.SaveChangesAsync(ct);
             logger.LogInformation("Order {OrderNumber} linked to customer {CustomerId}", order.OrderNumber, customer.UserId);
         }

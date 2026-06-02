@@ -5,6 +5,7 @@ using KatiesGarden.Models.Shop;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -54,6 +55,19 @@ public class AdminDeliverySettingsFunction(AppDbContext db)
         settings.CollectionAddress = request.CollectionAddress;
         settings.CollectionInstructions = request.CollectionInstructions;
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "DeliverySettingsUpdated",
+            EntityType = "DeliverySettings",
+            EntityId = "1",
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new
+            {
+                settings.LocalDeliveryFee,
+                settings.FreeDeliveryThreshold
+            })
+        });
         // FindAsync attaches the entity; SaveChanges persists the tracked changes.
         // No explicit db.Update() call needed.
         await db.SaveChangesAsync(ct);

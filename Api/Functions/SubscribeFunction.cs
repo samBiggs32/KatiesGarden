@@ -114,6 +114,65 @@ public class SubscribeFunction(
         }
     }
 
+    [Function("Unsubscribe")]
+    public async Task<HttpResponseData> Unsubscribe(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "subscribe/unsubscribe")] HttpRequestData req)
+    {
+        var ct = req.FunctionContext.CancellationToken;
+
+        UnsubscribeRequest? request;
+        try { request = await req.ReadFromJsonAsync<UnsubscribeRequest>(); }
+        catch
+        {
+            return await Responses.BadRequest(req, "Invalid request body.");
+        }
+
+        if (request is null || string.IsNullOrWhiteSpace(request.Email))
+            return await Responses.BadRequest(req, "Email is required.");
+
+        var email = request.Email.Trim().ToLowerInvariant();
+        var subscriber = await db.Subscribers.FirstOrDefaultAsync(s => s.Email == email, ct);
+
+        if (subscriber is not null)
+        {
+            // Audit and delete in one transaction — no evidence gap if the delete succeeds.
+            db.Subscribers.Remove(subscriber);
+            db.AuditLogs.Add(new Models.Entities.AuditLog
+            {
+                Action = "SubscriberErased",
+                EntityType = "Subscriber",
+                EntityId = LogRedaction.Hash(email),
+                Details = System.Text.Json.JsonSerializer.Serialize(new { reason = "unsubscribe_request" })
+            });
+            await db.SaveChangesAsync(ct);
+
+            await RemoveFromBrevo(email, ct);
+        }
+
+        // Return 200 regardless — don't reveal whether the email was subscribed.
+        logger.LogInformation("Unsubscribe request processed for {EmailHash}", LogRedaction.Hash(email));
+        return req.CreateResponse(System.Net.HttpStatusCode.OK);
+    }
+
+    private async Task RemoveFromBrevo(string email, CancellationToken ct)
+    {
+        var brevo = brevoOptions.Value;
+        if (!brevo.IsConfigured) return;
+
+        try
+        {
+            var client = http.CreateClient();
+            client.DefaultRequestHeaders.Add("api-key", brevo.ApiKey);
+            await client.DeleteAsync($"https://api.brevo.com/v3/contacts/{Uri.EscapeDataString(email)}", ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to remove {EmailHash} from Brevo", LogRedaction.Hash(email));
+        }
+    }
+
     private static bool IsUniqueViolation(DbUpdateException ex) =>
         ex.InnerException is PostgresException pg && pg.SqlState == Npgsql.PostgresErrorCodes.UniqueViolation;
 }
+
+file record UnsubscribeRequest(string? Email);

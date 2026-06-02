@@ -1,4 +1,3 @@
-using KatiesGarden.Api.Auditing;
 using KatiesGarden.Api.Auth;
 using KatiesGarden.Api.Data;
 using KatiesGarden.Api.Services;
@@ -17,7 +16,6 @@ namespace KatiesGarden.Api.Functions;
 
 public class AdminOrderFunction(
     AppDbContext db,
-    IAuditService audit,
     IOrderService orderService,
     RefundService refundService,
     ILogger<AdminOrderFunction> logger)
@@ -141,13 +139,17 @@ public class AdminOrderFunction(
         if (order is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
         var request = await req.ReadFromJsonAsync<NotesRequest>();
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         order.AdminNotes = request?.Notes;
         order.UpdatedAt = DateTime.UtcNow;
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "NotesUpdated",
+            EntityType = "Order",
+            EntityId = order.Id.ToString(),
+            ActorName = actor
+        });
         await db.SaveChangesAsync(ct);
-
-        var principal = SwaAuth.GetPrincipal(req);
-        await audit.LogAsync("NotesUpdated", "Order", order.Id.ToString(),
-            principal?.UserDetails, principal?.UserDetails, null, ct);
 
         return req.CreateResponse(HttpStatusCode.NoContent);
     }

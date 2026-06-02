@@ -9,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -103,7 +104,16 @@ public class AdminProductFunction(
             DisplayOrder = request.DisplayOrder
         };
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         db.Products.Add(product);
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "ProductCreated",
+            EntityType = "Product",
+            EntityId = product.Id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { product.Name, product.Price })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Created product {Name} ({Id})", product.Name, product.Id);
 
@@ -137,6 +147,15 @@ public class AdminProductFunction(
         product.HowToBuyNote = request.HowToBuyNote;
         product.DisplayOrder = request.DisplayOrder;
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "ProductUpdated",
+            EntityType = "Product",
+            EntityId = id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { request!.Name, request.Price })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Updated product {Id}", id);
 
@@ -159,7 +178,16 @@ public class AdminProductFunction(
         if (await db.OrderLines.AnyAsync(l => l.ProductId == id, ct))
             return await Responses.BadRequest(req, "Cannot delete a product that has been ordered. Deactivate it instead.");
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         db.Products.Remove(product);
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "ProductDeleted",
+            EntityType = "Product",
+            EntityId = id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { product.Name })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Deleted product {Id}", id);
         return req.CreateResponse(HttpStatusCode.NoContent);

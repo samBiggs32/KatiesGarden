@@ -9,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace KatiesGarden.Api.Functions;
 
@@ -100,7 +101,16 @@ public class AdminCollectionFunction(
             DisplayOrder = request.DisplayOrder
         };
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         db.Collections.Add(collection);
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "CollectionCreated",
+            EntityType = "Collection",
+            EntityId = collection.Id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { collection.Title })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Created collection {Title} ({Id})", collection.Title, collection.Id);
 
@@ -134,6 +144,15 @@ public class AdminCollectionFunction(
         collection.EndDate = request.EndDate;
         collection.DisplayOrder = request.DisplayOrder;
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "CollectionUpdated",
+            EntityType = "Collection",
+            EntityId = id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { request!.Title, request.IsActive })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Updated collection {Id}", id);
 
@@ -156,7 +175,16 @@ public class AdminCollectionFunction(
         var collection = await db.Collections.FindAsync([id], ct);
         if (collection is null) return req.CreateResponse(HttpStatusCode.NotFound);
 
+        var actor = SwaAuth.GetPrincipal(req)?.UserDetails ?? "Admin";
         collection.IsActive = false;
+        db.AuditLogs.Add(new AuditLog
+        {
+            Action = "CollectionDeactivated",
+            EntityType = "Collection",
+            EntityId = id.ToString(),
+            ActorName = actor,
+            Details = JsonSerializer.Serialize(new { collection.Title })
+        });
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Deactivated collection {Id}", id);
         return req.CreateResponse(HttpStatusCode.NoContent);
