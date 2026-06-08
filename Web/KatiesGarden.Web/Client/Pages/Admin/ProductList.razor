@@ -96,7 +96,7 @@ else
 
     private async Task DeleteAsync(Guid id, string name)
     {
-        var result = await DialogService.ShowMessageBox(
+        var result = await DialogService.ShowMessageBoxAsync(
             "Delete Product",
             $"Are you sure you want to delete \"{name}\"? This cannot be undone.",
             yesText: "Delete", cancelText: "Cancel");

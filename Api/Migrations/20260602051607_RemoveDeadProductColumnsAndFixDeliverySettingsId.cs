@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -18,15 +17,6 @@ namespace KatiesGarden.Api.Migrations
             migrationBuilder.DropColumn(
                 name: "StripeProductId",
                 table: "products");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "delivery_settings",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .OldAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
         }
 
         /// <inheritdoc />
@@ -43,15 +33,6 @@ namespace KatiesGarden.Api.Migrations
                 table: "products",
                 type: "text",
                 nullable: true);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "delivery_settings",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer")
-                .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
         }
     }
 }

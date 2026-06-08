@@ -24,10 +24,25 @@ public class OrderCleanupIntegrationTests(PostgresFixture fixture)
     public async Task OrphanOrder_WithLines_RemoveCascadesToOrderLines()
     {
         var ct = TestContext.Current.CancellationToken;
+
+        // Create a real product first — order_lines.ProductId has a RESTRICT FK.
+        var product = new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = "Cascade Test Product",
+            Slug = $"cascade-test-{Guid.NewGuid():N}",
+            Price = 5m
+        };
+        await using (var db = fixture.CreateDbContext())
+        {
+            db.Products.Add(product);
+            await db.SaveChangesAsync(ct);
+        }
+
         var order = BuildPendingOrder("KG-INT-AAAA");
         order.Lines.Add(new OrderLine
         {
-            ProductId = Guid.NewGuid(),
+            ProductId = product.Id,
             ProductName = "Test product",
             UnitPrice = 5m,
             Quantity = 1,

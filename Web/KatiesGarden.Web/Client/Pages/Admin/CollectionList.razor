@@ -78,7 +78,7 @@ else
 
     private async Task DeactivateAsync(Guid id, string title)
     {
-        var result = await DialogService.ShowMessageBox(
+        var result = await DialogService.ShowMessageBoxAsync(
             "Deactivate Collection",
             $"Deactivate \"{title}\"? It will be hidden from the shop but its products are kept.",
             yesText: "Deactivate", cancelText: "Cancel");

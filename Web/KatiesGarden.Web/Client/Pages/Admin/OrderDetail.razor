@@ -193,7 +193,7 @@ else
 
     private async Task RefundOrderAsync()
     {
-        var confirmed = await DialogService.ShowMessageBox(
+        var confirmed = await DialogService.ShowMessageBoxAsync(
             "Confirm Refund",
             $"Issue a full refund of £{_order!.Total:F2} for order {_order.OrderNumber}? This cannot be undone.",
             yesText: "Yes, Refund",
